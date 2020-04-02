@@ -1,0 +1,4661 @@
+<sdf version='1.6'>
+  <model name='upper_body'>
+    <link name='torso'>
+      <pose frame=''>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0.00776 0.00282 0.62658 0 -0 0</pose>
+        <mass>25.1605</mass>
+        <inertia>
+          <ixx>10.3986</ixx>
+          <ixy>0.000150134</ixy>
+          <ixz>-0.105864</ixz>
+          <iyy>10.5826</iyy>
+          <iyz>-0.0580774</iyz>
+          <izz>0.465889</izz>
+        </inertia>
+      </inertial>
+      <collision name='torso_collision_collision'>
+        <pose frame=''>0.00776 0.00282 0.62658 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/torso.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='torso_visual_visual'>
+        <pose frame=''>0.00776 0.00282 0.62658 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/torso.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name='head_link1'>
+      <pose frame=''>0 0 0.84075 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.038065</mass>
+        <inertia>
+          <ixx>0.0269083</ixx>
+          <ixy>-2.1684e-22</ixy>
+          <ixz>-2.44249e-19</ixz>
+          <iyy>0.0269083</iyy>
+          <iyz>5.60108e-18</iyz>
+          <izz>1.67867e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='head_link1_collision_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/head_link1.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='head_link1_visual_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/head_link1.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='head_axis0' type='revolute'>
+      <child>head_link1</child>
+      <parent>torso</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-3.14159</lower>
+          <upper>3.14159</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='head_link2'>
+      <pose frame=''>0 0 0.84075 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.00299637</mass>
+        <inertia>
+          <ixx>0.00211804</ixx>
+          <ixy>3.40439e-24</ixy>
+          <ixz>-1.78482e-20</ixz>
+          <iyy>0.00211804</iyy>
+          <iyz>4.44089e-19</iyz>
+          <izz>2.42706e-08</izz>
+        </inertia>
+      </inertial>
+      <collision name='head_link2_collision_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/head_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='head_link2_visual_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/head_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='head_axis1' type='revolute'>
+      <child>head_link2</child>
+      <parent>head_link1</parent>
+      <axis>
+        <xyz>0 0 -1</xyz>
+        <limit>
+          <lower>-3.14159</lower>
+          <upper>3.14159</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='head'>
+      <pose frame=''>0 0 0.84075 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>-0.000199 -0.018469 0.150845 0 -0 0</pose>
+        <mass>2.16584</mass>
+        <inertia>
+          <ixx>2.16031</ixx>
+          <ixy>2.33761e-05</ixy>
+          <ixz>0.000416374</ixz>
+          <iyy>2.16195</iyy>
+          <iyz>0.0374263</iyz>
+          <izz>0.0282095</izz>
+        </inertia>
+      </inertial>
+      <collision name='head_collision_collision'>
+        <pose frame=''>-0.0002 -0.01814 0.1507 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/head.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <collision name='head_link2_collision_collision_1'>
+        <pose frame=''>0.03 -0.137 0.203 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/head_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <collision name='head_link2_collision_collision_2'>
+        <pose frame=''>-0.03 -0.137 0.203 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/head_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='head_visual_visual'>
+        <pose frame=''>-0.0002 -0.01814 0.1507 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/head.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name='head_link2_visual_visual_1'>
+        <pose frame=''>0.03 -0.137 0.203 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/head_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name='head_link2_visual_visual_2'>
+        <pose frame=''>-0.03 -0.137 0.203 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/head_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='head_axis2' type='revolute'>
+      <child>head</child>
+      <parent>head_link2</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14159</lower>
+          <upper>3.14159</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='shoulder_left_link1'>
+      <pose frame=''>0.21017 0 0.69947 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.0903636</mass>
+        <inertia>
+          <ixx>0.0442193</ixx>
+          <ixy>-3.62904e-18</ixy>
+          <ixz>-0.0132845</ixz>
+          <iyy>0.048211</iyy>
+          <iyz>-1.20792e-17</iyz>
+          <izz>0.00399873</izz>
+        </inertia>
+      </inertial>
+      <collision name='shoulder_left_link1_collision_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/shoulder_left_link1.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='shoulder_left_link1_visual_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/shoulder_left_link1.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='shoulder_left_axis0' type='revolute'>
+      <child>shoulder_left_link1</child>
+      <parent>torso</parent>
+      <axis>
+        <xyz>0.97437 0 0.22495</xyz>
+        <limit>
+          <lower>-1.5</lower>
+          <upper>1</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='shoulder_left_link2'>
+      <pose frame=''>0.21017 0 0.69947 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.00711317</mass>
+        <inertia>
+          <ixx>0.00348037</ixx>
+          <ixy>-2.82066e-19</ixy>
+          <ixz>-0.00104572</ixz>
+          <iyy>0.00379458</iyy>
+          <iyz>-9.37098e-19</iyz>
+          <izz>0.000314313</izz>
+        </inertia>
+      </inertial>
+      <collision name='shoulder_left_link2_collision_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/shoulder_left_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='shoulder_left_link2_visual_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/shoulder_left_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='shoulder_left_axis1' type='revolute'>
+      <child>shoulder_left_link2</child>
+      <parent>shoulder_left_link1</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>0.1</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='upperarm_left'>
+      <pose frame=''>0.21017 0 0.69947 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0.01104 0.00134 -0.18587 0 -0 0</pose>
+        <mass>0.679381</mass>
+        <inertia>
+          <ixx>0.189786</ixx>
+          <ixy>-0.000203817</ixy>
+          <ixz>-0.0771493</ixz>
+          <iyy>0.222193</iyy>
+          <iyz>-0.000480145</iyz>
+          <izz>0.0346411</izz>
+        </inertia>
+      </inertial>
+      <collision name='upperarm_left_collision_collision'>
+        <pose frame=''>0.01104 0.00134 -0.18587 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/upperarm_left.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='upperarm_left_visual_visual'>
+        <pose frame=''>0.01104 0.00134 -0.18587 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/upperarm_left.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='shoulder_left_axis2' type='revolute'>
+      <child>upperarm_left</child>
+      <parent>shoulder_left_link2</parent>
+      <axis>
+        <xyz>-0.22495 0 0.97437</xyz>
+        <limit>
+          <lower>-1.5</lower>
+          <upper>1.5</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='elbow_left'>
+      <pose frame=''>0.21923 0 0.38739 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>-0.00325 0.03025 -0.04463 0 -0 0</pose>
+        <mass>0.0359135</mass>
+        <inertia>
+          <ixx>0.00427446</ixx>
+          <ixy>-0.000236075</ixy>
+          <ixz>-0.00265863</ixz>
+          <iyy>0.00590954</iyy>
+          <iyz>-0.000372475</iyz>
+          <izz>0.00172174</izz>
+        </inertia>
+      </inertial>
+      <collision name='elbow_left_collision_collision'>
+        <pose frame=''>-0.00325 0.03025 -0.04463 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/elbow_left.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='elbow_left_visual_visual'>
+        <pose frame=''>-0.00325 0.03025 -0.04463 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/elbow_left.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='elbow_left_axis0' type='revolute'>
+      <child>elbow_left</child>
+      <parent>upperarm_left</parent>
+      <axis>
+        <xyz>-1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.57</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lowerarm_left'>
+      <pose frame=''>0.21773 0 0.29739 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0.00049 -0.00129 -0.09306 0 -0 0</pose>
+        <mass>0.483114</mass>
+        <inertia>
+          <ixx>0.0241584</ixx>
+          <ixy>0.000128208</ixy>
+          <ixz>-0.0215989</ixz>
+          <iyy>0.0472025</iyy>
+          <iyz>0.000196968</iyz>
+          <izz>0.0236218</izz>
+        </inertia>
+      </inertial>
+      <collision name='lowerarm_left_collision_collision'>
+        <pose frame=''>0.00049 -0.00129 -0.09306 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/lowerarm_left.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='lowerarm_left_visual_visual'>
+        <pose frame=''>0.00049 -0.00129 -0.09306 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/lowerarm_left.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='elbow_left_axis1' type='revolute'>
+      <child>lowerarm_left</child>
+      <parent>elbow_left</parent>
+      <axis>
+        <xyz>-1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='wrist_left_link1'>
+      <pose frame=''>0.217 0 0.087 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.038065</mass>
+        <inertia>
+          <ixx>0.000289793</ixx>
+          <ixy>-8.97199e-19</ixy>
+          <ixz>-0.00071863</ixz>
+          <iyy>0.00208224</iyy>
+          <iyz>-3.59088e-19</iyz>
+          <izz>0.00179412</izz>
+        </inertia>
+      </inertial>
+      <collision name='wrist_left_link1_collision_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/wrist_left_link1.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='wrist_left_link1_visual_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/wrist_left_link1.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='wrist_left_axis0' type='revolute'>
+      <child>wrist_left_link1</child>
+      <parent>lowerarm_left</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-3.14159</lower>
+          <upper>3.14159</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='wrist_left_link2'>
+      <pose frame=''>0.217 0 0.087 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.00299637</mass>
+        <inertia>
+          <ixx>2.27038e-05</ixx>
+          <ixy>-7.0343e-20</ixy>
+          <ixz>-5.65685e-05</ixz>
+          <iyy>0.0001638</iyy>
+          <iyz>-2.81676e-20</iyz>
+          <izz>0.00014112</izz>
+        </inertia>
+      </inertial>
+      <collision name='wrist_left_link2_collision_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/wrist_left_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='wrist_left_link2_visual_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/wrist_left_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='wrist_left_axis1' type='revolute'>
+      <child>wrist_left_link2</child>
+      <parent>wrist_left_link1</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14159</lower>
+          <upper>3.14159</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='hand_left'>
+      <pose frame=''>0.217 0 0.087 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0.004613 0.000743 -0.065395 0 -0 0</pose>
+        <mass>1.05149</mass>
+        <inertia>
+          <ixx>0.00385935</ixx>
+          <ixy>-0.000215411</ixy>
+          <ixz>-0.00411659</ixz>
+          <iyy>0.0405563</iyy>
+          <iyz>2.39707e-06</iyz>
+          <izz>0.0377164</izz>
+        </inertia>
+      </inertial>
+      <collision name='hand_left_collision_collision'>
+        <pose frame=''>0.00506 0.00106 -0.06163 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/hand_left.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <collision name='hand_left_fixed_joint_lump__lh_palm_collision_1'>
+        <pose frame=''>0.01226 -0.011049 -0.076944 3.04159 0.001593 1.57159</pose>
+        <geometry>
+          <box>
+            <size>0.062 0.007 0.098</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_left_fixed_joint_lump__lh_palm_collision_2'>
+        <pose frame=''>0.00031 0.001939 -0.078163 3.04159 0.001593 1.57159</pose>
+        <geometry>
+          <box>
+            <size>0.036 0.017 0.098</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_left_fixed_joint_lump__lh_palm_collision_3'>
+        <pose frame=''>0.004727 -0.029127 -0.121893 3.04159 0.001593 1.57159</pose>
+        <geometry>
+          <box>
+            <size>0.026 0.017 0.01</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_left_fixed_joint_lump__lh_palm_collision_4'>
+        <pose frame=''>0.006015 -0.026606 -0.109708 -3.03811 0.026245 1.8204</pose>
+        <geometry>
+          <box>
+            <size>0.026 0.014 0.018</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_left_fixed_joint_lump__lh_palm_collision_5'>
+        <pose frame=''>-0.008333 -0.03151 -0.041793 3.04159 0.001593 1.57159</pose>
+        <geometry>
+          <box>
+            <size>0.021 0.027 0.024</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_left_fixed_joint_lump__lh_palm_collision_6'>
+        <pose frame=''>-0.014017 -0.012528 -0.050433 3.0521 -0.044703 1.09367</pose>
+        <geometry>
+          <box>
+            <size>0.022 0.005 0.04</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_left_fixed_joint_lump__lh_palm_collision_7'>
+        <pose frame=''>0.008894 -0.011134 -0.128538 3.04159 0.001593 1.57159</pose>
+        <geometry>
+          <box>
+            <size>0.018 0.024 0.004</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_left_fixed_joint_lump__lh_palm_collision_8'>
+        <pose frame=''>0.000875 0.029986 -0.049003 3.04159 0.001593 1.57159</pose>
+        <geometry>
+          <box>
+            <size>0.02 0.024 0.04</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='hand_left_visual_visual'>
+        <pose frame=''>0.00506 0.00106 -0.06163 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/hand_left.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name='hand_left_fixed_joint_lump__lh_palm_visual_1'>
+        <pose frame=''>0 0 -0.04 3.04159 0.001593 1.57159</pose>
+        <geometry>
+          <mesh>
+            <scale>-0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/palm.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='wrist_left_axis2' type='revolute'>
+      <child>hand_left</child>
+      <parent>wrist_left_link2</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14159</lower>
+          <upper>3.14159</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_ffknuckle'>
+      <pose frame=''>0.226511 -0.033143 -0.047473 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.008</mass>
+        <inertia>
+          <ixx>2.6e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.6e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_ffknuckle_collision'>
+        <pose frame=''>0 0 0 3.14159 1.57079 3.14159</pose>
+        <geometry>
+          <cylinder>
+            <length>0.014</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='lh_ffknuckle_visual'>
+        <pose frame=''>0 0 0.0005 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/knuckle.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_FFJ4' type='revolute'>
+      <child>lh_ffknuckle</child>
+      <parent>hand_left</parent>
+      <axis>
+        <xyz>0.995004 0.000951 0.099833</xyz>
+        <limit>
+          <lower>-0.349066</lower>
+          <upper>0.349066</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_ffproximal'>
+      <pose frame=''>0.226511 -0.033143 -0.047473 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0225 0 -0 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>9.8e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1.8e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_ffproximal_collision'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='lh_ffproximal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F3.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_FFJ3' type='revolute'>
+      <child>lh_ffproximal</child>
+      <parent>lh_ffknuckle</parent>
+      <axis>
+        <xyz>-0.000796 0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_ffmiddle'>
+      <pose frame=''>0.231003 -0.033211 -0.092248 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <mass>0.017</mass>
+        <inertia>
+          <ixx>2.6e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.7e-06</iyy>
+          <iyz>0</iyz>
+          <izz>8.7e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_ffmiddle_collision'>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.025</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name='lh_ffmiddle_collision_1'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <collision name='lh_ffmiddle_collision_2'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <visual name='lh_ffmiddle_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F2.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_FFJ2' type='revolute'>
+      <child>lh_ffmiddle</child>
+      <parent>lh_ffproximal</parent>
+      <axis>
+        <xyz>-0.000796 0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_ffdistal'>
+      <pose frame=''>0.233499 -0.033248 -0.117123 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.013077 0 -0 0</pose>
+        <mass>0.013</mass>
+        <inertia>
+          <ixx>1.12092e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.28092e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.3e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_ffdistal_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='lh_ffdistal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_FFJ1' type='revolute'>
+      <child>lh_ffdistal</child>
+      <parent>lh_ffmiddle</parent>
+      <axis>
+        <xyz>-0.000796 0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_lfmetacarpal'>
+      <pose frame=''>0.219041 0.032969 0.026341 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.04 0 -0 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>1.45e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.638e-05</iyy>
+          <iyz>0</iyz>
+          <izz>4.272e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_lfmetacarpal_collision'>
+        <pose frame=''>0 0 0.038 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.018 0.024 0.04</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='lh_lfmetacarpal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>-0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/lfmetacarpal.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_LFJ5' type='revolute'>
+      <child>lh_lfmetacarpal</child>
+      <parent>hand_left</parent>
+      <axis>
+        <xyz>-0.082237 0.574809 0.814145</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0.785398</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_lfknuckle'>
+      <pose frame=''>0.225609 0.03287 -0.03912 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.008</mass>
+        <inertia>
+          <ixx>2.6e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.6e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_lfknuckle_collision'>
+        <pose frame=''>0 0 0 3.14159 1.57079 3.14159</pose>
+        <geometry>
+          <cylinder>
+            <length>0.014</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='lh_lfknuckle_visual'>
+        <pose frame=''>0 0 0.0005 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/knuckle.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_LFJ4' type='revolute'>
+      <child>lh_lfknuckle</child>
+      <parent>lh_lfmetacarpal</parent>
+      <axis>
+        <xyz>-0.995004 -0.000951 -0.099833</xyz>
+        <limit>
+          <lower>-0.349066</lower>
+          <upper>0.349066</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_lfproximal'>
+      <pose frame=''>0.225609 0.03287 -0.03912 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0225 0 -0 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>9.8e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1.8e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_lfproximal_collision'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='lh_lfproximal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F3.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_LFJ3' type='revolute'>
+      <child>lh_lfproximal</child>
+      <parent>lh_lfknuckle</parent>
+      <axis>
+        <xyz>-0.000796 0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_lfmiddle'>
+      <pose frame=''>0.230102 0.032802 -0.083895 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <mass>0.017</mass>
+        <inertia>
+          <ixx>2.6e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.7e-06</iyy>
+          <iyz>0</iyz>
+          <izz>8.7e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_lfmiddle_collision'>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.025</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name='lh_lfmiddle_collision_1'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <collision name='lh_lfmiddle_collision_2'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <visual name='lh_lfmiddle_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F2.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_LFJ2' type='revolute'>
+      <child>lh_lfmiddle</child>
+      <parent>lh_lfproximal</parent>
+      <axis>
+        <xyz>-0.000796 0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_lfdistal'>
+      <pose frame=''>0.232598 0.032764 -0.108771 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.013077 0 -0 0</pose>
+        <mass>0.013</mass>
+        <inertia>
+          <ixx>1.12092e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.28092e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.3e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_lfdistal_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='lh_lfdistal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_LFJ1' type='revolute'>
+      <child>lh_lfdistal</child>
+      <parent>lh_lfmiddle</parent>
+      <axis>
+        <xyz>-0.000796 0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_mfknuckle'>
+      <pose frame=''>0.226892 -0.011149 -0.051488 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.008</mass>
+        <inertia>
+          <ixx>2.6e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.6e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_mfknuckle_collision'>
+        <pose frame=''>0 0 0 3.14159 1.57079 3.14159</pose>
+        <geometry>
+          <cylinder>
+            <length>0.014</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='lh_mfknuckle_visual'>
+        <pose frame=''>0 0 0.0005 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/knuckle.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_MFJ4' type='revolute'>
+      <child>lh_mfknuckle</child>
+      <parent>hand_left</parent>
+      <axis>
+        <xyz>0.995004 0.000951 0.099833</xyz>
+        <limit>
+          <lower>-0.349066</lower>
+          <upper>0.349066</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_mfproximal'>
+      <pose frame=''>0.226892 -0.011149 -0.051488 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0225 0 -0 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>9.8e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1.8e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_mfproximal_collision'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='lh_mfproximal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F3.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_MFJ3' type='revolute'>
+      <child>lh_mfproximal</child>
+      <parent>lh_mfknuckle</parent>
+      <axis>
+        <xyz>-0.000796 0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_mfmiddle'>
+      <pose frame=''>0.231385 -0.011217 -0.096263 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <mass>0.017</mass>
+        <inertia>
+          <ixx>2.6e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.7e-06</iyy>
+          <iyz>0</iyz>
+          <izz>8.7e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_mfmiddle_collision'>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.025</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name='lh_mfmiddle_collision_1'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <collision name='lh_mfmiddle_collision_2'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <visual name='lh_mfmiddle_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F2.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_MFJ2' type='revolute'>
+      <child>lh_mfmiddle</child>
+      <parent>lh_mfproximal</parent>
+      <axis>
+        <xyz>-0.000796 0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_mfdistal'>
+      <pose frame=''>0.233881 -0.011254 -0.121138 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.013077 0 -0 0</pose>
+        <mass>0.013</mass>
+        <inertia>
+          <ixx>1.12092e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.28092e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.3e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_mfdistal_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='lh_mfdistal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_MFJ1' type='revolute'>
+      <child>lh_mfdistal</child>
+      <parent>lh_mfmiddle</parent>
+      <axis>
+        <xyz>-0.000796 0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_rfknuckle'>
+      <pose frame=''>0.226476 0.010857 -0.047543 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.008</mass>
+        <inertia>
+          <ixx>2.6e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.6e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_rfknuckle_collision'>
+        <pose frame=''>0 0 0 3.14159 1.57079 3.14159</pose>
+        <geometry>
+          <cylinder>
+            <length>0.014</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='lh_rfknuckle_visual'>
+        <pose frame=''>0 0 0.0005 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/knuckle.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_RFJ4' type='revolute'>
+      <child>lh_rfknuckle</child>
+      <parent>hand_left</parent>
+      <axis>
+        <xyz>-0.995004 -0.000951 -0.099833</xyz>
+        <limit>
+          <lower>-0.349066</lower>
+          <upper>0.349066</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_rfproximal'>
+      <pose frame=''>0.226476 0.010857 -0.047543 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0225 0 -0 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>9.8e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1.8e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_rfproximal_collision'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='lh_rfproximal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F3.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_RFJ3' type='revolute'>
+      <child>lh_rfproximal</child>
+      <parent>lh_rfknuckle</parent>
+      <axis>
+        <xyz>-0.000796 0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_rfmiddle'>
+      <pose frame=''>0.230968 0.010789 -0.092318 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <mass>0.017</mass>
+        <inertia>
+          <ixx>2.6e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.7e-06</iyy>
+          <iyz>0</iyz>
+          <izz>8.7e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_rfmiddle_collision'>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.025</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name='lh_rfmiddle_collision_1'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <collision name='lh_rfmiddle_collision_2'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <visual name='lh_rfmiddle_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F2.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_RFJ2' type='revolute'>
+      <child>lh_rfmiddle</child>
+      <parent>lh_rfproximal</parent>
+      <axis>
+        <xyz>-0.000796 0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_rfdistal'>
+      <pose frame=''>0.233464 0.010752 -0.117193 3.04159 0.001593 1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.013077 0 -0 0</pose>
+        <mass>0.013</mass>
+        <inertia>
+          <ixx>1.12092e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.28092e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.3e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_rfdistal_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='lh_rfdistal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_RFJ1' type='revolute'>
+      <child>lh_rfdistal</child>
+      <parent>lh_rfmiddle</parent>
+      <axis>
+        <xyz>-0.000796 0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_thbase'>
+      <pose frame=''>0.211465 -0.034052 0.017351 -3.00042 -0.781999 -1.66966</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>1.6e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.6e-07</iyy>
+          <iyz>0</iyz>
+          <izz>1.6e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_thbase_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.011</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <visual name='lh_thbase_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.001 0.001 0.001</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_THJ5' type='revolute'>
+      <child>lh_thbase</child>
+      <parent>hand_left</parent>
+      <axis>
+        <xyz>0.071157 -0.70817 -0.702447</xyz>
+        <limit>
+          <lower>-1.0472</lower>
+          <upper>1.0472</upper>
+          <effort>5</effort>
+          <velocity>4</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.2</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_thproximal'>
+      <pose frame=''>0.211465 -0.034052 0.017351 -3.00042 -0.781999 -1.66966</pose>
+      <inertial>
+        <pose frame=''>0 0 0.019 0 -0 0</pose>
+        <mass>0.04</mass>
+        <inertia>
+          <ixx>1.36e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.36e-05</iyy>
+          <iyz>0</iyz>
+          <izz>3.13e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_thproximal_collision'>
+        <pose frame=''>0 0 0.02 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.018</length>
+            <radius>0.012</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='lh_thproximal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/TH3_z.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_THJ4' type='revolute'>
+      <child>lh_thproximal</child>
+      <parent>lh_thbase</parent>
+      <axis>
+        <xyz>0.070031 0.706041 -0.704699</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.22173</upper>
+          <effort>3</effort>
+          <velocity>4</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.2</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_thhub'>
+      <pose frame=''>0.214169 -0.060962 -0.009343 -3.00042 -0.781999 -1.66966</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.005</mass>
+        <inertia>
+          <ixx>1e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-06</iyy>
+          <iyz>0</iyz>
+          <izz>3e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_thhub_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.01</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <visual name='lh_thhub_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.001 0.001 0.001</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_THJ3' type='revolute'>
+      <child>lh_thhub</child>
+      <parent>lh_thproximal</parent>
+      <axis>
+        <xyz>-0.070031 -0.706041 0.704699</xyz>
+        <limit>
+          <lower>-0.20944</lower>
+          <upper>0.20944</upper>
+          <effort>2</effort>
+          <velocity>4</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.2</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_thmiddle'>
+      <pose frame=''>0.214169 -0.060962 -0.009343 -3.00042 -0.781999 -1.66966</pose>
+      <inertial>
+        <pose frame=''>0 0 0.016 0 -0 0</pose>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>5.1e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.1e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1.21e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_thmiddle_collision'>
+        <pose frame=''>0 0 0.012 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.018</length>
+            <radius>0.011</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name='lh_thmiddle_collision_1'>
+        <pose frame=''>0 0 0.019 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.011</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <visual name='lh_thmiddle_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/TH2_z.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_THJ2' type='revolute'>
+      <child>lh_thmiddle</child>
+      <parent>lh_thhub</parent>
+      <axis>
+        <xyz>0.995004 0.000951 0.099833</xyz>
+        <limit>
+          <lower>-0.698132</lower>
+          <upper>0.698132</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lh_thdistal'>
+      <pose frame=''>0.216446 -0.083624 -0.031821 2.35459 -0.1 0.000956</pose>
+      <inertial>
+        <pose frame=''>0 0 0.014559 0 -0 0</pose>
+        <mass>0.017</mass>
+        <inertia>
+          <ixx>2.27794e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.37794e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='lh_thdistal_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/TH1_z.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='lh_thdistal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/TH1_z.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='lh_THJ1' type='revolute'>
+      <child>lh_thdistal</child>
+      <parent>lh_thmiddle</parent>
+      <axis>
+        <xyz>0.995004 0.000951 0.099833</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>1</effort>
+          <velocity>4</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.2</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='shoulder_right_link1'>
+      <pose frame=''>-0.21017 0 0.69947 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.0903636</mass>
+        <inertia>
+          <ixx>0.0442193</ixx>
+          <ixy>3.62627e-18</ixy>
+          <ixz>0.0132845</ixz>
+          <iyy>0.048211</iyy>
+          <iyz>-1.20459e-17</iyz>
+          <izz>0.00399873</izz>
+        </inertia>
+      </inertial>
+      <collision name='shoulder_right_link1_collision_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/shoulder_right_link1.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='shoulder_right_link1_visual_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/shoulder_right_link1.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='shoulder_right_axis0' type='revolute'>
+      <child>shoulder_right_link1</child>
+      <parent>torso</parent>
+      <axis>
+        <xyz>0.97437 0 -0.22495</xyz>
+        <limit>
+          <lower>-1.5</lower>
+          <upper>1</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='shoulder_right_link2'>
+      <pose frame=''>-0.21017 0 0.69947 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.00711317</mass>
+        <inertia>
+          <ixx>0.00348037</ixx>
+          <ixy>2.80852e-19</ixy>
+          <ixz>0.00104572</ixz>
+          <iyy>0.00379458</iyy>
+          <iyz>-9.32587e-19</iyz>
+          <izz>0.000314313</izz>
+        </inertia>
+      </inertial>
+      <collision name='shoulder_right_link2_collision_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/shoulder_right_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='shoulder_right_link2_visual_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/shoulder_right_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='shoulder_right_axis1' type='revolute'>
+      <child>shoulder_right_link2</child>
+      <parent>shoulder_right_link1</parent>
+      <axis>
+        <xyz>0 -1 0</xyz>
+        <limit>
+          <lower>-1.5</lower>
+          <upper>0.1</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='upperarm_right'>
+      <pose frame=''>-0.21017 0 0.69947 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>-0.01115 0.00138 -0.17499 0 -0 0</pose>
+        <mass>0.662866</mass>
+        <inertia>
+          <ixx>0.189688</ixx>
+          <ixy>0.000203821</ixy>
+          <ixz>0.0768743</ixz>
+          <iyy>0.221317</iyy>
+          <iyz>-0.000480156</iyz>
+          <izz>0.0338631</izz>
+        </inertia>
+      </inertial>
+      <collision name='upperarm_right_collision_collision'>
+        <pose frame=''>-0.01115 0.00138 -0.17499 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/upperarm_right.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='upperarm_right_visual_visual'>
+        <pose frame=''>-0.01115 0.00138 -0.17499 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/upperarm_right.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='shoulder_right_axis2' type='revolute'>
+      <child>upperarm_right</child>
+      <parent>shoulder_right_link2</parent>
+      <axis>
+        <xyz>-0.22495 0 -0.97437</xyz>
+        <limit>
+          <lower>-1.5</lower>
+          <upper>1.5</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='elbow_right'>
+      <pose frame=''>-0.21123 0 0.38739 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>-0.00474 0.03025 -0.04463 0 -0 0</pose>
+        <mass>0.0359135</mass>
+        <inertia>
+          <ixx>0.00427445</ixx>
+          <ixy>0.000236075</ixy>
+          <ixz>0.00265859</ixz>
+          <iyy>0.00590949</iyy>
+          <iyz>-0.000372475</iyz>
+          <izz>0.0017217</izz>
+        </inertia>
+      </inertial>
+      <collision name='elbow_right_collision_collision'>
+        <pose frame=''>-0.00474 0.03025 -0.04463 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/elbow_right.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='elbow_right_visual_visual'>
+        <pose frame=''>-0.00474 0.03025 -0.04463 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/elbow_right.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='elbow_right_axis0' type='revolute'>
+      <child>elbow_right</child>
+      <parent>upperarm_right</parent>
+      <axis>
+        <xyz>-1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.22173</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='lowerarm_right'>
+      <pose frame=''>-0.21081 0 0.29739 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>-0.00733 -0.00117 -0.11185 0 -0 0</pose>
+        <mass>0.591788</mass>
+        <inertia>
+          <ixx>0.0252661</ixx>
+          <ixy>-0.000143391</ixy>
+          <ixz>0.0240118</ixz>
+          <iyy>0.0534705</iyy>
+          <iyz>0.000203395</iyz>
+          <izz>0.0288341</izz>
+        </inertia>
+      </inertial>
+      <collision name='lowerarm_right_collision_collision'>
+        <pose frame=''>-0.00733 -0.00117 -0.11185 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/lowerarm_right.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='lowerarm_right_visual_visual'>
+        <pose frame=''>-0.00733 -0.00117 -0.11185 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/lowerarm_right.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='elbow_right_axis1' type='revolute'>
+      <child>lowerarm_right</child>
+      <parent>elbow_right</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>0</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='wrist_right_link1'>
+      <pose frame=''>-0.21697 0 0.087 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.038065</mass>
+        <inertia>
+          <ixx>0.000289793</ixx>
+          <ixy>1.06165e-18</ixy>
+          <ixz>0.000718541</ixz>
+          <iyy>0.00208179</iyy>
+          <iyz>-4.25007e-19</iyz>
+          <izz>0.00179368</izz>
+        </inertia>
+      </inertial>
+      <collision name='wrist_right_link1_collision_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/wrist_right_link1.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='wrist_right_link1_visual_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/wrist_right_link1.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='wrist_right_axis0' type='revolute'>
+      <child>wrist_right_link1</child>
+      <parent>lowerarm_right</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.5</lower>
+          <upper>0.5</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='wrist_right_link2'>
+      <pose frame=''>-0.21697 0 0.087 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.00299637</mass>
+        <inertia>
+          <ixx>2.27038e-05</ixx>
+          <ixy>8.27897e-20</ixy>
+          <ixz>5.65615e-05</ixz>
+          <iyy>0.000163765</iyy>
+          <iyz>-3.31549e-20</iyz>
+          <izz>0.000141086</izz>
+        </inertia>
+      </inertial>
+      <collision name='wrist_right_link2_collision_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/wrist_right_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='wrist_right_link2_visual_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/wrist_right_link2.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='wrist_right_axis1' type='revolute'>
+      <child>wrist_right_link2</child>
+      <parent>wrist_right_link1</parent>
+      <axis>
+        <xyz>0 -1 0</xyz>
+        <limit>
+          <lower>-0.5</lower>
+          <upper>0.5</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='hand_right'>
+      <pose frame=''>-0.21697 0 0.087 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>-0.004613 0.000774 -0.065395 0 -0 0</pose>
+        <mass>1.05149</mass>
+        <inertia>
+          <ixx>0.0038593</ixx>
+          <ixy>0.000215459</ixy>
+          <ixz>0.00411608</ixz>
+          <iyy>0.0405473</iyy>
+          <iyz>3.23242e-06</iyz>
+          <izz>0.0377074</izz>
+        </inertia>
+      </inertial>
+      <collision name='hand_right_collision_collision'>
+        <pose frame=''>-0.00506 0.00106 -0.06163 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/collisions/hand_right.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <collision name='hand_right_fixed_joint_lump__rh_palm_collision_1'>
+        <pose frame=''>-0.01226 -0.010931 -0.076979 3.04159 0.001593 -1.57159</pose>
+        <geometry>
+          <box>
+            <size>0.062 0.007 0.098</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_right_fixed_joint_lump__rh_palm_collision_2'>
+        <pose frame=''>-0.00031 0.002061 -0.078156 3.04159 0.001593 -1.57159</pose>
+        <geometry>
+          <box>
+            <size>0.036 0.017 0.098</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_right_fixed_joint_lump__rh_palm_collision_3'>
+        <pose frame=''>-0.004727 -0.028866 -0.121986 3.04159 0.001593 -1.57159</pose>
+        <geometry>
+          <box>
+            <size>0.026 0.017 0.01</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_right_fixed_joint_lump__rh_palm_collision_4'>
+        <pose frame=''>-0.006014 -0.026384 -0.109792 -3.0389 -0.023158 -1.82039</pose>
+        <geometry>
+          <box>
+            <size>0.026 0.014 0.018</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_right_fixed_joint_lump__rh_palm_collision_5'>
+        <pose frame=''>0.008333 -0.031504 -0.041894 3.04159 0.001593 -1.57159</pose>
+        <geometry>
+          <box>
+            <size>0.021 0.027 0.024</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_right_fixed_joint_lump__rh_palm_collision_6'>
+        <pose frame=''>0.014017 -0.012495 -0.050472 3.05356 0.047532 -1.09361</pose>
+        <geometry>
+          <box>
+            <size>0.022 0.005 0.04</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_right_fixed_joint_lump__rh_palm_collision_7'>
+        <pose frame=''>-0.008894 -0.010852 -0.128573 3.04159 0.001593 -1.57159</pose>
+        <geometry>
+          <box>
+            <size>0.018 0.024 0.004</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='hand_right_fixed_joint_lump__rh_palm_collision_8'>
+        <pose frame=''>-0.000875 0.030015 -0.048907 3.04159 0.001593 -1.57159</pose>
+        <geometry>
+          <box>
+            <size>0.02 0.024 0.04</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='hand_right_visual_visual'>
+        <pose frame=''>-0.00506 0.00106 -0.06163 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/meshes/visuals/hand_right.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name='hand_right_fixed_joint_lump__rh_palm_visual_1'>
+        <pose frame=''>0 0 -0.04 3.04159 0.001593 -1.57159</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/palm.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='wrist_right_axis2' type='revolute'>
+      <child>hand_right</child>
+      <parent>wrist_right_link2</parent>
+      <axis>
+        <xyz>0 0 -1</xyz>
+        <limit>
+          <lower>-0.5</lower>
+          <upper>0.5</upper>
+          <effort>1</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <link name='rh_ffknuckle'>
+      <pose frame=''>-0.22648 -0.032842 -0.047578 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.008</mass>
+        <inertia>
+          <ixx>2.6e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.6e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_ffknuckle_collision'>
+        <pose frame=''>0 0 0 3.14159 1.57079 3.14159</pose>
+        <geometry>
+          <cylinder>
+            <length>0.014</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_ffknuckle_visual'>
+        <pose frame=''>0 0 0.0005 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/knuckle.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Grey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <sensor name='rh_ffknuckle_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_ffknuckle_collision</collision>
+          <topic>rh_ffknuckle_collision</topic>
+        </contact>
+        <plugin name='rh_ffknuckle_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_ffknuckle</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_ff/knuckle</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_FFJ4' type='revolute'>
+      <child>rh_ffknuckle</child>
+      <parent>hand_right</parent>
+      <axis>
+        <xyz>0.995004 -0.000633 -0.099833</xyz>
+        <limit>
+          <lower>-0.349066</lower>
+          <upper>0.349066</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_ffproximal'>
+      <pose frame=''>-0.22648 -0.032842 -0.047578 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0225 0 -0 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>9.8e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1.8e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_ffproximal_collision'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_ffproximal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F3.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_ffproximal_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_ffproximal_collision</collision>
+          <topic>rh_ffproximal_collision</topic>
+        </contact>
+        <plugin name='rh_ffproximal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_ffproximal</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_ff/proximal</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_FFJ3' type='revolute'>
+      <child>rh_ffproximal</child>
+      <parent>rh_ffknuckle</parent>
+      <axis>
+        <xyz>-0.000796 -0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_ffmiddle'>
+      <pose frame=''>-0.230973 -0.032767 -0.092353 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <mass>0.017</mass>
+        <inertia>
+          <ixx>2.6e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.7e-06</iyy>
+          <iyz>0</iyz>
+          <izz>8.7e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_ffmiddle_collision'>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.025</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='rh_ffmiddle_collision_1'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='rh_ffmiddle_collision_2'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_ffmiddle_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F2.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_ffmiddle_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_ffmiddle_collision</collision>
+          <topic>rh_ffmiddle_collision</topic>
+        </contact>
+        <plugin name='rh_ffproximal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_ffmiddle</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_ff/middle</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_FFJ2' type='revolute'>
+      <child>rh_ffmiddle</child>
+      <parent>rh_ffproximal</parent>
+      <axis>
+        <xyz>-0.000796 -0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_ffdistal'>
+      <pose frame=''>-0.233469 -0.032725 -0.117228 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.013077 0 -0 0</pose>
+        <mass>0.013</mass>
+        <inertia>
+          <ixx>1.12092e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.28092e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.3e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_ffdistal_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e+07</kp>
+              <kd>1</kd>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>500</mu>
+              <mu2>500</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_ffdistal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_ffdistal_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_ffdistal_collision</collision>
+          <topic>rh_ffdistal_collision</topic>
+        </contact>
+        <plugin name='rh_ffdistal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_ffdistal</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_ff/distal</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_FFJ1' type='revolute'>
+      <child>rh_ffdistal</child>
+      <parent>rh_ffmiddle</parent>
+      <axis>
+        <xyz>-0.000796 -0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_lfmetacarpal'>
+      <pose frame=''>-0.219011 0.033034 0.026446 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.04 0 -0 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>1.45e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.638e-05</iyy>
+          <iyz>0</iyz>
+          <izz>4.272e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_lfmetacarpal_collision'>
+        <pose frame=''>0 0 0.038 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.018 0.024 0.04</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_lfmetacarpal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/lfmetacarpal.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_lfmetacarpal_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_lfmetacarpal_collision</collision>
+          <topic>rh_lfmetacarpal_collision</topic>
+        </contact>
+        <plugin name='rh_lfmetacarpal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_lfmetacarpal</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_lf/metacarpal</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_LFJ5' type='revolute'>
+      <child>rh_lfmetacarpal</child>
+      <parent>hand_right</parent>
+      <axis>
+        <xyz>-0.082234 -0.572212 -0.815972</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0.785398</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_lfknuckle'>
+      <pose frame=''>-0.225579 0.033144 -0.039015 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.008</mass>
+        <inertia>
+          <ixx>2.6e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.6e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_lfknuckle_collision'>
+        <pose frame=''>0 0 0 3.14159 1.57079 3.14159</pose>
+        <geometry>
+          <cylinder>
+            <length>0.014</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_lfknuckle_visual'>
+        <pose frame=''>0 0 0.0005 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/knuckle.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Grey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <sensor name='rh_lfknuckle_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_lfknuckle_collision</collision>
+          <topic>rh_lfknuckle_collision</topic>
+        </contact>
+        <plugin name='rh_lfknuckle_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_lfknuckle</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_lf/knuckle</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_LFJ4' type='revolute'>
+      <child>rh_lfknuckle</child>
+      <parent>rh_lfmetacarpal</parent>
+      <axis>
+        <xyz>-0.995004 0.000633 0.099833</xyz>
+        <limit>
+          <lower>-0.349066</lower>
+          <upper>0.349066</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_lfproximal'>
+      <pose frame=''>-0.225579 0.033144 -0.039015 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0225 0 -0 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>9.8e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1.8e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_lfproximal_collision'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_lfproximal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F3.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_lfproximal_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_lfproximal_collision</collision>
+          <topic>rh_lfproximal_collision</topic>
+        </contact>
+        <plugin name='rh_lfproximal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_lfproximal</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_lf/proximal</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_LFJ3' type='revolute'>
+      <child>rh_lfproximal</child>
+      <parent>rh_lfknuckle</parent>
+      <axis>
+        <xyz>-0.000796 -0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_lfmiddle'>
+      <pose frame=''>-0.230072 0.033219 -0.08379 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <mass>0.017</mass>
+        <inertia>
+          <ixx>2.6e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.7e-06</iyy>
+          <iyz>0</iyz>
+          <izz>8.7e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_lfmiddle_collision'>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.025</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='rh_lfmiddle_collision_1'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='rh_lfmiddle_collision_2'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_lfmiddle_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F2.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_lfmiddle_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_lfmiddle_collision</collision>
+          <topic>rh_lfmiddle_collision</topic>
+        </contact>
+        <plugin name='rh_lfproximal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_lfmiddle</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_lf/middle</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_LFJ2' type='revolute'>
+      <child>rh_lfmiddle</child>
+      <parent>rh_lfproximal</parent>
+      <axis>
+        <xyz>-0.000796 -0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_lfdistal'>
+      <pose frame=''>-0.232567 0.03326 -0.108665 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.013077 0 -0 0</pose>
+        <mass>0.013</mass>
+        <inertia>
+          <ixx>1.12092e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.28092e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.3e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_lfdistal_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e+07</kp>
+              <kd>1</kd>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>500</mu>
+              <mu2>500</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_lfdistal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_lfdistal_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_lfdistal_collision</collision>
+          <topic>rh_lfdistal_collision</topic>
+        </contact>
+        <plugin name='rh_lfdistal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_lfdistal</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_lf/distal</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_LFJ1' type='revolute'>
+      <child>rh_lfdistal</child>
+      <parent>rh_lfmiddle</parent>
+      <axis>
+        <xyz>-0.000796 -0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_mfknuckle'>
+      <pose frame=''>-0.226862 -0.010835 -0.051523 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.008</mass>
+        <inertia>
+          <ixx>2.6e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.6e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_mfknuckle_collision'>
+        <pose frame=''>0 0 0 3.14159 1.57079 3.14159</pose>
+        <geometry>
+          <cylinder>
+            <length>0.014</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_mfknuckle_visual'>
+        <pose frame=''>0 0 0.0005 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/knuckle.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Grey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <sensor name='rh_mfknuckle_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_mfknuckle_collision</collision>
+          <topic>rh_mfknuckle_collision</topic>
+        </contact>
+        <plugin name='rh_mfknuckle_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_mfknuckle</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_mf/knuckle</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_MFJ4' type='revolute'>
+      <child>rh_mfknuckle</child>
+      <parent>hand_right</parent>
+      <axis>
+        <xyz>0.995004 -0.000633 -0.099833</xyz>
+        <limit>
+          <lower>-0.349066</lower>
+          <upper>0.349066</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_mfproximal'>
+      <pose frame=''>-0.226862 -0.010835 -0.051523 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0225 0 -0 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>9.8e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1.8e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_mfproximal_collision'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_mfproximal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F3.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_mfproximal_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_mfproximal_collision</collision>
+          <topic>rh_mfproximal_collision</topic>
+        </contact>
+        <plugin name='rh_mfproximal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_mfproximal</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_mf/proximal</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_MFJ3' type='revolute'>
+      <child>rh_mfproximal</child>
+      <parent>rh_mfknuckle</parent>
+      <axis>
+        <xyz>-0.000796 -0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_mfmiddle'>
+      <pose frame=''>-0.231355 -0.01076 -0.096298 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <mass>0.017</mass>
+        <inertia>
+          <ixx>2.6e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.7e-06</iyy>
+          <iyz>0</iyz>
+          <izz>8.7e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_mfmiddle_collision'>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.025</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='rh_mfmiddle_collision_1'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='rh_mfmiddle_collision_2'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_mfmiddle_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F2.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_mfmiddle_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_mfmiddle_collision</collision>
+          <topic>rh_mfmiddle_collision</topic>
+        </contact>
+        <plugin name='rh_mfproximal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_mfmiddle</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_mf/middle</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_MFJ2' type='revolute'>
+      <child>rh_mfmiddle</child>
+      <parent>rh_mfproximal</parent>
+      <axis>
+        <xyz>-0.000796 -0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_mfdistal'>
+      <pose frame=''>-0.23385 -0.010719 -0.121173 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.013077 0 -0 0</pose>
+        <mass>0.013</mass>
+        <inertia>
+          <ixx>1.12092e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.28092e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.3e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_mfdistal_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e+07</kp>
+              <kd>1</kd>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>500</mu>
+              <mu2>500</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_mfdistal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_mfdistal_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_mfdistal_collision</collision>
+          <topic>rh_mfdistal_collision</topic>
+        </contact>
+        <plugin name='rh_mfdistal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_mfdistal</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_mf/distal</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_MFJ1' type='revolute'>
+      <child>rh_mfdistal</child>
+      <parent>rh_mfmiddle</parent>
+      <axis>
+        <xyz>-0.000796 -0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_rfknuckle'>
+      <pose frame=''>-0.226445 0.011158 -0.047508 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.008</mass>
+        <inertia>
+          <ixx>2.6e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.6e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_rfknuckle_collision'>
+        <pose frame=''>0 0 0 3.14159 1.57079 3.14159</pose>
+        <geometry>
+          <cylinder>
+            <length>0.014</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_rfknuckle_visual'>
+        <pose frame=''>0 0 0.0005 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/knuckle.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Grey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <sensor name='rh_rfknuckle_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_rfknuckle_collision</collision>
+          <topic>rh_rfknuckle_collision</topic>
+        </contact>
+        <plugin name='rh_rfknuckle_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_rfknuckle</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_rf/knuckle</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_RFJ4' type='revolute'>
+      <child>rh_rfknuckle</child>
+      <parent>hand_right</parent>
+      <axis>
+        <xyz>-0.995004 0.000633 0.099833</xyz>
+        <limit>
+          <lower>-0.349066</lower>
+          <upper>0.349066</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_rfproximal'>
+      <pose frame=''>-0.226445 0.011158 -0.047508 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0225 0 -0 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>9.8e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1.8e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_rfproximal_collision'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_rfproximal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F3.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_rfproximal_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_rfproximal_collision</collision>
+          <topic>rh_rfproximal_collision</topic>
+        </contact>
+        <plugin name='rh_rfproximal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_rfproximal</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_rf/proximal</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_RFJ3' type='revolute'>
+      <child>rh_rfproximal</child>
+      <parent>rh_rfknuckle</parent>
+      <axis>
+        <xyz>-0.000796 -0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_rfmiddle'>
+      <pose frame=''>-0.230938 0.011233 -0.092283 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <mass>0.017</mass>
+        <inertia>
+          <ixx>2.6e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.7e-06</iyy>
+          <iyz>0</iyz>
+          <izz>8.7e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_rfmiddle_collision'>
+        <pose frame=''>0 0 0.0125 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.025</length>
+            <radius>0.007</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='rh_rfmiddle_collision_1'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='rh_rfmiddle_collision_2'>
+        <pose frame=''>0 0 0.025 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.007</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_rfmiddle_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F2.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_rfmiddle_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_rfmiddle_collision</collision>
+          <topic>rh_rfmiddle_collision</topic>
+        </contact>
+        <plugin name='rh_rfproximal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_rfmiddle</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_rf/middle</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_RFJ2' type='revolute'>
+      <child>rh_rfmiddle</child>
+      <parent>rh_rfproximal</parent>
+      <axis>
+        <xyz>-0.000796 -0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_rfdistal'>
+      <pose frame=''>-0.233434 0.011275 -0.117158 3.04159 0.001593 -1.57159</pose>
+      <inertial>
+        <pose frame=''>0 0 0.013077 0 -0 0</pose>
+        <mass>0.013</mass>
+        <inertia>
+          <ixx>1.12092e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.28092e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.3e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_rfdistal_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e+07</kp>
+              <kd>1</kd>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>500</mu>
+              <mu2>500</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_rfdistal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/F1.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_rfdistal_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_rfdistal_collision</collision>
+          <topic>rh_rfdistal_collision</topic>
+        </contact>
+        <plugin name='rh_rfdistal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_rfdistal</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_rf/distal</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_RFJ1' type='revolute'>
+      <child>rh_rfdistal</child>
+      <parent>rh_rfmiddle</parent>
+      <axis>
+        <xyz>-0.000796 -0.999998 -0.001593</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_thbase'>
+      <pose frame=''>-0.211435 -0.033957 0.017242 3.00086 -0.77883 -1.47225</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>1.6e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.6e-07</iyy>
+          <iyz>0</iyz>
+          <izz>1.6e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_thbase_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.011</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_thbase_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.001 0.001 0.001</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+      <sensor name='rh_thbase_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_thbase_collision</collision>
+          <topic>rh_thbase_collision</topic>
+        </contact>
+        <plugin name='rh_thbase_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_thbase</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_th/base</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_THJ5' type='revolute'>
+      <child>rh_thbase</child>
+      <parent>hand_right</parent>
+      <axis>
+        <xyz>0.071155 0.705929 0.704699</xyz>
+        <limit>
+          <lower>-1.0472</lower>
+          <upper>1.0472</upper>
+          <effort>5</effort>
+          <velocity>4</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.2</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_thproximal'>
+      <pose frame=''>-0.211435 -0.033957 0.017242 3.00086 -0.77883 -1.47225</pose>
+      <inertial>
+        <pose frame=''>0 0 0.019 0 -0 0</pose>
+        <mass>0.04</mass>
+        <inertia>
+          <ixx>1.36e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.36e-05</iyy>
+          <iyz>0</iyz>
+          <izz>3.13e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_thproximal_collision'>
+        <pose frame=''>0 0 0.02 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.018</length>
+            <radius>0.012</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_thproximal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/TH3_z.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+      <sensor name='rh_thproximal_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_thproximal_collision</collision>
+          <topic>rh_thproximal_collision</topic>
+        </contact>
+        <plugin name='rh_thproximal_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_thproximal</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_th/proximal</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_THJ4' type='revolute'>
+      <child>rh_thproximal</child>
+      <parent>rh_thbase</parent>
+      <axis>
+        <xyz>0.070029 -0.708282 0.702447</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.22173</upper>
+          <effort>3</effort>
+          <velocity>4</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.2</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_thhub'>
+      <pose frame=''>-0.214139 -0.060782 -0.009536 3.00086 -0.77883 -1.47225</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.005</mass>
+        <inertia>
+          <ixx>1e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-06</iyy>
+          <iyz>0</iyz>
+          <izz>3e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_thhub_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.01</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_thhub_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.001 0.001 0.001</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_thhub_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_thhub_collision</collision>
+          <topic>rh_thhub_collision</topic>
+        </contact>
+        <plugin name='rh_thhub_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_thhub</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_th/hub</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_THJ3' type='revolute'>
+      <child>rh_thhub</child>
+      <parent>rh_thproximal</parent>
+      <axis>
+        <xyz>0.070029 -0.708282 0.702447</xyz>
+        <limit>
+          <lower>-0.20944</lower>
+          <upper>0.20944</upper>
+          <effort>2</effort>
+          <velocity>4</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.2</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_thmiddle'>
+      <pose frame=''>-0.214139 -0.060782 -0.009536 3.00086 -0.77883 -1.47225</pose>
+      <inertial>
+        <pose frame=''>0 0 0.016 0 -0 0</pose>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>5.1e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.1e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1.21e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_thmiddle_collision'>
+        <pose frame=''>0 0 0.012 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.018</length>
+            <radius>0.011</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='rh_thmiddle_collision_1'>
+        <pose frame=''>0 0 0.019 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.011</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rh_thmiddle_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/TH2_z.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>__default__</uri>
+            <name>__default__</name>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>1</self_collide>
+      <sensor name='rh_thmiddle_contact' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <contact>
+          <collision>rh_thmiddle_collision</collision>
+          <topic>rh_thmiddle_collision</topic>
+        </contact>
+        <plugin name='rh_thmiddle_gazebo_ros_bumper_controller' filename='libgazebo_ros_bumper.so'>
+          <alwaysOn>1</alwaysOn>
+          <frameName>rh_thmiddle</frameName>
+          <updateRate>100.0</updateRate>
+          <bumperTopicName>contacts/rh_th/middle</bumperTopicName>
+        </plugin>
+      </sensor>
+    </link>
+    <joint name='rh_THJ2' type='revolute'>
+      <child>rh_thmiddle</child>
+      <parent>rh_thhub</parent>
+      <axis>
+        <xyz>0.995004 -0.000633 -0.099833</xyz>
+        <limit>
+          <lower>-0.698132</lower>
+          <upper>0.698132</upper>
+          <effort>2</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rh_thdistal'>
+      <pose frame=''>-0.216416 -0.083372 -0.032087 2.3578 0.1 -0.000637</pose>
+      <inertial>
+        <pose frame=''>0 0 0.014559 0 -0 0</pose>
+        <mass>0.017</mass>
+        <inertia>
+          <ixx>2.27794e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.37794e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='rh_thdistal_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/TH1_z.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='rh_thdistal_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://robots/upper_body/hand/model/TH1_z.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rh_THJ1' type='revolute'>
+      <child>rh_thdistal</child>
+      <parent>rh_thmiddle</parent>
+      <axis>
+        <xyz>0.995004 -0.000633 -0.099833</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.5708</upper>
+          <effort>1</effort>
+          <velocity>4</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.2</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+  </model>
+</sdf>
