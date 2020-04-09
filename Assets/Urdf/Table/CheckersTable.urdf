@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<robot name="CheckersTable">
+  <material name="mat_Table">
+    <color rgba="0.8396 0.8396 0.8396 1" />
+  </material>
+  <material name="mat_CheckersBoard">
+    <texture filename="resources/tex_Chessboard.png" />
+  </material>
+  <link name="base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
+    </inertial>
+  </link>
+  <link name="Table">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
+    </inertial>
+  </link>
+  <link name="Leg">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.5" />
+      <geometry>
+        <mesh filename="meshes/TableLeg.stl" scale="0.1 0.1 1" />
+      </geometry>
+      <material name="mat_Table" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.5" />
+      <geometry>
+        <mesh filename="meshes/TableLeg.stl" scale="0.1 0.1 1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="Top">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 1" />
+      <geometry>
+        <mesh filename="meshes/TableTop.stl" scale="1 1 0.1" />
+      </geometry>
+      <material name="mat_Table" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 1" />
+      <geometry>
+        <mesh filename="meshes/TableTop.stl" scale="1 1 0.1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="Gameboard">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 1.055" />
+      <geometry>
+        <mesh filename="meshes/GameBoard.stl" scale="0.075 0.075 1" />
+      </geometry>
+      <material name="mat_CheckersBoard" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 1.055" />
+      <geometry>
+        <mesh filename="meshes/GameBoard.stl" scale="0.075 0.075 1" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="1" type="fixed">
+    <parent link="base_link" />
+    <child link="Table" />
+  </joint>
+  <joint name="2" type="fixed">
+    <parent link="Table" />
+    <child link="Leg" />
+  </joint>
+  <joint name="3" type="fixed">
+    <parent link="Table" />
+    <child link="Top" />
+  </joint>
+  <joint name="4" type="fixed">
+    <parent link="base_link" />
+    <child link="Gameboard" />
+  </joint>
+</robot>
