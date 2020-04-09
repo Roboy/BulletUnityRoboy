@@ -5,11 +5,14 @@ using RosSharp.Urdf;
 using UnityEngine.UI;
 using System.Runtime.InteropServices;
 using System;
+using Valve.VR;
 
 [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
 public class JointControl : MonoBehaviour
 {
     public GameObject upperBody;
+    public GameObject table;
+    public GameObject token;
     private UrdfRobot UrdfRobot;
     private UrdfJoint joint;
     private IntPtr pybullet;
@@ -29,7 +32,7 @@ public class JointControl : MonoBehaviour
         upperBody.transform.Rotate(0, 90, 0);
         var rbs = upperBody.GetComponentsInChildren<Rigidbody>();
         foreach (var rb in rbs) {
-            rb.detectCollisions = false;
+            //rb.detectCollisions = false;
             rb.isKinematic = true;
         }
         UrdfRobot = GetComponent<UrdfRobot>();
@@ -40,7 +43,31 @@ public class JointControl : MonoBehaviour
             if (urdfJoint.JointName == "shoulder_right_axis0")
                 joint = urdfJoint;
         }
-            
+
+        // load URDF model
+
+        var tablePos = table.transform.position;
+        var q = table.transform.rotation;
+        var tablePath = "C:\\Users\\roboy\\Documents\\code\\BulletUnityRoboy\\Assets\\Urdf\\Table\\CheckersTable.urdf";
+        var tableId = loadURDF(tablePath, tablePos, q);
+
+        var tokenPath = "C:\\Users\\roboy\\Documents\\code\\BulletUnityRoboy\\Assets\\Urdf\\token\\token.urdf";
+        var tokenId = loadURDF(tokenPath, token.transform.position, token.transform.rotation);
+        
+        Debug.Log(tokenId.ToString());
+    }
+
+    int loadURDF(string file, Vector3 p, Quaternion q) 
+    {
+        var cmd = NativeMethods.b3CreateCollisionShapeCommandInit(pybullet);
+        p = RosSharp.TransformExtensions.Unity2Ros(p);
+        q = RosSharp.TransformExtensions.Unity2Ros(q);
+        cmd = NativeMethods.b3LoadUrdfCommandInit(pybullet, file);
+        NativeMethods.b3LoadUrdfCommandSetStartPosition(cmd, p.x, p.y, p.z);
+        NativeMethods.b3LoadUrdfCommandSetStartOrientation(cmd, q.x, q.y, q.z, q.w);
+        var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+        var bodyId = NativeMethods.b3GetStatusBodyIndex(status);
+        return bodyId;
     }
 
     // Update is called once per frame
@@ -80,5 +107,13 @@ public class JointControl : MonoBehaviour
         //upperBody.transform.Rotate(0, 100 * Time.deltaTime, 0);
         //joint.UpdateJointState(1 * Time.deltaTime);
         
+    }
+
+    private void OnDestroy()
+    {
+        if (pybullet != IntPtr.Zero)
+        {
+            NativeMethods.b3DisconnectSharedMemory(pybullet);
+        }
     }
 }
