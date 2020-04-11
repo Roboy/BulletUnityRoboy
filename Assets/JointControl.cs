@@ -41,7 +41,7 @@ public class JointControl : MonoBehaviour
         Debug.Log(NativeMethods.b3CanSubmitCommand(pybullet));
 
 
-        //resetSimulation();
+        resetSimulation();
 
         IntPtr cmd = NativeMethods.b3InitSyncBodyInfoCommand(pybullet);
         IntPtr status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
@@ -71,7 +71,7 @@ public class JointControl : MonoBehaviour
         var tableId = loadURDF(tablePath, table.transform.position, table.transform.rotation, 1);     
 
         var robotPath = "C:\\Users\\roboy\\Documents\\code\\roboy3_models\\upper_body\\bullet.urdf";
-        b3RobotId = 0;// loadURDF(robotPath, upperBody.transform.position, upperBody.transform.rotation, 1);
+        b3RobotId =  loadURDF(robotPath, upperBody.transform.position, upperBody.transform.rotation, 1);
         
         
 
@@ -130,6 +130,8 @@ public class JointControl : MonoBehaviour
         status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
 
         Valve.VR.OpenVR.System.ResetSeatedZeroPose();
+        SteamVR_Actions.default_GrabPinch.AddOnStateDownListener(TriggerPressed, SteamVR_Input_Sources.Any);
+
         syncPoseUnity2Bullet(upperBody);
         setGravity();
         setRealTimeSimualtion(1);
@@ -146,6 +148,7 @@ public class JointControl : MonoBehaviour
             Debug.LogWarning("reset");
             initRobotPosition = upperBody.transform.position;
             resetRobotPose();
+            camYOffset = cam.transform.rotation.eulerAngles.y;
             //resetCheckersPose();
             syncPoseUnity2Bullet(upperBody);
             syncPoseUnity2Bullet(table);
@@ -169,14 +172,28 @@ public class JointControl : MonoBehaviour
 
     }
 
+    private void TriggerPressed(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+    {
+        Debug.LogWarning("reset");
+        initRobotPosition = upperBody.transform.position;
+        resetRobotPose();
+        camYOffset = cam.transform.rotation.eulerAngles.y;
+        //resetCheckersPose();
+        syncPoseUnity2Bullet(upperBody);
+        syncPoseUnity2Bullet(table);
+
+        foreach (var token in tokens)
+        {
+            syncPoseUnity2Bullet(token);
+        }
+    }
+
     void resetRobotPose()
     {
-        var cam_pos = cam.transform.position;
-        cam_pos.y -= 0.9f;
+        var p = - cam.transform.up + cam.transform.forward * -0.2f + cam.transform.position;
         var cam_rotation = cam.transform.rotation;
-        Quaternion q = new Quaternion(0, -0.707f, 0, 0.707f);
-        cam_rotation = q * cam_rotation;
-        upperBody.transform.SetPositionAndRotation(cam_pos, cam_rotation);
+        var q = Quaternion.Euler(0, cam_rotation.y-90, 0);
+        upperBody.transform.SetPositionAndRotation(p, q);
     }
 
     void resetCheckersPose()
