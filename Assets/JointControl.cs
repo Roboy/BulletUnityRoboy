@@ -10,6 +10,7 @@ using UnityEditorInternal;
 using System.Linq;
 using System.Security.Principal;
 using RosSharp;
+using UnityEngine.Assertions.Must;
 
 [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
 public class JointControl : MonoBehaviour
@@ -17,6 +18,7 @@ public class JointControl : MonoBehaviour
     public GameObject upperBody;
     public GameObject table;
     public GameObject head;
+    public GameObject glove;
     public List<GameObject> tokens;
     public Camera cam;
     public Transform wristTransform;
@@ -30,14 +32,15 @@ public class JointControl : MonoBehaviour
     private float lastHeadUpdate;
     private List<int> headJointIds;
     private List<int> freeJoints;
-    private List<int> handJoints;
+    private List<List<int>> handJoints;
     private List<int> wristJoints;
     private int b3RobotId;
     private double setpoint;
     private double camYOffset;
     private List<double> wristOffset;
     private Vector3 initRobotPosition;
-    
+    private SenseGlove_VirtualHand virtualHand;
+
 
     // Start is called before the first frame update
     void Start()
@@ -134,6 +137,35 @@ public class JointControl : MonoBehaviour
         };
 
 
+        handJoints = new List<List<int>>(){
+            new List<int> {
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ4")),
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ3")),
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ2")),
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ1"))
+            },
+        new List<int> {
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_FFJ3")),
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_FFJ2")),
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_FFJ1")) 
+            },
+            new List<int> {
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_MFJ3")),
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_MFJ2")),
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_MFJ1")) 
+            },
+            new List<int> {
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_RFJ3")),
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_RFJ2")),
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_RFJ1"))
+            },
+            new List<int> {
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_LFJ3")),
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_LFJ2")),
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_LFJ1"))
+            }
+        };
+
         b3IdMap = new Dictionary<GameObject, int>
         {
             { table, tableId },
@@ -160,6 +192,10 @@ public class JointControl : MonoBehaviour
         Valve.VR.OpenVR.System.ResetSeatedZeroPose();
         SteamVR_Actions.default_GrabPinch.AddOnStateDownListener(TriggerPressed, SteamVR_Input_Sources.Any);
 
+        virtualHand = glove.GetComponent<SenseGlove_VirtualHand>();
+        //virtualHand.CollectFingerJoints();
+        //virtualHand.CollectCorrections();
+
         syncPoseUnity2Bullet(upperBody);
         setGravity();
         setRealTimeSimualtion(1);
@@ -169,6 +205,8 @@ public class JointControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
+        //Debug.Log(hand.indexFingerJoints[2].rotation.eulerAngles);
         //var q = new Quaternion(0, 1.57f, 0, 1.57f);
         //cam.transform.SetPositionAndRotation(camHolder.transform.position, q*cam.transform.rotation);
         if (Input.GetKeyDown("space"))
@@ -202,9 +240,103 @@ public class JointControl : MonoBehaviour
             {
                 trackHead();
                 followObjectIK(IKTarget);
+                trackFingerJoints();
             }
         }
 
+    }
+
+    void trackFingerJoints()
+    {
+        var cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, 2);
+        for (int i=0; i<handJoints.Count; i++)
+        {
+            List<Transform> joints = new List<Transform>();
+            for (int j=0; j<handJoints[i].Count; j++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        joints = virtualHand.thumbJoints;
+                        break;
+                    case 1:
+                        joints = virtualHand.indexFingerJoints;
+                        break;
+                    case 2:
+                        joints = virtualHand.middleFingerJoints;
+                        break;
+                    case 3:
+                        joints = virtualHand.ringFingerJoints;
+                        break;
+                    case 4:
+                        joints = virtualHand.pinkyJoints;
+                        break;
+
+                    default:
+                        Debug.LogError("unknown finger");
+                        break;
+
+                        
+                }
+                Quaternion q;
+                if (i==0 && j>0)
+                {
+                    q = (joints[j-1].rotation * virtualHand.fingerCorrection[i][j-1]).Unity2Ros();
+                } else
+                {
+                    q = (joints[j].rotation * virtualHand.fingerCorrection[i][j]).Unity2Ros();
+                }
+                
+                //var q = joints[j].rotation.Unity2Ros();
+                if (i == 0)
+                {
+                    if (j==0)
+                    {
+                        Debug.LogWarning("x: " + clipAngle(q.eulerAngles.x) + "\t y: " + clipAngle(q.eulerAngles.y) + "\t z: " + clipAngle(q.eulerAngles.z));
+
+                        setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.z) * Mathf.Deg2Rad);
+                        continue;
+                    }
+                    
+                    if (j==1)
+                    {
+                        
+                        setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
+                        continue;
+                        //Debug.LogWarning(clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
+                    }
+
+                    setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
+                    continue;
+                }
+                if (j==0)
+                {
+                    //if (i==0)
+                    //{
+                    //    Debug.LogWarning(clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
+                    //    setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z) * Mathf.Deg2Rad);
+                    //}
+                    //Debug.LogWarning(clipAngle(-q.eulerAngles.z) * Mathf.Deg2Rad);
+                    setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z+110) * Mathf.Deg2Rad);
+                    continue;
+                }
+                setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z)*Mathf.Deg2Rad);
+            }
+        }
+        NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+    }
+
+    double clipAngle(double angle)
+    {
+        if (angle > 180)
+        {
+            angle -= 360;
+        }
+        else if (angle < -180)
+        {
+            angle += 360;
+        }
+        return angle;
     }
 
     void followObjectIK(GameObject target)
@@ -237,7 +369,7 @@ public class JointControl : MonoBehaviour
             {
                 continue;
             }
-            setJointPosition(ref cmd, id, jointTargets[id]);
+            //setJointPosition(ref cmd, id, jointTargets[id]);
         }
         
         
@@ -388,7 +520,7 @@ public class JointControl : MonoBehaviour
             for (int i = 0; i < robot.GetComponentsInChildren<UrdfJoint>().Length; i++)
             {
                 var unityJoint = robot.GetComponentsInChildren<UrdfJoint>()[i];
-                if (unityJoint.JointName.Contains("TH") || !jointNames.Contains(unityJoint.JointName)) continue;
+                if (!jointNames.Contains(unityJoint.JointName)) continue;
                 
                 
                 
