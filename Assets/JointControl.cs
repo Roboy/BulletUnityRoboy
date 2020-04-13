@@ -9,6 +9,7 @@ using Valve.VR;
 using UnityEditorInternal;
 using System.Linq;
 using System.Security.Principal;
+using RosSharp;
 
 [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
 public class JointControl : MonoBehaviour
@@ -18,7 +19,8 @@ public class JointControl : MonoBehaviour
     public GameObject head;
     public List<GameObject> tokens;
     public Camera cam;
-    public GameObject camHolder;
+    public Transform wristTransform;
+    public GameObject IKTarget;
     private UrdfRobot UrdfRobot;
     private UrdfJoint joint;
     private IntPtr pybullet;
@@ -27,9 +29,13 @@ public class JointControl : MonoBehaviour
     private List<string> jointNames; // synced with b3JointIds
     private float lastHeadUpdate;
     private List<int> headJointIds;
+    private List<int> freeJoints;
+    private List<int> handJoints;
+    private List<int> wristJoints;
     private int b3RobotId;
     private double setpoint;
     private double camYOffset;
+    private List<double> wristOffset;
     private Vector3 initRobotPosition;
     
 
@@ -82,12 +88,24 @@ public class JointControl : MonoBehaviour
         jointNames = new List<string>();
         var urdfJoints = UrdfRobot.GetComponentsInChildren<UrdfJoint>();
         b3JointIds = new List<int> ();
-        
+        freeJoints = new List<int>();
+
+        cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, 2); 
         for (int i=0; i<b3JointsNum; i++)
         {
             NativeMethods.b3GetJointInfo(pybullet, b3RobotId, i, ref jointInfo);
             b3JointNames.Add(jointInfo.m_jointName);
+            if ((JointType) jointInfo.m_jointType != JointType.eFixedType)
+            {
+                freeJoints.Add(i);
+            }
+            if(jointInfo.m_jointName.Contains("rh"))
+            {
+                setJointPosition(ref cmd, i, 0);
+            }
         }
+        NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+         
         
         foreach(var j in urdfJoints)
         {
@@ -103,6 +121,16 @@ public class JointControl : MonoBehaviour
             b3JointIds.ElementAt(jointNames.IndexOf("head_axis0")),
             b3JointIds.ElementAt(jointNames.IndexOf("head_axis2")),
             b3JointIds.ElementAt(jointNames.IndexOf("head_axis1"))
+        };
+        wristJoints = new List<int>
+        {
+            b3JointIds.ElementAt(jointNames.IndexOf("wrist_right_axis0")),
+            b3JointIds.ElementAt(jointNames.IndexOf("wrist_right_axis1")),
+            b3JointIds.ElementAt(jointNames.IndexOf("wrist_right_axis2"))
+        };
+        wristOffset = new List<double>
+        {
+            0,0,0
         };
 
 
@@ -156,7 +184,11 @@ public class JointControl : MonoBehaviour
             foreach(var token in tokens) {
                 syncPoseUnity2Bullet(token);
             }
-            
+            wristOffset[0] = IKTarget.transform.rotation.eulerAngles.x;
+            wristOffset[1] = IKTarget.transform.rotation.eulerAngles.y;
+            wristOffset[2] = IKTarget.transform.rotation.eulerAngles.z;
+
+
         }
         UrdfRobot = GetComponent<UrdfRobot>();
         if (pybullet != IntPtr.Zero)
@@ -166,10 +198,78 @@ public class JointControl : MonoBehaviour
                 syncBodyState(token);
             //syncBodyState(table);
             //syncBodyState(upperBody);
-            trackHead();
-            
+            if (Time.time * 1000 - lastHeadUpdate > 20)
+            {
+                trackHead();
+                followObjectIK(IKTarget);
+            }
         }
 
+    }
+
+    void followObjectIK(GameObject target)
+    {
+        var cmd = NativeMethods.b3CalculateInverseKinematicsCommandInit(pybullet, b3RobotId);
+        var targetPosRos = target.transform.position.Unity2Ros();
+        //target.transform.Rotate(90, 180, 0);
+        var targetOrnRos = wristTransform.rotation.Unity2Ros(); // target.transform.rotation.Unity2Ros();
+        //var newEuler = new Vector3(targetOrnRos.eulerAngles.x - 90, targetOrnRos.eulerAngles.y - 180, targetOrnRos.eulerAngles.z);
+        //targetOrnRos = Quaternion.Euler(newEuler).Unity2Ros();
+        double[] targetPos = { targetPosRos.x, targetPosRos.y, targetPosRos.z };
+        double[] targetOrn = { targetOrnRos.x, targetOrnRos.y, targetOrnRos.z, targetOrnRos.w };
+        int[] dofCount = new int[2];
+        double[] jointTargets = new double[100];
+        int bodyId =-1;
+        //NativeMethods.b3CalculateInverseKinematicsAddTargetPositionWithOrientation(cmd, 7, ref targetPos[0], ref targetOrn[0]);
+        NativeMethods.b3CalculateInverseKinematicsAddTargetPurePosition(cmd, 7, ref targetPos[0]);
+        var statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+        NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount[0], ref jointTargets[0]);
+        cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, 2);
+        foreach (var id in freeJoints)
+        {
+            double angle = 0;
+            if (headJointIds.Contains(id))
+            {
+                continue;
+            }
+            else if (id==wristJoints[0])
+            {
+                angle = targetOrnRos.eulerAngles.x;
+                //angle -= wristOffset[0];
+                if (angle > 200) angle -= 360;
+                if (angle < -200) angle += 360;
+
+                angle *= -Mathf.Deg2Rad;
+                
+            }
+            else if(id == wristJoints[1])
+            {
+                angle = targetOrnRos.eulerAngles.y;
+                //angle -= wristOffset[1];
+                if (angle > 200) angle -= 360;
+                if (angle < -200) angle += 360;
+                angle *= Mathf.Deg2Rad;
+                
+            }
+            else if(id == wristJoints[2])
+            {
+                angle = targetOrnRos.eulerAngles.z;
+                angle -= wristOffset[2];
+                if (angle > 200) angle -= 360;
+                if (angle < -200) angle += 360;
+                angle *= -Mathf.Deg2Rad;
+                angle += 1.57/2.0;
+               
+            }
+            else
+            {
+                angle = 0;// jointTargets[id];   
+            }
+            setJointPosition(ref cmd, id, angle);
+        }
+        
+        
+        var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
     }
 
     private void TriggerPressed(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
@@ -190,7 +290,7 @@ public class JointControl : MonoBehaviour
 
     void resetRobotPose()
     {
-        var p = - cam.transform.up + cam.transform.forward * -0.2f + cam.transform.position;
+        var p = - cam.transform.up + cam.transform.forward * -0.1f + cam.transform.position;
         var cam_rotation = cam.transform.rotation;
         var q = Quaternion.Euler(0, cam_rotation.y-90, 0);
         upperBody.transform.SetPositionAndRotation(p, q);
@@ -337,8 +437,8 @@ public class JointControl : MonoBehaviour
 
     void trackHead()
     {
-        if (Time.time * 1000 - lastHeadUpdate > 100)
-        {
+        //if (Time.time * 1000 - lastHeadUpdate > 100)
+        //{
             var eulerAngles = cam.transform.rotation.eulerAngles;
             var roll = eulerAngles.x;
             var pitch = eulerAngles.y-camYOffset;
@@ -360,22 +460,23 @@ public class JointControl : MonoBehaviour
             }
 
             IntPtr cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, 2);
-            setJointPosition(ref cmd, headJointIds[0], roll);
-            setJointPosition(ref cmd, headJointIds[1], yaw);
-            setJointPosition(ref cmd, headJointIds[2], pitch);
+            setJointPosition(ref cmd, headJointIds[0], roll * Mathf.Deg2Rad);
+            //Debug.LogWarning(roll + "\t" + roll * Mathf.Deg2Rad);
+            setJointPosition(ref cmd, headJointIds[1], yaw * Mathf.Deg2Rad);
+            setJointPosition(ref cmd, headJointIds[2], pitch * Mathf.Deg2Rad);
 
             var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
             
             lastHeadUpdate = Time.time * 1000;
            
-        }
+       // }
     }
 
-    void setJointPosition(ref IntPtr cmd, int jointIndex, double targetPositionDeg)
+    void setJointPosition(ref IntPtr cmd, int jointIndex, double targetPositionRad)
     {
         b3JointInfo ji = new b3JointInfo();
         NativeMethods.b3GetJointInfo(pybullet, b3RobotId, jointIndex, ref ji);
-        NativeMethods.b3JointControlSetDesiredPosition(cmd, ji.m_qIndex, targetPositionDeg * Mathf.Deg2Rad);
+        NativeMethods.b3JointControlSetDesiredPosition(cmd, ji.m_qIndex, targetPositionRad);
         NativeMethods.b3JointControlSetKp(cmd, ji.m_uIndex, 0.1);
         NativeMethods.b3JointControlSetDesiredVelocity(cmd, ji.m_uIndex, 0);
         NativeMethods.b3JointControlSetKd(cmd, ji.m_uIndex, 1.0);
