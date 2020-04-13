@@ -212,60 +212,32 @@ public class JointControl : MonoBehaviour
         var cmd = NativeMethods.b3CalculateInverseKinematicsCommandInit(pybullet, b3RobotId);
         var targetPosRos = target.transform.position.Unity2Ros();
         //target.transform.Rotate(90, 180, 0);
-        var targetOrnRos = wristTransform.rotation.Unity2Ros(); // target.transform.rotation.Unity2Ros();
-        //var newEuler = new Vector3(targetOrnRos.eulerAngles.x - 90, targetOrnRos.eulerAngles.y - 180, targetOrnRos.eulerAngles.z);
+
+        var targetOrnRos = wristTransform.rotation;//.Unity2Ros(); // target.transform.rotation.Unity2Ros();
+        targetOrnRos *= Quaternion.AngleAxis(90, new Vector3(0, 1, 0));
+        targetOrnRos *= Quaternion.AngleAxis(180, new Vector3(1, 0, 0));
+        //targetOrnRos *= Quaternion.AngleAxis(-180, new Vector3(0, 0, 1));
+        targetOrnRos = targetOrnRos.Unity2Ros();
+        targetOrnRos = Quaternion.Euler(targetOrnRos.eulerAngles.x, targetOrnRos.eulerAngles.y, targetOrnRos.eulerAngles.z);
+        //var newEuler = new Vector3(-targetOrnRos.eulerAngles.x , targetOrnRos.eulerAngles.y, -targetOrnRos.eulerAngles.z);
         //targetOrnRos = Quaternion.Euler(newEuler).Unity2Ros();
         double[] targetPos = { targetPosRos.x, targetPosRos.y, targetPosRos.z };
         double[] targetOrn = { targetOrnRos.x, targetOrnRos.y, targetOrnRos.z, targetOrnRos.w };
         int[] dofCount = new int[2];
         double[] jointTargets = new double[100];
         int bodyId =-1;
-        //NativeMethods.b3CalculateInverseKinematicsAddTargetPositionWithOrientation(cmd, 7, ref targetPos[0], ref targetOrn[0]);
-        NativeMethods.b3CalculateInverseKinematicsAddTargetPurePosition(cmd, 7, ref targetPos[0]);
+        NativeMethods.b3CalculateInverseKinematicsAddTargetPositionWithOrientation(cmd, 8, ref targetPos[0], ref targetOrn[0]);
+        //NativeMethods.b3CalculateInverseKinematicsAddTargetPurePosition(cmd, 7, ref targetPos[0]);
         var statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
         NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount[0], ref jointTargets[0]);
         cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, 2);
         foreach (var id in freeJoints)
         {
-            double angle = 0;
             if (headJointIds.Contains(id))
             {
                 continue;
             }
-            else if (id==wristJoints[0])
-            {
-                angle = targetOrnRos.eulerAngles.x;
-                //angle -= wristOffset[0];
-                if (angle > 200) angle -= 360;
-                if (angle < -200) angle += 360;
-
-                angle *= -Mathf.Deg2Rad;
-                
-            }
-            else if(id == wristJoints[1])
-            {
-                angle = targetOrnRos.eulerAngles.y;
-                //angle -= wristOffset[1];
-                if (angle > 200) angle -= 360;
-                if (angle < -200) angle += 360;
-                angle *= Mathf.Deg2Rad;
-                
-            }
-            else if(id == wristJoints[2])
-            {
-                angle = targetOrnRos.eulerAngles.z;
-                angle -= wristOffset[2];
-                if (angle > 200) angle -= 360;
-                if (angle < -200) angle += 360;
-                angle *= -Mathf.Deg2Rad;
-                angle += 1.57/2.0;
-               
-            }
-            else
-            {
-                angle = 0;// jointTargets[id];   
-            }
-            setJointPosition(ref cmd, id, angle);
+            setJointPosition(ref cmd, id, jointTargets[id]);
         }
         
         
