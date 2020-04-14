@@ -19,6 +19,7 @@ public class JointControl : MonoBehaviour
     public GameObject table;
     public GameObject head;
     public GameObject glove;
+    public GameObject cube;
     public List<GameObject> tokens;
     public Camera cam;
     public Transform wristTransform;
@@ -40,6 +41,8 @@ public class JointControl : MonoBehaviour
     private List<double> wristOffset;
     private Vector3 initRobotPosition;
     private SenseGlove_VirtualHand virtualHand;
+    private bool reset;
+    private List<int> excludeFromIkJoints;
 
 
     // Start is called before the first frame update
@@ -73,8 +76,8 @@ public class JointControl : MonoBehaviour
 
         // load URDF models
 
-        var cubePath = "C:\\Users\\roboy\\Documents\\code\\bullet3\\examples\\pybullet\\gym\\pybullet_data\\cube_no_rotation.urdf";
-        //var cubeId = loadURDF(cubePath, cube.transform.position, cube.transform.rotation, 1);
+        //var cubePath = "C:\\Users\\roboy\\Documents\\code\\bullet3\\examples\\pybullet\\gym\\pybullet_data\\cube_small.urdf";
+        //var cubeId = loadURDF(cubePath, cube.transform.position, cube.transform.rotation);
 
         var tablePath = "C:\\Users\\roboy\\Documents\\code\\BulletUnityRoboy\\Assets\\Urdf\\Table\\CheckersTable.urdf";
         var tableId = loadURDF(tablePath, table.transform.position, table.transform.rotation, 1);     
@@ -92,6 +95,7 @@ public class JointControl : MonoBehaviour
         var urdfJoints = UrdfRobot.GetComponentsInChildren<UrdfJoint>();
         b3JointIds = new List<int> ();
         freeJoints = new List<int>();
+        excludeFromIkJoints = new List<int>();
 
         cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, 2); 
         for (int i=0; i<b3JointsNum; i++)
@@ -102,10 +106,14 @@ public class JointControl : MonoBehaviour
             {
                 freeJoints.Add(i);
             }
-            if(jointInfo.m_jointName.Contains("rh"))
+            if (jointInfo.m_jointName.Contains("rh") || jointInfo.m_jointName.Contains("lh") || jointInfo.m_jointName.Contains("head"))
             {
-                setJointPosition(ref cmd, i, 0);
+                excludeFromIkJoints.Add(i);
             }
+            //if(jointInfo.m_jointName.Contains("rh"))
+            //{
+            //    setJointPosition(ref cmd, i, 0);
+            //}
         }
         NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
          
@@ -196,6 +204,7 @@ public class JointControl : MonoBehaviour
         //virtualHand.CollectFingerJoints();
         //virtualHand.CollectCorrections();
 
+        reset = false;
         syncPoseUnity2Bullet(upperBody);
         setGravity();
         setRealTimeSimualtion(1);
@@ -209,7 +218,7 @@ public class JointControl : MonoBehaviour
         //Debug.Log(hand.indexFingerJoints[2].rotation.eulerAngles);
         //var q = new Quaternion(0, 1.57f, 0, 1.57f);
         //cam.transform.SetPositionAndRotation(camHolder.transform.position, q*cam.transform.rotation);
-        if (Input.GetKeyDown("space"))
+        if (!reset) //Input.GetKeyDown("space"))
         {
             Debug.LogWarning("reset");
             initRobotPosition = upperBody.transform.position;
@@ -226,7 +235,7 @@ public class JointControl : MonoBehaviour
             wristOffset[1] = IKTarget.transform.rotation.eulerAngles.y;
             wristOffset[2] = IKTarget.transform.rotation.eulerAngles.z;
 
-
+            reset = true;
         }
         UrdfRobot = GetComponent<UrdfRobot>();
         if (pybullet != IntPtr.Zero)
@@ -239,7 +248,7 @@ public class JointControl : MonoBehaviour
             if (Time.time * 1000 - lastHeadUpdate > 20)
             {
                 trackHead();
-                followObjectIK(IKTarget);
+                if (reset)  followObjectIK(IKTarget);
                 trackFingerJoints();
             }
         }
@@ -292,9 +301,9 @@ public class JointControl : MonoBehaviour
                 {
                     if (j==0)
                     {
-                        Debug.LogWarning("x: " + clipAngle(q.eulerAngles.x) + "\t y: " + clipAngle(q.eulerAngles.y) + "\t z: " + clipAngle(q.eulerAngles.z));
+                        //Debug.LogWarning("x: " + clipAngle(q.eulerAngles.x) + "\t y: " + clipAngle(q.eulerAngles.y) + "\t z: " + clipAngle(q.eulerAngles.z));
 
-                        setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.z) * Mathf.Deg2Rad);
+                        setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.y) * Mathf.Deg2Rad);
                         continue;
                     }
                     
@@ -365,11 +374,11 @@ public class JointControl : MonoBehaviour
         cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, 2);
         foreach (var id in freeJoints)
         {
-            if (headJointIds.Contains(id))
+            if (excludeFromIkJoints.Contains(id))//headJointIds.Contains(id) ) 
             {
                 continue;
             }
-            //setJointPosition(ref cmd, id, jointTargets[id]);
+            setJointPosition(ref cmd, id, jointTargets[id]);
         }
         
         
