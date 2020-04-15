@@ -18,6 +18,7 @@ public class BulletSpawner : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("Hello");
         Physics.gravity = new Vector3(0.0f, Gravity, 0.0f);   
     }
 
@@ -50,7 +51,7 @@ public class BulletSpawner : MonoBehaviour
         Rigidbody rb = go.AddComponent<Rigidbody>();
         rb.mass = Mass;
         //Apply force in direction to target object
-        rb.AddForce(direction, ForceMode.Impulse);
+        rb.AddForce(direction, ForceMode.Force);
         Bullets.Add(go);
     }
 

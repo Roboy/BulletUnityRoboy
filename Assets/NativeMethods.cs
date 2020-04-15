@@ -1681,7 +1681,7 @@ public struct b3LinkState
     public double[] m_worldAABBMax;
 }
 
-public enum Anonymous_1c3087f1_d5d4_438e_86ce_5ef3c379c435
+public enum EnumControlMode
 {
 
     /// CONTROL_MODE_VELOCITY -> 0
