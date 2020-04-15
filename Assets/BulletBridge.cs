@@ -41,6 +41,7 @@ public class BulletBridge : MonoBehaviour
     private Vector3 initRobotPosition;
     private SenseGlove_VirtualHand virtualHand;
     private List<List<Transform>> virtualHandJointsTF;
+    private string urdfPath;
     private bool reset;
     
 
@@ -71,10 +72,10 @@ public class BulletBridge : MonoBehaviour
         //var cubePath = "C:\\Users\\roboy\\Documents\\code\\bullet3\\examples\\pybullet\\gym\\pybullet_data\\sphere2red.urdf";
         //var cubeId = loadURDF(cubePath, cube.transform.position, cube.transform.rotation);
 
-        var tablePath = "C:\\Users\\roboy\\Documents\\code\\BulletUnityRoboy\\Assets\\Urdf\\Table\\CheckersTable.urdf";
+        var tablePath = Application.dataPath + "\\Urdf\\Table\\CheckersTable.urdf";
         var tableId = loadURDF(tablePath, table.transform.position, table.transform.rotation, 1);     
 
-        var robotPath = "C:\\Users\\roboy\\Documents\\code\\roboy3_models\\upper_body\\bullet.urdf";
+        var robotPath = Application.dataPath + "\\URDF\\roboy3_models\\upper_body\\bullet.urdf";
         b3RobotId =  loadURDF(robotPath, upperBody.transform.position, upperBody.transform.rotation, 1);
 
         b3IdMap = new Dictionary<GameObject, int>
@@ -84,14 +85,10 @@ public class BulletBridge : MonoBehaviour
             //{ cube, cubeId}
         };
 
-        var tokenPath = "C:\\Users\\roboy\\Documents\\code\\BulletUnityRoboy\\Assets\\Urdf\\tokenbk\\token.urdf";
+        var tokenPath = Application.dataPath + "\\Urdf\\token\\black_token.urdf";
 
         foreach (var token in tokens)
         {
-            if (token.name.Contains("black"))
-            {
-                tokenPath = "C:\\Users\\roboy\\Documents\\code\\BulletUnityRoboy\\Assets\\Urdf\\token\\black_token.urdf";
-            }
             makeKinematic(token.GetComponentsInChildren<Rigidbody>());
             var tokenId = loadURDF(tokenPath, token.transform.position, token.transform.rotation);
             b3IdMap.Add(token, tokenId);
@@ -147,7 +144,7 @@ public class BulletBridge : MonoBehaviour
                 syncPoseUnity2Bullet(token);
             }
 
-            var cubePath = "C:\\Users\\roboy\\Documents\\code\\bullet3\\examples\\pybullet\\gym\\pybullet_data\\sphere2red.urdf";
+            var cubePath = Application.dataPath + "\\Urdf\\sphere2red.urdf";
             var cubeId = loadURDF(cubePath, cube.transform.position, cube.transform.rotation);
             b3IdMap.Add(cube, cubeId);
             reset = true;
