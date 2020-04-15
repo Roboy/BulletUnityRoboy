@@ -36,7 +36,7 @@ public class JointControl : MonoBehaviour
     private List<List<int>> handJoints;
     private List<int> wristJoints;
     private int b3RobotId;
-    private double setpoint;
+    private List<double> thumbPrevSetpoints;
     private double camYOffset;
     private List<double> wristOffset;
     private Vector3 initRobotPosition;
@@ -147,10 +147,11 @@ public class JointControl : MonoBehaviour
 
         handJoints = new List<List<int>>(){
             new List<int> {
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ5")),
                 b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ4")),
                 b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ3")),
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ2")),
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ1"))
+                b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ2"))
+                //b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ1"))
 
             },
         new List<int> {
@@ -174,6 +175,7 @@ public class JointControl : MonoBehaviour
                 b3JointIds.ElementAt(jointNames.IndexOf("rh_LFJ1"))
             }
         };
+        thumbPrevSetpoints = new List<double>(new double[handJoints[0].Count]);
 
         b3IdMap = new Dictionary<GameObject, int>
         {
@@ -197,7 +199,7 @@ public class JointControl : MonoBehaviour
 
         
         lastHeadUpdate = Time.time * 1000;
-        setpoint = 0;
+        //setpoint = 0;
 
         camYOffset = cam.transform.rotation.eulerAngles.y;
 
@@ -215,6 +217,7 @@ public class JointControl : MonoBehaviour
         syncPoseUnity2Bullet(upperBody);
         setGravity();
         setRealTimeSimualtion(1);
+
         UrdfRobot = GetComponent<UrdfRobot>();
 
     }
@@ -276,10 +279,14 @@ public class JointControl : MonoBehaviour
                 syncBodyState(token);
             if (reset) syncBodyState(cube);
             //syncBodyState(upperBody);
-            if (Time.time * 1000 - lastHeadUpdate > 10)
+            if (Time.time * 1000 - lastHeadUpdate > 20)
             {
                 trackHead();
-                if (reset) followObjectIK(IKTarget);
+                if (reset)
+                {
+                    followObjectIK(IKTarget);
+                    
+                }
                 trackFingerJoints();
             }
         }
@@ -292,6 +299,7 @@ public class JointControl : MonoBehaviour
         for (int i=0; i<handJoints.Count; i++)
         {
             List<Transform> joints = new List<Transform>();
+            var targetPos = 0.0;
             for (int j=0; j<handJoints[i].Count; j++)
             {
                 switch (i)
@@ -319,9 +327,13 @@ public class JointControl : MonoBehaviour
                         
                 }
                 Quaternion q;
-                if (i==0 && j>0)
+                
+                if (i==0)
                 {
-                    q = (joints[j-1].rotation * virtualHand.fingerCorrection[i][j-1]).Unity2Ros();
+                    if (j > 2)
+                        q = (joints[j-2].rotation * virtualHand.fingerCorrection[i][j-2]).Unity2Ros();
+                    else
+                        q = (joints[0].rotation * virtualHand.fingerCorrection[i][0]).Unity2Ros();
                 } else
                 {
                     q = (joints[j].rotation * virtualHand.fingerCorrection[i][j]).Unity2Ros();
@@ -330,15 +342,21 @@ public class JointControl : MonoBehaviour
                 //var q = joints[j].rotation.Unity2Ros();
                 if (i == 0)
                 {
-                    
-                    if (j==0)
+                    if (j == 0)
                     {
                         //Debug.LogWarning("x: " + clipAngle(q.eulerAngles.x) + "\t y: " + clipAngle(q.eulerAngles.y) + "\t z: " + clipAngle(q.eulerAngles.z));
                         //Debug.Log(clipAngle(q.eulerAngles.y) * Mathf.Deg2Rad);
-                        setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.y) * Mathf.Deg2Rad+0.6);
+                        setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad+0.6);
                         continue;
                     }
                     if (j==1)
+                    {
+                        //Debug.LogWarning("x: " + clipAngle(q.eulerAngles.x) + "\t y: " + clipAngle(q.eulerAngles.y) + "\t z: " + clipAngle(q.eulerAngles.z));
+                        //Debug.Log(clipAngle(q.eulerAngles.y) * Mathf.Deg2Rad);
+                        setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.y) * Mathf.Deg2Rad);
+                        continue;
+                    }
+                    if (j==2)
                     {
                         //Debug.Log(clipAngle(q.eulerAngles.x) +"\t "+ clipAngle(q.eulerAngles.y) + "\t" + clipAngle(q.eulerAngles.z));
                         setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z) * Mathf.Deg2Rad);
@@ -348,13 +366,14 @@ public class JointControl : MonoBehaviour
                     if (j==3)
                     {
                         //Debug.Log(clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
-                        //setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
+                        setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
                         continue;
                     }
 
                     setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
                     continue;
                 }
+
                 if (j==0)
                 {
                     //if (i==0)
@@ -366,7 +385,18 @@ public class JointControl : MonoBehaviour
                     setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z+100) * Mathf.Deg2Rad);
                     continue;
                 }
-                setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z)*Mathf.Deg2Rad);
+                if (j == 1)
+                {
+                    //if (i==0)
+                    //{
+                    //    Debug.LogWarning(clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
+                    //    setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z) * Mathf.Deg2Rad);
+                    //}
+                    //Debug.LogWarning(clipAngle(-q.eulerAngles.z) * Mathf.Deg2Rad);
+                    setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z + 60) * Mathf.Deg2Rad);
+                    continue;
+                }
+                setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z-20)*Mathf.Deg2Rad);
             }
         }
         NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
@@ -577,15 +607,38 @@ public class JointControl : MonoBehaviour
 
                 NativeMethods.b3GetJointState(pybullet, status_handle, b3JointIds[i], ref state);
                 var diff = (float)state.m_jointPosition - unityJoint.GetPosition();
+                //if (unityJoint.JointName.Contains("rh_THJ")) continue;
                 if (unityJoint.JointName.Contains("rh_THJ"))
                 {
-                    unityJoint.UpdateJointState(0);
+                    for (int j = 0; j < thumbPrevSetpoints.Count; j++)
+                    {
+
+                        if (b3JointIds[i] == handJoints[0][j])
+                        {
+                            diff = (float)(state.m_jointPosition - thumbPrevSetpoints[j]);
+                            thumbPrevSetpoints[j] = state.m_jointPosition;
+                            //Quaternion rot = Quaternion.AngleAxis(-diff * Mathf.Rad2Deg, new Vector3(0, 0, 1));// unityJoint.UnityJoint.axis);
+                            //unityJoint.transform.rotation = unityJoint.transform.rotation * rot;
+                            //unityJoint.GetComponentInChildren<Rigidbody>().transform.rotation = unityJoint.transform.rotation * rot;
+                            unityJoint.UpdateJointState(diff);
+                            break;
+                        }
+
+                    }
                     continue;
                 }
+                    
+                //{
+                //    diff = (float)(state.m_jointPosition - setpoint);
+                //    setpoint = state.m_jointPosition;
+                //    unityJoint.UpdateJointState(diff);
+                //    continue;
+                //}
                 unityJoint.UpdateJointState(diff);
+                
 
 
-               
+
             }
 
         }
