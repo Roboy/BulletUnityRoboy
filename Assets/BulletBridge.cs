@@ -13,7 +13,7 @@ using RosSharp;
 using UnityEngine.Assertions.Must;
 
 [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-public class JointControl : MonoBehaviour
+public class BulletBridge : MonoBehaviour
 {
     public GameObject upperBody;
     public GameObject table;
