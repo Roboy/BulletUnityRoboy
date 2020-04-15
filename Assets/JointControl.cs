@@ -76,7 +76,7 @@ public class JointControl : MonoBehaviour
 
         // load URDF models
 
-        //var cubePath = "C:\\Users\\roboy\\Documents\\code\\bullet3\\examples\\pybullet\\gym\\pybullet_data\\cube_small.urdf";
+        //var cubePath = "C:\\Users\\roboy\\Documents\\code\\bullet3\\examples\\pybullet\\gym\\pybullet_data\\sphere2red.urdf";
         //var cubeId = loadURDF(cubePath, cube.transform.position, cube.transform.rotation);
 
         var tablePath = "C:\\Users\\roboy\\Documents\\code\\BulletUnityRoboy\\Assets\\Urdf\\Table\\CheckersTable.urdf";
@@ -110,10 +110,10 @@ public class JointControl : MonoBehaviour
             {
                 excludeFromIkJoints.Add(i);
             }
-            //if(jointInfo.m_jointName.Contains("rh"))
-            //{
-            //    setJointPosition(ref cmd, i, 0);
-            //}
+            if (jointInfo.m_jointName.Contains("lh"))
+            {
+                setJointPosition(ref cmd, i, 0);
+            }
         }
         NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
          
@@ -151,6 +151,7 @@ public class JointControl : MonoBehaviour
                 b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ3")),
                 b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ2")),
                 b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ1"))
+
             },
         new List<int> {
                 b3JointIds.ElementAt(jointNames.IndexOf("rh_FFJ3")),
@@ -178,17 +179,23 @@ public class JointControl : MonoBehaviour
         {
             { table, tableId },
             { upperBody, b3RobotId }
+            //{ cube, cubeId}
         };
 
-        var tokenPath = "C:\\Users\\roboy\\Documents\\code\\BulletUnityRoboy\\Assets\\Urdf\\token\\token.urdf";
+        var tokenPath = "C:\\Users\\roboy\\Documents\\code\\BulletUnityRoboy\\Assets\\Urdf\\tokenbk\\token.urdf";
 
         foreach (var token in tokens)
         {
+            if (token.name.Contains("black"))
+            {
+                tokenPath = "C:\\Users\\roboy\\Documents\\code\\BulletUnityRoboy\\Assets\\Urdf\\token\\black_token.urdf";
+            }
             makeKinematic(token.GetComponentsInChildren<Rigidbody>());
             var tokenId = loadURDF(tokenPath, token.transform.position, token.transform.rotation);
             b3IdMap.Add(token, tokenId);
         }
 
+        
         lastHeadUpdate = Time.time * 1000;
         setpoint = 0;
 
@@ -208,8 +215,28 @@ public class JointControl : MonoBehaviour
         syncPoseUnity2Bullet(upperBody);
         setGravity();
         setRealTimeSimualtion(1);
+        UrdfRobot = GetComponent<UrdfRobot>();
 
     }
+
+    //private void FixedUpdate()
+    //{
+        
+    //    if (pybullet != IntPtr.Zero)
+    //    {
+    //        syncRobotJointStates(ref UrdfRobot);
+    //        foreach (var token in tokens)
+    //            syncBodyState(token);
+    //        //syncBodyState(table);
+    //        //syncBodyState(upperBody);
+    //        if (Time.time * 1000 - lastHeadUpdate > 20)
+    //        {
+    //            trackHead();
+    //            if (reset) followObjectIK(IKTarget);
+    //            trackFingerJoints();
+    //        }
+    //    }
+    //}
 
     // Update is called once per frame
     void Update()
@@ -218,8 +245,9 @@ public class JointControl : MonoBehaviour
         //Debug.Log(hand.indexFingerJoints[2].rotation.eulerAngles);
         //var q = new Quaternion(0, 1.57f, 0, 1.57f);
         //cam.transform.SetPositionAndRotation(camHolder.transform.position, q*cam.transform.rotation);
-        if (!reset) //Input.GetKeyDown("space"))
+        if (Input.GetKeyDown("space"))
         {
+            
             Debug.LogWarning("reset");
             initRobotPosition = upperBody.transform.position;
             resetRobotPose();
@@ -228,13 +256,16 @@ public class JointControl : MonoBehaviour
             syncPoseUnity2Bullet(upperBody);
             syncPoseUnity2Bullet(table);
            
+           
             foreach(var token in tokens) {
                 syncPoseUnity2Bullet(token);
             }
             wristOffset[0] = IKTarget.transform.rotation.eulerAngles.x;
             wristOffset[1] = IKTarget.transform.rotation.eulerAngles.y;
             wristOffset[2] = IKTarget.transform.rotation.eulerAngles.z;
-
+            var cubePath = "C:\\Users\\roboy\\Documents\\code\\bullet3\\examples\\pybullet\\gym\\pybullet_data\\sphere2red.urdf";
+            var cubeId = loadURDF(cubePath, cube.transform.position, cube.transform.rotation);
+            b3IdMap.Add(cube, cubeId);
             reset = true;
         }
         UrdfRobot = GetComponent<UrdfRobot>();
@@ -243,12 +274,12 @@ public class JointControl : MonoBehaviour
             syncRobotJointStates(ref UrdfRobot);
             foreach (var token in tokens)
                 syncBodyState(token);
-            //syncBodyState(table);
+            if (reset) syncBodyState(cube);
             //syncBodyState(upperBody);
-            if (Time.time * 1000 - lastHeadUpdate > 20)
+            if (Time.time * 1000 - lastHeadUpdate > 10)
             {
                 trackHead();
-                if (reset)  followObjectIK(IKTarget);
+                if (reset) followObjectIK(IKTarget);
                 trackFingerJoints();
             }
         }
@@ -299,20 +330,26 @@ public class JointControl : MonoBehaviour
                 //var q = joints[j].rotation.Unity2Ros();
                 if (i == 0)
                 {
+                    
                     if (j==0)
                     {
                         //Debug.LogWarning("x: " + clipAngle(q.eulerAngles.x) + "\t y: " + clipAngle(q.eulerAngles.y) + "\t z: " + clipAngle(q.eulerAngles.z));
-
-                        setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.y) * Mathf.Deg2Rad);
+                        //Debug.Log(clipAngle(q.eulerAngles.y) * Mathf.Deg2Rad);
+                        setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.y) * Mathf.Deg2Rad+0.6);
                         continue;
                     }
-                    
                     if (j==1)
                     {
-                        
-                        setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
+                        //Debug.Log(clipAngle(q.eulerAngles.x) +"\t "+ clipAngle(q.eulerAngles.y) + "\t" + clipAngle(q.eulerAngles.z));
+                        setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z) * Mathf.Deg2Rad);
                         continue;
                         //Debug.LogWarning(clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
+                    }
+                    if (j==3)
+                    {
+                        //Debug.Log(clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
+                        //setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
+                        continue;
                     }
 
                     setJointPosition(ref cmd, handJoints[i][j], clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad);
@@ -326,7 +363,7 @@ public class JointControl : MonoBehaviour
                     //    setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z) * Mathf.Deg2Rad);
                     //}
                     //Debug.LogWarning(clipAngle(-q.eulerAngles.z) * Mathf.Deg2Rad);
-                    setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z+110) * Mathf.Deg2Rad);
+                    setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z+100) * Mathf.Deg2Rad);
                     continue;
                 }
                 setJointPosition(ref cmd, handJoints[i][j], clipAngle(-q.eulerAngles.z)*Mathf.Deg2Rad);
@@ -435,7 +472,7 @@ public class JointControl : MonoBehaviour
             var orn = RosSharp.TransformExtensions.Unity2Ros(body.transform.rotation);
             if (body == upperBody)
             {
-                NativeMethods.b3CreatePoseCommandSetBasePosition(cmd, pos.x, pos.y, pos.z+0.6);
+                NativeMethods.b3CreatePoseCommandSetBasePosition(cmd, pos.x, pos.y, pos.z+0.62);
             }  else
             {
                 NativeMethods.b3CreatePoseCommandSetBasePosition(cmd, pos.x, pos.y, pos.z);
@@ -451,7 +488,13 @@ public class JointControl : MonoBehaviour
     {
         foreach (var rb in rbs)
         {
-            //rb.detectCollisions = false;
+            //if(rb.name.Contains("rh_th")) {
+            //    Debug.Log(rb.name);
+            //}
+            //rb.interpolation = RigidbodyInterpolation.Extrapolate;
+            //rb.inertiaTensor = new Vector3(50,50,50);
+            //rb.centerOfMass = new Vector3(0, 0, 0);
+            rb.detectCollisions = false;
             rb.isKinematic = true;
         }
     }
@@ -530,17 +573,21 @@ public class JointControl : MonoBehaviour
             {
                 var unityJoint = robot.GetComponentsInChildren<UrdfJoint>()[i];
                 if (!jointNames.Contains(unityJoint.JointName)) continue;
-                
-                
-                
                 b3JointSensorState state = new b3JointSensorState();
-  
+
                 NativeMethods.b3GetJointState(pybullet, status_handle, b3JointIds[i], ref state);
-                
-                unityJoint.UpdateJointState((float)state.m_jointPosition - unityJoint.GetPosition());
+                var diff = (float)state.m_jointPosition - unityJoint.GetPosition();
+                if (unityJoint.JointName.Contains("rh_THJ"))
+                {
+                    unityJoint.UpdateJointState(0);
+                    continue;
+                }
+                unityJoint.UpdateJointState(diff);
+
+
+               
             }
 
-            //Debug.Log(state.m_jointPosition);
         }
         else
         {

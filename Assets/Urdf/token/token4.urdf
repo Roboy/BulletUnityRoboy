@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<robot name="token4">
+  <material name="mat_TokenWhiteWLogo">
+    <texture filename="package://resources/tex_GameToken.png" />
+  </material>
+  <link name="base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.041 0.03 -6.5E-05" />
+      <mass value="1" />
+      <inertia ixx="0.000413573900004849" ixy="-1.06519751352785E-10" ixz="1.6229571428994E-06" iyy="0.000413574016420171" iyz="1.62300534611859E-06" izz="0.000760834664106369" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="package://meshes/TokenWhiteWLogo.stl" scale="20 4 4" />
+      </geometry>
+      <material name="mat_TokenWhiteWLogo" />
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="package://meshes/TokenWhiteWLogo.stl" scale="20 4 4" />
+      </geometry>
+    </collision>
+  </link>
+</robot>
