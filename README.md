@@ -1,3 +1,9 @@
+```
+git clone https://github.com/Roboy/BulletUnityRoboy.git
+cd BulletUnityRoboy
+git submodule init
+git submodule update
+```
 # pybullet server setup
 Get Python >=3.6 and install pybullet.
 ```
