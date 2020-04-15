@@ -1,0 +1,3 @@
+[submodule "Assets/Urdf/roboy3_models"]
+	path = Assets/Urdf/roboy3_models
+	url = https://github.com/Roboy/roboy3_models.git
