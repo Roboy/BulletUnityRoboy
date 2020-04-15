@@ -1,5 +1,5 @@
-# Pybullet server setup
-Get Python3 and install pybullet.
+# pybullet server setup
+Get Python >=3.6 and install pybullet.
 ```
 pip3 install --user --upgrade numpy pybullet
 ```
