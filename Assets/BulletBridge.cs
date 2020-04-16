@@ -75,7 +75,7 @@ public class BulletBridge : MonoBehaviour
         var tablePath = Application.dataPath + "\\Urdf\\Table\\CheckersTable.urdf";
         var tableId = loadURDF(tablePath, table.transform.position, table.transform.rotation, 1);     
 
-        var robotPath = Application.dataPath + "\\URDF\\roboy3_models\\upper_body\\bullet.urdf";
+        var robotPath = Application.dataPath + "\\Urdf\\roboy3_models\\upper_body\\bullet.urdf";
         b3RobotId =  loadURDF(robotPath, upperBody.transform.position, upperBody.transform.rotation, 1);
 
         b3IdMap = new Dictionary<GameObject, int>
