@@ -21,9 +21,11 @@ public class BulletBridge : MonoBehaviour
     public GameObject glove;
     public GameObject cube;
     public List<GameObject> tokens;
-    public Camera cam;    
-    public GameObject IKTarget;
+    public Camera cam;
+    public Transform leftHandTarget;
+    public Transform rightHandTarget;
 
+    private List<IKTarget> IKTargets;
     private UrdfRobot UrdfRobot;
     private IntPtr pybullet;
     private Dictionary<GameObject, int> b3IdMap;
@@ -41,10 +43,20 @@ public class BulletBridge : MonoBehaviour
     private Vector3 initRobotPosition;
     private SenseGlove_VirtualHand virtualHand;
     private List<List<Transform>> virtualHandJointsTF;
-    private string urdfPath;
     private bool reset;
     
-
+    struct IKTarget
+    {
+        public IKTarget(Transform tf, int id, List<int> kc)
+        {
+            targetTF = tf;
+            endeffectorLinkId = id;
+            kinematicChain = kc;
+        }
+        public Transform targetTF;
+        public int endeffectorLinkId;
+        public List<int> kinematicChain;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -95,7 +107,17 @@ public class BulletBridge : MonoBehaviour
         }
 
         setupRobotJoints();
-                
+
+        // IK setup
+        IKTargets = new List<IKTarget>()
+        {
+            
+            new IKTarget(rightHandTarget, b3GetLinkId("rh_palm", b3RobotId), getJointKinematicChain("rh_palm", "shoulder_right_link1")),
+            new IKTarget(leftHandTarget, b3GetLinkId("lh_palm", b3RobotId), getJointKinematicChain("lh_palm", "shoulder_left_link1"))
+
+
+        };
+
         lastUpdate = Time.time * 1000;
 
         camYOffset = cam.transform.rotation.eulerAngles.y;
@@ -131,7 +153,7 @@ public class BulletBridge : MonoBehaviour
         
         if (Input.GetKeyDown("space"))
         {
-            
+
             Debug.LogWarning("reset");
             initRobotPosition = upperBody.transform.position;
             resetRobotPose();
@@ -139,8 +161,9 @@ public class BulletBridge : MonoBehaviour
             //resetCheckersPose();
             syncPoseUnity2Bullet(upperBody);
             syncPoseUnity2Bullet(table);
-           
-            foreach(var token in tokens) {
+
+            foreach (var token in tokens)
+            {
                 syncPoseUnity2Bullet(token);
             }
 
@@ -162,10 +185,13 @@ public class BulletBridge : MonoBehaviour
                 trackHead();
                 if (reset)
                 {
-                    followObjectIK(IKTarget);
+                    //leftHandTarget.position = new Vector3(-0.2f * Mathf.Cos(Time.time) +2.0f, -3.0f, 0f + 0.2f * Mathf.Sin(Time.time) + 0.2f).Ros2Unity();
+                    //rightHandTarget.position = new Vector3(-0.2f * Mathf.Cos(Time.time) + 2.0f, -3.0f, 0f + 0.2f * Mathf.Sin(Time.time) + 0.2f).Ros2Unity();
+                    foreach (var target in IKTargets)
+                        followObjectIK(target);
                     
                 }
-                trackFingerJoints();
+                //trackFingerJoints();
             }
         }
 
@@ -226,25 +252,11 @@ public class BulletBridge : MonoBehaviour
         NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
     }
 
-    double clipAngle(double angle)
-    {
-        if (angle > 180)
-        {
-            angle -= 360;
-        }
-        else if (angle < -180)
-        {
-            angle += 360;
-        }
-        return angle;
-    }
-
-    void followObjectIK(GameObject target)
+    void followObjectIK(IKTarget target)
     {
         var cmd = NativeMethods.b3CalculateInverseKinematicsCommandInit(pybullet, b3RobotId);
-        var targetPosRos = target.transform.position.Unity2Ros();
-
-        var targetOrnRos = target.transform.rotation;
+        var targetPosRos = target.targetTF.position.Unity2Ros();
+        var targetOrnRos = target.targetTF.rotation;
         targetOrnRos *= Quaternion.AngleAxis(90, new Vector3(0, 1, 0));
         targetOrnRos *= Quaternion.AngleAxis(180, new Vector3(1, 0, 0));
         targetOrnRos = targetOrnRos.Unity2Ros();
@@ -252,27 +264,24 @@ public class BulletBridge : MonoBehaviour
         double[] targetPos = { targetPosRos.x, targetPosRos.y, targetPosRos.z };
         double[] targetOrn = { targetOrnRos.x, targetOrnRos.y, targetOrnRos.z, targetOrnRos.w };
 
-        NativeMethods.b3CalculateInverseKinematicsAddTargetPositionWithOrientation(cmd, 8, ref targetPos[0], ref targetOrn[0]);
-        //NativeMethods.b3CalculateInverseKinematicsAddTargetPurePosition(cmd, 7, ref targetPos[0]);
+        NativeMethods.b3CalculateInverseKinematicsAddTargetPositionWithOrientation(cmd, target.endeffectorLinkId, ref targetPos[0], ref targetOrn[0]); 
+        //NativeMethods.b3CalculateInverseKinematicsAddTargetPurePosition(cmd, target.endeffectorLinkId, ref targetPos[0]);
+
         var statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
 
-        int[] dofCount = new int[2];
-        double[] jointTargets = new double[100];
+        int dofCount = 0;
+        double[] jointTargets = new double[freeJoints.Count];
         int bodyId = -1;
-        NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount[0], ref jointTargets[0]);
+        var status = NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount, ref jointTargets[0]);
+        status = NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount, ref jointTargets[0]);
 
         cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, (int)EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
-        foreach (var id in freeJoints)
+        for (int i=0; i<jointTargets.Length; i++)
         {
-            if (excludeFromIkJoints.Contains(id)) // skipping head and fingers joints
-            {
-                continue;
-            }
-            setJointPosition(ref cmd, id, jointTargets[id]);
+            if (!target.kinematicChain.Contains(freeJoints[i])) continue;
+            setJointPosition(ref cmd, freeJoints[i], jointTargets[i]);
         }
-        
-        
-        var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+        var st = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
     }
 
     private void TriggerPressed(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
@@ -486,6 +495,20 @@ public class BulletBridge : MonoBehaviour
 
     }
 
+    List<int> getJointKinematicChain(string ef, string root)
+    {
+        
+        var start = b3GetLinkId(root, b3RobotId);
+        var efLinkId = b3GetLinkId(ef, b3RobotId);
+        var chain = new List<int>();
+        for (int i=start; i<=efLinkId; i++)
+        {
+            chain.Add(i);
+            //TODO check if joint is movable
+        }
+        return chain;
+    }
+
     void setupRobotJoints()
     {
         b3JointInfo jointInfo = new b3JointInfo();
@@ -502,18 +525,18 @@ public class BulletBridge : MonoBehaviour
         {
             NativeMethods.b3GetJointInfo(pybullet, b3RobotId, i, ref jointInfo);
             b3JointNames.Add(jointInfo.m_jointName);
-            if ((JointType)jointInfo.m_jointType != JointType.eFixedType)
+            if (jointInfo.m_jointType == 0)//JointType.eRevoluteType)
             {
                 freeJoints.Add(i);
             }
-            if (jointInfo.m_jointName.Contains("rh") || jointInfo.m_jointName.Contains("lh") || jointInfo.m_jointName.Contains("head"))
+            if (jointInfo.m_jointName.Contains("rh_") || jointInfo.m_jointName.Contains("lh_") || jointInfo.m_jointName.Contains("head"))
             {
                 excludeFromIkJoints.Add(i);
             }
-            if (jointInfo.m_jointName.Contains("lh"))
-            {
-                setJointPosition(ref cmd, i, 0);
-            }
+            //if (jointInfo.m_jointName.Contains("lh"))
+            //{
+            //    setJointPosition(ref cmd, i, 0);
+            //}
         }
         NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
 
@@ -524,6 +547,9 @@ public class BulletBridge : MonoBehaviour
             {
                 b3JointIds.Add(b3JointNames.IndexOf(j.JointName));
                 jointNames.Add(j.JointName);
+            } else
+            {
+                Debug.LogWarning("pybullet doesnt know about " + j.JointName);
             }
 
         }
@@ -575,6 +601,31 @@ public class BulletBridge : MonoBehaviour
 
 
     }
+
+    int b3GetLinkId(string name, int bodyId)
+    {
+        b3JointInfo ji = new b3JointInfo();
+        var b3JointsNum = NativeMethods.b3GetNumJoints(pybullet, b3RobotId);
+        for (int i=0; i<b3JointsNum; i++)
+        {
+            NativeMethods.b3GetJointInfo(pybullet, bodyId, i, ref ji);
+            if (ji.m_linkName == name)
+            {
+                return i;
+            }
+        }
+        Debug.LogError("Could not find link id with name " + name);
+        return -1;
+        
+    }
+
+    string b3GetJointName(int jointId, int bodyId)
+    {
+        b3JointInfo ji = new b3JointInfo();
+        NativeMethods.b3GetJointInfo(pybullet, bodyId, jointId, ref ji);
+        return ji.m_jointName;
+    }
+
     void resetSimulation()
     {
         IntPtr cmd = NativeMethods.b3InitResetSimulationCommand(pybullet);
@@ -608,6 +659,19 @@ public class BulletBridge : MonoBehaviour
             IntPtr statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, command);
         }
        
+    }
+
+    double clipAngle(double angle)
+    {
+        if (angle > 180)
+        {
+            angle -= 360;
+        }
+        else if (angle < -180)
+        {
+            angle += 360;
+        }
+        return angle;
     }
 
     private void OnDestroy()
