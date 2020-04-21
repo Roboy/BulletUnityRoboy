@@ -23,9 +23,11 @@ public class BulletBridge : MonoBehaviour
     //public GameObject leftGlove;
     public GameObject cube;
     public List<GameObject> tokens;
-    public Camera cam;
+    //public Camera cam;
+    public GameObject cam;
     public Transform leftHandTarget;
     public Transform rightHandTarget;
+    public bool withZed;
 
     private List<IKTarget> IKTargets;
     private UrdfRobot UrdfRobot;
@@ -365,7 +367,9 @@ public class BulletBridge : MonoBehaviour
     {
         var p = - cam.transform.up + cam.transform.forward * -0.1f + cam.transform.position;
         var cam_rotation = cam.transform.rotation;
-        var q = Quaternion.Euler(0, cam_rotation.y-90, 0);
+        Quaternion q;
+        if (withZed) q = Quaternion.Euler(0, cam_rotation.y - 180, 0);
+        else q = Quaternion.Euler(0, cam_rotation.y - 90, 0);
         upperBody.transform.SetPositionAndRotation(p, q);
     }
 
@@ -532,18 +536,29 @@ public class BulletBridge : MonoBehaviour
     void trackHead()
     {
         
-            var eulerAngles = cam.transform.rotation.eulerAngles;
-            var roll = eulerAngles.x;
-            var pitch = eulerAngles.y-camYOffset;
-            var yaw = eulerAngles.z;
-            IntPtr cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, 2);
-            setJointPosition(ref cmd, headJointIds[0], clipAngle(roll) * Mathf.Deg2Rad);
-            setJointPosition(ref cmd, headJointIds[1], clipAngle(yaw) * Mathf.Deg2Rad);
-            setJointPosition(ref cmd, headJointIds[2], clipAngle(pitch) * Mathf.Deg2Rad);
+        var eulerAngles = cam.transform.rotation.eulerAngles;
+        double pitch, roll, yaw; 
+        if (withZed)
+        {
+            pitch = eulerAngles.z;
+            roll = eulerAngles.y - camYOffset;
+            yaw = eulerAngles.x;
+            Debug.Log(clipAngle(yaw) * Mathf.Deg2Rad);
+        } else
+        {
+            roll = eulerAngles.x;
+            pitch = eulerAngles.y - camYOffset;
+            yaw = eulerAngles.z;
+        }
+        Debug.Log(clipAngle(yaw) * Mathf.Deg2Rad);
+        IntPtr cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, 2);
+        setJointPosition(ref cmd, headJointIds[0], clipAngle(roll) * Mathf.Deg2Rad);
+        setJointPosition(ref cmd, headJointIds[1], clipAngle(yaw) * Mathf.Deg2Rad);
+        setJointPosition(ref cmd, headJointIds[2], clipAngle(pitch) * Mathf.Deg2Rad);
 
-            var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+        var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
             
-            lastUpdate = Time.time * 1000;
+        lastUpdate = Time.time * 1000;
            
     }
 
@@ -620,15 +635,15 @@ public class BulletBridge : MonoBehaviour
         }
         headJointIds = new List<int>
         {
-            b3JointIds.ElementAt(b3JointNames.IndexOf("head_axis0")),
-            b3JointIds.ElementAt(b3JointNames.IndexOf("head_axis2")),
-            b3JointIds.ElementAt(b3JointNames.IndexOf("head_axis1"))
+            b3JointIds.ElementAt(jointNames.IndexOf("head_axis0")),
+            b3JointIds.ElementAt(jointNames.IndexOf("head_axis2")),
+            b3JointIds.ElementAt(jointNames.IndexOf("head_axis1"))
         };
         wristJoints = new List<int>
         {
-            b3JointIds.ElementAt(b3JointNames.IndexOf("wrist_right_axis0")),
-            b3JointIds.ElementAt(b3JointNames.IndexOf("wrist_right_axis1")),
-            b3JointIds.ElementAt(b3JointNames.IndexOf("wrist_right_axis2"))
+            b3JointIds.ElementAt(jointNames.IndexOf("wrist_right_axis0")),
+            b3JointIds.ElementAt(jointNames.IndexOf("wrist_right_axis1")),
+            b3JointIds.ElementAt(jointNames.IndexOf("wrist_right_axis2"))
         };
 
 
