@@ -11,6 +11,7 @@ using System.Linq;
 using System.Security.Principal;
 using RosSharp;
 using UnityEngine.Assertions.Must;
+using System.Diagnostics.Eventing.Reader;
 
 [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
 public class BulletBridge : MonoBehaviour
@@ -18,7 +19,8 @@ public class BulletBridge : MonoBehaviour
     public GameObject upperBody;
     public GameObject table;
     //public GameObject head;
-    public GameObject glove;
+    public List<GameObject> senseGloves;
+    //public GameObject leftGlove;
     public GameObject cube;
     public List<GameObject> tokens;
     public Camera cam;
@@ -30,19 +32,21 @@ public class BulletBridge : MonoBehaviour
     private IntPtr pybullet;
     private Dictionary<GameObject, int> b3IdMap;
     private List<int> b3JointIds;
+    private List<string> b3JointNames;
     private List<string> jointNames; // synced with b3JointIds
     private float lastUpdate;
     private List<int> headJointIds;
     private List<int> freeJoints;
-    private List<List<int>> handJoints;
+    //private List<List<int>> handJoints;
     private List<int> wristJoints;
     private List<int> excludeFromIkJoints;
     private int b3RobotId;
-    private List<double> thumbPrevSetpoints;
+    //private List<double> thumbPrevSetpoints;
     private double camYOffset;
     private Vector3 initRobotPosition;
-    private SenseGlove_VirtualHand virtualHand;
-    private List<List<Transform>> virtualHandJointsTF;
+    private List<GloveInfo> glovesInfo;
+    //private SenseGlove_VirtualHand virtualHand;
+    //private List<List<Transform>> virtualHandJointsTF;
     private bool reset;
     
     struct IKTarget
@@ -56,6 +60,65 @@ public class BulletBridge : MonoBehaviour
         public Transform targetTF;
         public int endeffectorLinkId;
         public List<int> kinematicChain;
+    }
+
+    struct GloveInfo
+    {
+        public GloveInfo(GameObject glove, List<int> jointIds, List<string> jointNames)
+        {
+            var vHand = glove.GetComponent<SenseGlove_VirtualHand>();
+
+            isRight = glove.name.Contains("Right"); 
+                
+            //vHand.senseGlove.IsRight;// glove.GetComponent<SenseGlove_Object>().IsRight;
+            jointTFs = new List<List<Transform>>()
+            {
+                vHand.thumbJoints,
+                vHand.indexFingerJoints,
+                vHand.middleFingerJoints,
+                vHand.ringFingerJoints,
+                vHand.pinkyJoints
+            };
+            jointCorrections = vHand.fingerCorrection;
+            var pref = "lh_";
+            if (isRight) pref = "rh_";
+            handJointsIds = new List<List<int>>(){
+                new List<int> {
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "THJ5")),
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "THJ4")),
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "THJ3")),
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "THJ2"))
+                    //b3JointIds.ElementAt(jointNames.IndexOf(pref + "THJ1"))
+
+                },
+                new List<int> {
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "FFJ3")),
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "FFJ2")),
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "FFJ1"))
+                },
+                new List<int> {
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "MFJ3")),
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "MFJ2")),
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "MFJ1"))
+                },
+                new List<int> {
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "RFJ3")),
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "RFJ2")),
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "RFJ1"))
+                },
+                new List<int> {
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "LFJ3")),
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "LFJ2")),
+                    jointIds.ElementAt(jointNames.IndexOf(pref + "LFJ1"))
+                }
+            };
+            thumbPrevSetpoints = new List<double>(new double[handJointsIds[0].Count]);
+        }
+        public List<List<Transform>> jointTFs;
+        public List<List<Quaternion>> jointCorrections;
+        public bool isRight;
+        public List<List<int>> handJointsIds;
+        public List<double> thumbPrevSetpoints;
     }
 
     // Start is called before the first frame update
@@ -130,15 +193,11 @@ public class BulletBridge : MonoBehaviour
         // connect trigger for reset
         SteamVR_Actions.default_GrabPinch.AddOnStateDownListener(TriggerPressed, SteamVR_Input_Sources.Any);
 
-        virtualHand = glove.GetComponent<SenseGlove_VirtualHand>();
-        virtualHandJointsTF = new List<List<Transform>>()
+        glovesInfo = new List<GloveInfo>();
+        foreach (var glove in senseGloves)
         {
-            virtualHand.thumbJoints,
-            virtualHand.indexFingerJoints,
-            virtualHand.middleFingerJoints,
-            virtualHand.ringFingerJoints,
-            virtualHand.pinkyJoints
-        };
+            glovesInfo.Add(new GloveInfo(glove, b3JointIds, jointNames));
+        }
 
         reset = false;
         syncPoseUnity2Bullet(upperBody);
@@ -191,20 +250,21 @@ public class BulletBridge : MonoBehaviour
                         followObjectIK(target);
                     
                 }
-                //trackFingerJoints();
+                foreach (var glove in glovesInfo) trackFingerJoints(glove);
             }
         }
 
     }
 
-    void trackFingerJoints()
+    void trackFingerJoints(GloveInfo glove)
     {
+        
         var cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, (int)EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD); 
         
-        for (int i=0; i<handJoints.Count; i++)
+        for (int i=0; i<glove.handJointsIds.Count; i++)
         {
-            List<Transform> joints = virtualHandJointsTF[i];// new List<Transform>();
-            for (int j=0; j<handJoints[i].Count; j++)
+            List<Transform> joints = glove.jointTFs[i];// new List<Transform>();
+            for (int j=0; j< glove.handJointsIds[i].Count; j++)
             {   
                 Quaternion q;
                 double targetJointPos;
@@ -213,26 +273,26 @@ public class BulletBridge : MonoBehaviour
                     switch(j)
                     {
                         case 0:
-                            q = (joints[0].rotation * virtualHand.fingerCorrection[i][0]).Unity2Ros();
+                            q = (joints[0].rotation * glove.jointCorrections[i][0]).Unity2Ros();
                             targetJointPos = clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad + 0.6;
                             break;
                         case 1:
-                            q = (joints[0].rotation * virtualHand.fingerCorrection[i][0]).Unity2Ros();
+                            q = (joints[0].rotation * glove.jointCorrections[i][0]).Unity2Ros();
                             targetJointPos = clipAngle(q.eulerAngles.y) * Mathf.Deg2Rad;
                             break;
                         case 2:
-                            q = (joints[0].rotation * virtualHand.fingerCorrection[i][0]).Unity2Ros();
+                            q = (joints[0].rotation * glove.jointCorrections[i][0]).Unity2Ros();
                             targetJointPos = clipAngle(-q.eulerAngles.z) * Mathf.Deg2Rad;
                             break;
                         default:
-                            q = (joints[j - 2].rotation * virtualHand.fingerCorrection[i][j - 2]).Unity2Ros();
+                            q = (joints[j - 2].rotation * glove.jointCorrections[i][j - 2]).Unity2Ros();
                             targetJointPos = clipAngle(q.eulerAngles.x) * Mathf.Deg2Rad;
                             break;
                     }
 
                 }
                 else {
-                    q = (joints[j].rotation * virtualHand.fingerCorrection[i][j]).Unity2Ros();
+                    q = (joints[j].rotation * glove.jointCorrections[i][j]).Unity2Ros();
                     switch (j)
                     {
                         case 0:
@@ -246,11 +306,12 @@ public class BulletBridge : MonoBehaviour
                             break;
                     }
                 }
-                setJointPosition(ref cmd, handJoints[i][j], targetJointPos);
+                setJointPosition(ref cmd, glove.handJointsIds[i][j], targetJointPos);
             }
         }
         NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
     }
+
 
     void followObjectIK(IKTarget target)
     {
@@ -432,15 +493,23 @@ public class BulletBridge : MonoBehaviour
                 NativeMethods.b3GetJointState(pybullet, status_handle, b3JointIds[i], ref state);
                 var diff = (float)state.m_jointPosition - unityJoint.GetPosition();
                 
-                if (unityJoint.JointName.Contains("rh_THJ"))
+                if (unityJoint.JointName.Contains("THJ"))
                 {
-                    for (int j = 0; j < thumbPrevSetpoints.Count; j++)
+                    
+                    var candidates = from gi in glovesInfo
+                                where (gi.isRight && unityJoint.JointName.Contains("rh_")) || (unityJoint.JointName.Contains("lh_") && !gi.isRight)
+                                select gi;
+                    var gl = candidates.FirstOrDefault();
+                    if (gl.jointTFs == null) continue;
+                       
+                   // var gl = (unityJoint.JointName.Contains("rh_")) ? glovesInfo.Find(x => x.isRight) : glovesInfo.Find(x => !x.isRight);
+                    for (int j = 0; j < gl.thumbPrevSetpoints.Count; j++)
                     {
 
-                        if (b3JointIds[i] == handJoints[0][j])
+                        if (b3JointIds[i] == gl.handJointsIds[0][j])
                         {
-                            diff = (float)(state.m_jointPosition - thumbPrevSetpoints[j]);
-                            thumbPrevSetpoints[j] = state.m_jointPosition;
+                            diff = (float)(state.m_jointPosition - gl.thumbPrevSetpoints[j]);
+                            gl.thumbPrevSetpoints[j] = state.m_jointPosition;
                             //Quaternion rot = Quaternion.AngleAxis(-diff * Mathf.Rad2Deg, new Vector3(0, 0, 1));// unityJoint.UnityJoint.axis);
                             //unityJoint.transform.rotation = unityJoint.transform.rotation * rot;
                             //unityJoint.GetComponentInChildren<Rigidbody>().transform.rotation = unityJoint.transform.rotation * rot;
@@ -452,12 +521,7 @@ public class BulletBridge : MonoBehaviour
                     continue;
                 }
                 unityJoint.UpdateJointState(diff);
-                
-
-
-
             }
-
         }
         else
         {
@@ -513,7 +577,7 @@ public class BulletBridge : MonoBehaviour
     {
         b3JointInfo jointInfo = new b3JointInfo();
         var b3JointsNum = NativeMethods.b3GetNumJoints(pybullet, b3RobotId);
-        List<string> b3JointNames = new List<string>();
+        b3JointNames = new List<string>();
         jointNames = new List<string>();
         var urdfJoints = UrdfRobot.GetComponentsInChildren<UrdfJoint>();
         b3JointIds = new List<int>();
@@ -541,6 +605,7 @@ public class BulletBridge : MonoBehaviour
         NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
 
 
+
         foreach (var j in urdfJoints)
         {
             if (b3JointNames.Contains(j.JointName))
@@ -555,49 +620,49 @@ public class BulletBridge : MonoBehaviour
         }
         headJointIds = new List<int>
         {
-            b3JointIds.ElementAt(jointNames.IndexOf("head_axis0")),
-            b3JointIds.ElementAt(jointNames.IndexOf("head_axis2")),
-            b3JointIds.ElementAt(jointNames.IndexOf("head_axis1"))
+            b3JointIds.ElementAt(b3JointNames.IndexOf("head_axis0")),
+            b3JointIds.ElementAt(b3JointNames.IndexOf("head_axis2")),
+            b3JointIds.ElementAt(b3JointNames.IndexOf("head_axis1"))
         };
         wristJoints = new List<int>
         {
-            b3JointIds.ElementAt(jointNames.IndexOf("wrist_right_axis0")),
-            b3JointIds.ElementAt(jointNames.IndexOf("wrist_right_axis1")),
-            b3JointIds.ElementAt(jointNames.IndexOf("wrist_right_axis2"))
+            b3JointIds.ElementAt(b3JointNames.IndexOf("wrist_right_axis0")),
+            b3JointIds.ElementAt(b3JointNames.IndexOf("wrist_right_axis1")),
+            b3JointIds.ElementAt(b3JointNames.IndexOf("wrist_right_axis2"))
         };
 
 
-        handJoints = new List<List<int>>(){
-            new List<int> {
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ5")),
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ4")),
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ3")),
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ2"))
-                //b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ1"))
+        //handJoints = new List<List<int>>(){
+        //    new List<int> {
+        //        b3JointIds.ElementAt(b3JointNames.IndexOf("rh_THJ5")),
+        //        b3JointIds.ElementAt(b3JointNames.IndexOf("rh_THJ4")),
+        //        b3JointIds.ElementAt(b3JointNames.IndexOf("rh_THJ3")),
+        //        b3JointIds.ElementAt(b3JointNames.IndexOf("rh_THJ2"))
+        //        //b3JointIds.ElementAt(jointNames.IndexOf("rh_THJ1"))
 
-            },
-            new List<int> {
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_FFJ3")),
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_FFJ2")),
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_FFJ1"))
-            },
-            new List<int> {
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_MFJ3")),
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_MFJ2")),
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_MFJ1"))
-            },
-            new List<int> {
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_RFJ3")),
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_RFJ2")),
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_RFJ1"))
-            },
-            new List<int> {
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_LFJ3")),
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_LFJ2")),
-                b3JointIds.ElementAt(jointNames.IndexOf("rh_LFJ1"))
-            }
-        };
-        thumbPrevSetpoints = new List<double>(new double[handJoints[0].Count]);
+        //    },
+        //    new List<int> {
+        //        b3JointIds.ElementAt(jointNames.IndexOf("rh_FFJ3")),
+        //        b3JointIds.ElementAt(jointNames.IndexOf("rh_FFJ2")),
+        //        b3JointIds.ElementAt(jointNames.IndexOf("rh_FFJ1"))
+        //    },
+        //    new List<int> {
+        //        b3JointIds.ElementAt(jointNames.IndexOf("rh_MFJ3")),
+        //        b3JointIds.ElementAt(jointNames.IndexOf("rh_MFJ2")),
+        //        b3JointIds.ElementAt(jointNames.IndexOf("rh_MFJ1"))
+        //    },
+        //    new List<int> {
+        //        b3JointIds.ElementAt(jointNames.IndexOf("rh_RFJ3")),
+        //        b3JointIds.ElementAt(jointNames.IndexOf("rh_RFJ2")),
+        //        b3JointIds.ElementAt(jointNames.IndexOf("rh_RFJ1"))
+        //    },
+        //    new List<int> {
+        //        b3JointIds.ElementAt(jointNames.IndexOf("rh_LFJ3")),
+        //        b3JointIds.ElementAt(jointNames.IndexOf("rh_LFJ2")),
+        //        b3JointIds.ElementAt(jointNames.IndexOf("rh_LFJ1"))
+        //    }
+        //};
+        //thumbPrevSetpoints = new List<double>(new double[handJoints[0].Count]);
 
 
     }
