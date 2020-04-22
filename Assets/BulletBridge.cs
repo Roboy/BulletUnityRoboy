@@ -443,7 +443,7 @@ public class BulletBridge : MonoBehaviour
 
     //}
 
-    public static void makeKinematic(Rigidbody[] rbs)
+    public static void MakeKinematic(Rigidbody[] rbs)
     {
         foreach (var rb in rbs)
         {
@@ -586,7 +586,7 @@ public class BulletBridge : MonoBehaviour
 
     //}
 
-    public void setJointPosition(ref IntPtr cmd, int bodyId, int jointIndex, double targetPositionRad)
+    public void SetJointPosition(ref IntPtr cmd, int bodyId, int jointIndex, double targetPositionRad)
     {
         b3JointInfo ji = new b3JointInfo();
         NativeMethods.b3GetJointInfo(pybullet, bodyId, jointIndex, ref ji);
@@ -765,7 +765,7 @@ public class BulletBridge : MonoBehaviour
        
     }
 
-    double clipAngle(double angle)
+    public static double ClipAngle(double angle)
     {
         if (angle > 180)
         {

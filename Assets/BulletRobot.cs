@@ -21,6 +21,7 @@ public class BulletRobot : MonoBehaviour
     public string urdfPath;
 
     private IntPtr pybullet;
+    private BulletBridge bb;
     private List<IKTarget> IKTargets;
     private float lastUpdate;
 
@@ -52,7 +53,7 @@ public class BulletRobot : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        var bb = GameObject.Find("BulletBridge").GetComponent<BulletBridge>();
+        bb = GameObject.Find("BulletBridge").GetComponent<BulletBridge>();
         while (!bb.isInitialized)
         {
             bb.WaitForConnection();
@@ -60,10 +61,11 @@ public class BulletRobot : MonoBehaviour
         pybullet = bb.GetPhysicsServerPtr();
         Debug.Log("Connected " + name + " to bullet server.");
 
-        BulletBridge.makeKinematic(GetComponentsInChildren<Rigidbody>());
+        BulletBridge.MakeKinematic(GetComponentsInChildren<Rigidbody>());
+        resetRobotPose();
         urdfRobot = GetComponent<UrdfRobot>();
         var robotPath = Application.dataPath + urdfPath;
-        b3RobotId =  bb.LoadURDF(robotPath, initTF.position, initTF.rotation, 1);
+        b3RobotId =  bb.LoadURDF(robotPath, transform.position, transform.rotation, 1);
         bb.AddGameObject(gameObject, b3RobotId);
 
         setupRobotJoints();
@@ -87,6 +89,73 @@ public class BulletRobot : MonoBehaviour
     void Update()
     {
         syncRobotJointStates(ref urdfRobot);
+        if (Time.time * 1000 - lastUpdate > 20)
+        {
+            trackHead();
+            foreach (var target in IKTargets)
+                followObjectIK(target);
+        }
+    }
+
+    void resetRobotPose()
+    {
+        var p = -initTF.up + initTF.forward * -0.1f + initTF.position;
+        var cam_rotation = initTF.rotation;
+        Quaternion q = Quaternion.Euler(0, cam_rotation.y-90, 0);
+        transform.SetPositionAndRotation(p, q);
+    }
+
+    void followObjectIK(IKTarget target)
+    {
+        var cmd = NativeMethods.b3CalculateInverseKinematicsCommandInit(pybullet, b3RobotId);
+        var targetPosRos = target.targetTF.position.Unity2Ros();
+        var targetOrnRos = target.targetTF.rotation;
+        targetOrnRos *= Quaternion.AngleAxis(90, new Vector3(0, 1, 0));
+        targetOrnRos *= Quaternion.AngleAxis(180, new Vector3(1, 0, 0));
+        targetOrnRos = targetOrnRos.Unity2Ros();
+
+        double[] targetPos = { targetPosRos.x, targetPosRos.y, targetPosRos.z };
+        double[] targetOrn = { targetOrnRos.x, targetOrnRos.y, targetOrnRos.z, targetOrnRos.w };
+
+        NativeMethods.b3CalculateInverseKinematicsAddTargetPositionWithOrientation(cmd, target.endeffectorLinkId, ref targetPos[0], ref targetOrn[0]);
+        //NativeMethods.b3CalculateInverseKinematicsAddTargetPurePosition(cmd, target.endeffectorLinkId, ref targetPos[0]);
+
+        var statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+
+        int dofCount = 0;
+        double[] jointTargets = new double[freeJoints.Count];
+        int bodyId = -1;
+        var status = NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount, ref jointTargets[0]);
+        status = NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount, ref jointTargets[0]);
+
+        cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, (int)EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
+        for (int i = 0; i < jointTargets.Length; i++)
+        {
+            if (!target.kinematicChain.Contains(freeJoints[i])) continue;
+            bb.SetJointPosition(ref cmd, b3RobotId, freeJoints[i], jointTargets[i]);
+        }
+        var st = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+    }
+
+    void trackHead()
+    {
+
+        var eulerAngles = initTF.rotation.eulerAngles;
+        double pitch, roll, yaw;
+        roll = eulerAngles.x;
+        pitch = eulerAngles.y - camYOffset;
+        yaw = eulerAngles.z;
+
+        //Debug.Log(BulletBridge.ClipAngle(yaw) * Mathf.Deg2Rad);
+        IntPtr cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, 2);
+        bb.SetJointPosition(ref cmd, b3RobotId, headJointIds[0], BulletBridge.ClipAngle(roll) * Mathf.Deg2Rad);
+        bb.SetJointPosition(ref cmd, b3RobotId, headJointIds[1], BulletBridge.ClipAngle(yaw) * Mathf.Deg2Rad);
+        bb.SetJointPosition(ref cmd, b3RobotId, headJointIds[2], BulletBridge.ClipAngle(pitch) * Mathf.Deg2Rad);
+
+        var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+
+        lastUpdate = Time.time * 1000;
+
     }
 
     void syncRobotJointStates(ref UrdfRobot robot)
