@@ -16,6 +16,7 @@ using RosSharp;
 public class BulletRobot : MonoBehaviour
 {
     public Transform cameraTF;
+    public bool trackIK;
     public Transform leftHandTarget;
     public Transform rightHandTarget;
     public string urdfPath;
@@ -69,11 +70,15 @@ public class BulletRobot : MonoBehaviour
         bb.AddGameObject(gameObject, b3RobotId);
 
         setupRobotJoints();
-        IKTargets = new List<IKTarget>()
+        if (trackIK)
         {
-            new IKTarget(rightHandTarget, bb.b3GetLinkId("rh_palm", b3RobotId), bb.GetJointKinematicChain(b3RobotId, "rh_palm", "shoulder_right_link1")),
-            new IKTarget(leftHandTarget, bb.b3GetLinkId("lh_palm", b3RobotId), bb.GetJointKinematicChain(b3RobotId, "lh_palm", "shoulder_left_link1"))
-        };
+            IKTargets = new List<IKTarget>()    
+            {
+                new IKTarget(rightHandTarget, bb.b3GetLinkId("rh_palm", b3RobotId), bb.GetJointKinematicChain(b3RobotId, "rh_palm", "shoulder_right_link1")),
+                new IKTarget(leftHandTarget, bb.b3GetLinkId("lh_palm", b3RobotId), bb.GetJointKinematicChain(b3RobotId, "lh_palm", "shoulder_left_link1"))
+            };
+        }
+        
 
         lastUpdate = Time.time * 1000;
 
@@ -92,8 +97,12 @@ public class BulletRobot : MonoBehaviour
         if (Time.time * 1000 - lastUpdate > 20)
         {
             trackHead();
-            foreach (var target in IKTargets)
-                followObjectIK(target);
+            if(trackIK)
+            {
+                foreach (var target in IKTargets)
+                    followObjectIK(target);
+            }
+            
         }
     }
 
