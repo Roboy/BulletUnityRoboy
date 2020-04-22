@@ -15,7 +15,7 @@ using RosSharp;
 [RequireComponent(typeof(UrdfRobot))]
 public class BulletRobot : MonoBehaviour
 {
-    public Transform initTF;
+    public Transform cameraTF;
     public Transform leftHandTarget;
     public Transform rightHandTarget;
     public string urdfPath;
@@ -77,7 +77,7 @@ public class BulletRobot : MonoBehaviour
 
         lastUpdate = Time.time * 1000;
 
-        camYOffset = initTF.rotation.eulerAngles.y;
+        camYOffset = cameraTF.rotation.eulerAngles.y;
 
         var cmd = NativeMethods.b3InitSyncBodyInfoCommand(pybullet);
         var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
@@ -99,8 +99,8 @@ public class BulletRobot : MonoBehaviour
 
     void resetRobotPose()
     {
-        var p = -initTF.up + initTF.forward * -0.1f + initTF.position;
-        var cam_rotation = initTF.rotation;
+        var p = -cameraTF.up + cameraTF.forward * -0.1f + cameraTF.position;
+        var cam_rotation = cameraTF.rotation;
         Quaternion q = Quaternion.Euler(0, cam_rotation.y-90, 0);
         transform.SetPositionAndRotation(p, q);
     }
@@ -140,7 +140,7 @@ public class BulletRobot : MonoBehaviour
     void trackHead()
     {
 
-        var eulerAngles = initTF.rotation.eulerAngles;
+        var eulerAngles = cameraTF.rotation.eulerAngles;
         double pitch, roll, yaw;
         roll = eulerAngles.x;
         pitch = eulerAngles.y - camYOffset;

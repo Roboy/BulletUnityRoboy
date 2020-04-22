@@ -465,50 +465,50 @@ public class BulletBridge : MonoBehaviour
         return bodyId;
     }
 
-    //public struct MyPos
-    //{
-    //    public double x, y, z;
-    //    public double qx, qy, qz, qw;
-    //}
+    public struct MyPos
+    {
+        public double x, y, z;
+        public double qx, qy, qz, qw;
+    }
 
-    //void syncPoseBullet2Unity(GameObject body)
-    //{
-    //    int bodyId = -1;
-    //    b3IdMap.TryGetValue(body, out bodyId);
-    //    if (bodyId >= 0 )
-    //    {
-    //        IntPtr cmd_handle =
-    //            NativeMethods.b3RequestActualStateCommandInit(pybullet, bodyId);
-    //        IntPtr status_handle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd_handle);
+    public void SyncPoseBullet2Unity(GameObject body)
+    {
+        int bodyId = -1;
+        b3IdMap.TryGetValue(body, out bodyId);
+        if (bodyId >= 0)
+        {
+            IntPtr cmd_handle =
+                NativeMethods.b3RequestActualStateCommandInit(pybullet, bodyId);
+            IntPtr status_handle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd_handle);
 
-    //        EnumSharedMemoryServerStatus status_type = (EnumSharedMemoryServerStatus)NativeMethods.b3GetStatusType(status_handle);
+            EnumSharedMemoryServerStatus status_type = (EnumSharedMemoryServerStatus)NativeMethods.b3GetStatusType(status_handle);
 
-    //        if (status_type == EnumSharedMemoryServerStatus.CMD_ACTUAL_STATE_UPDATE_COMPLETED)
-    //        {
-    //            IntPtr p = IntPtr.Zero;
-    //            int numDofQ = 0;
-    //            int numDofU = 0;
-    //            IntPtr inertialFrame = IntPtr.Zero;
-    //            IntPtr actualStateQ = IntPtr.Zero;
-    //            IntPtr actualStateQdot = IntPtr.Zero;
-    //            IntPtr joint_reaction_forces = IntPtr.Zero;
+            if (status_type == EnumSharedMemoryServerStatus.CMD_ACTUAL_STATE_UPDATE_COMPLETED)
+            {
+                IntPtr p = IntPtr.Zero;
+                int numDofQ = 0;
+                int numDofU = 0;
+                IntPtr inertialFrame = IntPtr.Zero;
+                IntPtr actualStateQ = IntPtr.Zero;
+                IntPtr actualStateQdot = IntPtr.Zero;
+                IntPtr joint_reaction_forces = IntPtr.Zero;
 
-    //            NativeMethods.b3GetStatusActualState(
-    //            status_handle, ref bodyId, ref numDofQ, ref numDofU,
-    //            ref inertialFrame, ref actualStateQ,
-    //            ref actualStateQdot, ref joint_reaction_forces);
+                NativeMethods.b3GetStatusActualState(
+                status_handle, ref bodyId, ref numDofQ, ref numDofU,
+                ref inertialFrame, ref actualStateQ,
+                ref actualStateQdot, ref joint_reaction_forces);
 
-    //            MyPos mpos = (MyPos)Marshal.PtrToStructure(actualStateQ, typeof(MyPos));
-    //            Vector3 pos = new Vector3((float)mpos.x, (float)mpos.y, (float)mpos.z);
-    //            Quaternion orn = new Quaternion((float)mpos.qx, (float)mpos.qy, (float)mpos.qz, (float)mpos.qw);
+                MyPos mpos = (MyPos)Marshal.PtrToStructure(actualStateQ, typeof(MyPos));
+                Vector3 pos = new Vector3((float)mpos.x, (float)mpos.y, (float)mpos.z);
+                Quaternion orn = new Quaternion((float)mpos.qx, (float)mpos.qy, (float)mpos.qz, (float)mpos.qw);
 
-    //            pos = RosSharp.TransformExtensions.Ros2Unity(pos);
-    //            orn = RosSharp.TransformExtensions.Ros2Unity(orn);
-    //            var tf = body.transform.position;
-    //            body.transform.SetPositionAndRotation(pos, orn);
-    //        }
-    //    }
-    //}
+                pos = RosSharp.TransformExtensions.Ros2Unity(pos);
+                orn = RosSharp.TransformExtensions.Ros2Unity(orn);
+                var tf = body.transform.position;
+                body.transform.SetPositionAndRotation(pos, orn);
+            }
+        }
+    }
 
     //void syncRobotJointStates(ref UrdfRobot robot)
     //{
