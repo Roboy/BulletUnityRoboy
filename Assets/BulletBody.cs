@@ -9,13 +9,11 @@ public class BulletBody : MonoBehaviour
 {
 
     public string urdfPath;
-    //public Transform initTF;
     public bool resetPose;
     public Transform baseFrame;
     public Vector3 translation;
     public Vector3 rotation;
     public bool useFixedBase;
-
 
     private IntPtr pybullet;
     private BulletBridge bb;

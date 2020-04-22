@@ -16,26 +16,10 @@ using System.Diagnostics.Eventing.Reader;
 [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
 public class BulletBridge : MonoBehaviour
 {
-    //public GameObject upperBody;
-    //public GameObject table;
-    //public GameObject head;
-    //public List<GameObject> senseGloves;
-    //public GameObject leftGlove;
-    //public GameObject cube;
-    //public List<GameObject> tokens;
-    //public Camera cam;
-    //public GameObject cam;
-    //public Transform leftHandTarget;
-    //public Transform rightHandTarget;
-
-    //private List<IKTarget> IKTargets;
-    //private UrdfRobot UrdfRobot;
+    
     private IntPtr pybullet;
     public bool isInitialized;
     private Dictionary<GameObject, int> b3IdMap;
-    //private List<int> b3JointIds;
-    //private List<string> b3JointNames;
-    //private List<string> jointNames; // synced with b3JointIds
     private float lastUpdate;
     //private List<int> headJointIds;
     //private List<int> freeJoints;
