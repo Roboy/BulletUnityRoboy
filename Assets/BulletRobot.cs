@@ -55,10 +55,15 @@ public class BulletRobot : MonoBehaviour
     void Start()
     {
         bb = GameObject.Find("BulletBridge").GetComponent<BulletBridge>();
-        while (!bb.isInitialized)
+        if(!bb.isInitialized)
         {
-            bb.WaitForConnection();
+            Debug.LogError("no bullet bridge");
+            Application.Quit();
         }
+        //while (!bb.isInitialized)
+        //{
+        //    bb.WaitForConnection();
+        //}
         pybullet = bb.GetPhysicsServerPtr();
         Debug.Log("Connected " + name + " to bullet server.");
 
