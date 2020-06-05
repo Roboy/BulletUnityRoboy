@@ -12,6 +12,7 @@ using System.Security.Principal;
 using RosSharp;
 using UnityEngine.Assertions.Must;
 using System.Diagnostics.Eventing.Reader;
+using SenseGloveCs;
 
 [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
 public class BulletBridge : MonoBehaviour
@@ -121,7 +122,7 @@ public class BulletBridge : MonoBehaviour
         public double qx, qy, qz, qw;
     }
 
-    public void SyncPoseBullet2Unity(GameObject body)
+    public void SyncBodyPoseBullet2Unity(GameObject body)
     {
         int bodyId = -1;
         b3IdMap.TryGetValue(body, out bodyId);
@@ -156,6 +157,49 @@ public class BulletBridge : MonoBehaviour
                 orn = RosSharp.TransformExtensions.Ros2Unity(orn);
                 var tf = body.transform.position;
                 body.transform.SetPositionAndRotation(pos, orn);
+            }
+        }
+    }
+
+    public void SyncLinkPoseBullet2Unity(UrdfLink link, int b3BodyId)
+    {
+        int linkId = b3GetLinkId(link.name, b3BodyId);
+        if (linkId >= -1)
+        {
+            IntPtr cmd_handle =
+                NativeMethods.b3RequestActualStateCommandInit(pybullet, b3BodyId);
+            IntPtr status_handle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd_handle);
+
+            EnumSharedMemoryServerStatus status_type = (EnumSharedMemoryServerStatus)NativeMethods.b3GetStatusType(status_handle);
+
+            if (status_type == EnumSharedMemoryServerStatus.CMD_ACTUAL_STATE_UPDATE_COMPLETED)
+            {
+                var linkState = new b3LinkState();
+                NativeMethods.b3GetLinkState(pybullet, status_handle, linkId, ref linkState);
+                var pos = new Vector3((float)linkState.m_worldPosition[0], (float)linkState.m_worldPosition[1], (float)linkState.m_worldPosition[2]);
+                var orn = new Quaternion((float)linkState.m_worldOrientation[0], (float)linkState.m_worldOrientation[1], (float)linkState.m_worldOrientation[2], (float)linkState.m_worldOrientation[3]);
+
+                //IntPtr p = IntPtr.Zero;
+                //int numDofQ = 0;
+                //int numDofU = 0;
+                //IntPtr inertialFrame = IntPtr.Zero;
+                //IntPtr actualStateQ = IntPtr.Zero;
+                //IntPtr actualStateQdot = IntPtr.Zero;
+                //IntPtr joint_reaction_forces = IntPtr.Zero;
+
+                //NativeMethods.b3GetStatusActualState(
+                //status_handle, ref linkId, ref numDofQ, ref numDofU,
+                //ref inertialFrame, ref actualStateQ,
+                //ref actualStateQdot, ref joint_reaction_forces);
+
+                //MyPos mpos = (MyPos)Marshal.PtrToStructure(actualStateQ, typeof(MyPos));
+                //Vector3 pos = new Vector3((float)mpos.x, (float)mpos.y, (float)mpos.z);
+                //Quaternion orn = new Quaternion((float)mpos.qx, (float)mpos.qy, (float)mpos.qz, (float)mpos.qw);
+
+                pos = pos.Ros2Unity();
+                orn = orn.Ros2Unity();
+                var tf = link.transform.position;
+                link.transform.SetPositionAndRotation(pos, orn);
             }
         }
     }
@@ -202,6 +246,14 @@ public class BulletBridge : MonoBehaviour
         return -1;
         
     }
+
+    //public Transform b3GetLinkPose(string name, int bodyId)
+    //{
+    //    var id = b3GetLinkId(name, bodyId);
+    //    var linkState = new b3LinkState();
+    //    var cmd = NativeMethods.b3RequestActualStateCommandInit(pybullet, bodyId);
+    //    NativeMethods.b3GetLinkState(pybullet, cmd, id, ref linkState);
+    //}
 
     public string b3GetJointName(int jointId, int bodyId)
     {

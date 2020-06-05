@@ -69,6 +69,6 @@ public class BulletBody : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        bb.SyncPoseBullet2Unity(gameObject);
+        bb.SyncBodyPoseBullet2Unity(gameObject);
     }
 }
