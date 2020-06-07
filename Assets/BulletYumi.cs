@@ -10,20 +10,27 @@ using UnityEditorInternal;
 using System.Linq;
 using System.Security.Principal;
 using RosSharp;
+using PathCreation;
 
 
 [RequireComponent(typeof(UrdfRobot))]
 public class BulletYumi : MonoBehaviour
 {
-    //public Transform cameraTF;
-    //public bool trackIK;
-    //public Transform leftHandTarget;
-    //public Transform rightHandTarget;
+    public Transform cameraTF;
+    public bool trackIK;
+    public bool followPath;
+    public Transform leftHandTarget;
+    public Transform rightHandTarget;
     public string urdfPath;
+
+    public PathCreator pathCreator;
+    public EndOfPathInstruction endOfPathInstruction;
+    public float speed = 5;
+    float distanceTravelled;
 
     private IntPtr pybullet;
     private BulletBridge bb;
-    //private List<IKTarget> IKTargets;
+    private List<BulletRobot.IKTarget> IKTargets;
     private float lastUpdate;
 
     private UrdfRobot urdfRobot;
@@ -57,14 +64,32 @@ public class BulletYumi : MonoBehaviour
         Debug.Log("Connected " + name + " to bullet server.");
 
         BulletBridge.MakeKinematic(GetComponentsInChildren<Rigidbody>());
+        
+
         resetRobotPose();
         urdfRobot = GetComponent<UrdfRobot>();
         var robotPath = Application.dataPath + urdfPath;
         b3RobotId = bb.LoadURDF(robotPath, transform.position, transform.rotation, 1);
         bb.AddGameObject(gameObject, b3RobotId);
 
-        setupRobotJoints();
+        //setupRobotJoints();
+        //if (trackIK)
+        //{
+        //    IKTargets = new List<BulletRobot.IKTarget>()
+        //    {
+        //        //new BulletRobot.IKTarget(rightHandTarget, bb.b3GetLinkId("gripper_r_base", b3RobotId), bb.GetJointKinematicChain(b3RobotId, "gripper_r_base", "yumi_link_1_r")),
+        //        new BulletRobot.IKTarget(leftHandTarget, bb.b3GetLinkId("gripper_l_base", b3RobotId), bb.GetJointKinematicChain(b3RobotId, "gripper_l_base", "yumi_body"))
+        //    };
+        //}
 
+        //if(followPath )
+        //{
+        //    if (pathCreator != null)
+        //    {
+        //        // Subscribed to the pathUpdated event so that we're notified if the path changes during the game
+        //        pathCreator.pathUpdated += OnPathChanged;
+        //    }
+        //}
 
         lastUpdate = Time.time * 1000;
 
@@ -87,15 +112,37 @@ public class BulletYumi : MonoBehaviour
         if (Time.time * 1000 - lastUpdate > 20)
         {
             //trackHead();
-            //if (trackIK)
-            //{
-            //    foreach (var target in IKTargets)
-            //        followObjectIK(target);
-            //}
+            if (trackIK)
+            {
+                foreach (var target in IKTargets)
+                    followObjectIK(target);
+            }
+
+            if (followPath)
+            {
+                if (pathCreator != null)
+                {
+                    distanceTravelled += speed * Time.deltaTime;
+                    GameObject targetObj = new GameObject();
+                    
+                    if (pathCreator.transform != null)
+                    {
+                        targetObj.transform.position = pathCreator.path.GetPointAtDistance(distanceTravelled, endOfPathInstruction);
+                        targetObj.transform.rotation = pathCreator.path.GetRotationAtDistance(distanceTravelled, endOfPathInstruction);
+                        var t = new BulletRobot.IKTarget(targetObj.transform, bb.b3GetLinkId("gripper_l_base", b3RobotId), bb.GetJointKinematicChain(b3RobotId, "gripper_l_base", "yumi_body"));
+                        followObjectIK(t);
+                    }
+                    
+                }
+            }
 
         }
     }
 
+    void OnPathChanged()
+    {
+        distanceTravelled = pathCreator.path.GetClosestDistanceAlongPath(transform.position);
+    }
     void resetRobotPose()
     {
         //var p = -cameraTF.up + cameraTF.forward * -0.1f + cameraTF.position;
@@ -104,37 +151,40 @@ public class BulletYumi : MonoBehaviour
         //transform.SetPositionAndRotation(p, q);
     }
 
-    //void followObjectIK(IKTarget target)
-    //{
-    //    var cmd = NativeMethods.b3CalculateInverseKinematicsCommandInit(pybullet, b3RobotId);
-    //    var targetPosRos = target.targetTF.position.Unity2Ros();
-    //    var targetOrnRos = target.targetTF.rotation;
-    //    targetOrnRos *= Quaternion.AngleAxis(90, new Vector3(0, 1, 0));
-    //    targetOrnRos *= Quaternion.AngleAxis(180, new Vector3(1, 0, 0));
-    //    targetOrnRos = targetOrnRos.Unity2Ros();
+    void followObjectIK(BulletRobot.IKTarget target)
+    {
+        if (pybullet != IntPtr.Zero)
+        {
+            var cmd = NativeMethods.b3CalculateInverseKinematicsCommandInit(pybullet, b3RobotId);
+            var targetPosRos = target.targetTF.position.Unity2Ros();
+            var targetOrnRos = target.targetTF.rotation;
+            //targetOrnRos *= Quaternion.AngleAxis(90, new Vector3(0, 1, 0));
+            //targetOrnRos *= Quaternion.AngleAxis(180, new Vector3(1, 0, 0));
+            targetOrnRos = targetOrnRos.Unity2Ros();
 
-    //    double[] targetPos = { targetPosRos.x, targetPosRos.y, targetPosRos.z };
-    //    double[] targetOrn = { targetOrnRos.x, targetOrnRos.y, targetOrnRos.z, targetOrnRos.w };
+            double[] targetPos = { targetPosRos.x, targetPosRos.y, targetPosRos.z };
+            double[] targetOrn = { targetOrnRos.x, targetOrnRos.y, targetOrnRos.z, targetOrnRos.w };
 
-    //    NativeMethods.b3CalculateInverseKinematicsAddTargetPositionWithOrientation(cmd, target.endeffectorLinkId, ref targetPos[0], ref targetOrn[0]);
-    //    //NativeMethods.b3CalculateInverseKinematicsAddTargetPurePosition(cmd, target.endeffectorLinkId, ref targetPos[0]);
+            NativeMethods.b3CalculateInverseKinematicsAddTargetPositionWithOrientation(cmd, target.endeffectorLinkId, ref targetPos[0], ref targetOrn[0]);
+            //NativeMethods.b3CalculateInverseKinematicsAddTargetPurePosition(cmd, target.endeffectorLinkId, ref targetPos[0]);
 
-    //    var statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+            var statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
 
-    //    int dofCount = 0;
-    //    double[] jointTargets = new double[freeJoints.Count];
-    //    int bodyId = -1;
-    //    var status = NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount, ref jointTargets[0]);
-    //    status = NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount, ref jointTargets[0]);
+            int dofCount = 0;
+            double[] jointTargets = new double[freeJoints.Count];
+            int bodyId = -1;
+            var status = NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount, ref jointTargets[0]);
+            status = NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount, ref jointTargets[0]);
 
-    //    cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, (int)EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
-    //    for (int i = 0; i < jointTargets.Length; i++)
-    //    {
-    //        if (!target.kinematicChain.Contains(freeJoints[i])) continue;
-    //        bb.SetJointPosition(ref cmd, b3RobotId, freeJoints[i], jointTargets[i]);
-    //    }
-    //    var st = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
-    //}
+            cmd = NativeMethods.b3JointControlCommandInit2(pybullet, b3RobotId, (int)EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
+            for (int i = 0; i < jointTargets.Length; i++)
+            {
+                if (!target.kinematicChain.Contains(freeJoints[i])) continue;
+                bb.SetJointPosition(ref cmd, b3RobotId, freeJoints[i], jointTargets[i]);
+            }
+            var st = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+        }
+    }
 
     //void trackHead()
     //{

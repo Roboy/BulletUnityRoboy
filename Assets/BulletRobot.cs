@@ -26,7 +26,7 @@ public class BulletRobot : MonoBehaviour
     private List<IKTarget> IKTargets;
     private float lastUpdate;
 
-    private UrdfRobot urdfRobot;
+    protected UrdfRobot urdfRobot;
     private List<int> b3JointIds;
     private List<string> b3JointNames;
     private List<string> jointNames; // synced with b3JointIds
@@ -38,7 +38,7 @@ public class BulletRobot : MonoBehaviour
     private double camYOffset;
     private Vector3 initRobotPosition;
 
-    struct IKTarget
+    public struct IKTarget
     {
         public IKTarget(Transform tf, int id, List<int> kc)
         {
