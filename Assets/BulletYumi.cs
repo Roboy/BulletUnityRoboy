@@ -69,6 +69,7 @@ public class BulletYumi : MonoBehaviour
         resetRobotPose();
         urdfRobot = GetComponent<UrdfRobot>();
         var robotPath = Application.dataPath + urdfPath;
+        //transform.position
         b3RobotId = bb.LoadURDF(robotPath, transform.position, transform.rotation, 1);
         bb.AddGameObject(gameObject, b3RobotId);
 
@@ -106,37 +107,38 @@ public class BulletYumi : MonoBehaviour
     {
         foreach (var link in GetComponentsInChildren<UrdfLink>())
         {
+            if (link.name == "yumi_base_link" || link.name == "yumi_link_1_r" || link.name == "yumi_link_1_l") continue;
             bb.SyncLinkPoseBullet2Unity(link, b3RobotId);
         }
-        //syncRobotJointStates(ref urdfRobot);
-        if (Time.time * 1000 - lastUpdate > 20)
-        {
-            //trackHead();
-            if (trackIK)
-            {
-                foreach (var target in IKTargets)
-                    followObjectIK(target);
-            }
+        ////syncRobotJointStates(ref urdfRobot);
+        //if (Time.time * 1000 - lastUpdate > 20)
+        //{
+        //    //trackHead();
+        //    if (trackIK)
+        //    {
+        //        foreach (var target in IKTargets)
+        //            followObjectIK(target);
+        //    }
 
-            if (followPath)
-            {
-                if (pathCreator != null)
-                {
-                    distanceTravelled += speed * Time.deltaTime;
-                    GameObject targetObj = new GameObject();
-                    
-                    if (pathCreator.transform != null)
-                    {
-                        targetObj.transform.position = pathCreator.path.GetPointAtDistance(distanceTravelled, endOfPathInstruction);
-                        targetObj.transform.rotation = pathCreator.path.GetRotationAtDistance(distanceTravelled, endOfPathInstruction);
-                        var t = new BulletRobot.IKTarget(targetObj.transform, bb.b3GetLinkId("gripper_l_base", b3RobotId), bb.GetJointKinematicChain(b3RobotId, "gripper_l_base", "yumi_body"));
-                        followObjectIK(t);
-                    }
-                    
-                }
-            }
+        //    if (followPath)
+        //    {
+        //        if (pathCreator != null)
+        //        {
+        //            distanceTravelled += speed * Time.deltaTime;
+        //            GameObject targetObj = new GameObject();
 
-        }
+        //            if (pathCreator.transform != null)
+        //            {
+        //                targetObj.transform.position = pathCreator.path.GetPointAtDistance(distanceTravelled, endOfPathInstruction);
+        //                targetObj.transform.rotation = pathCreator.path.GetRotationAtDistance(distanceTravelled, endOfPathInstruction);
+        //                var t = new BulletRobot.IKTarget(targetObj.transform, bb.b3GetLinkId("gripper_l_base", b3RobotId), bb.GetJointKinematicChain(b3RobotId, "gripper_l_base", "yumi_body"));
+        //                followObjectIK(t);
+        //            }
+
+        //        }
+        //    }
+
+        //}
     }
 
     void OnPathChanged()

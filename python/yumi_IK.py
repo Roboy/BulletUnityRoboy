@@ -56,7 +56,10 @@ def accurateCalculateInverseKinematics(ob, endEffectorId, targetPos, threshold, 
   dist2 = 1e30
   while (not closeEnough and iter < maxIter):
     # jointPoses = p.calculateInverseKinematics2(ob, endEffectorLinkIndices=endEffectorIds, targetPositions=targetPos)
-    jointPoses = p.calculateInverseKinematics(ob, endEffectorId, targetPos, targetOrientation =(0,-0.7,0,0.7))
+    if endEffectorId == endEffectorLeftId:
+        jointPoses = p.calculateInverseKinematics(ob, endEffectorId, targetPos, targetOrientation =(0,1,0,0))
+    else:
+        jointPoses = p.calculateInverseKinematics(ob, endEffectorId, targetPos,targetOrientation =(0,1,0,0))
     #import pdb; pdb.set_trace()
     for i in range(len(freeJoints)):
       p.resetJointState(ob, freeJoints[i], jointPoses[i])
@@ -70,7 +73,9 @@ def accurateCalculateInverseKinematics(ob, endEffectorId, targetPos, threshold, 
   return jointPoses
 
 base_pos = p.getBasePositionAndOrientation(ob)[0]
+first = True
 while True:
+
     if (useRealTimeSimulation):
         t = time.time()  #(dt, micro) = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
         #t = (dt.second/60.)*2.*math.pi
@@ -84,24 +89,30 @@ while True:
     z = 13*np.cos(t)-5*np.cos(2*t)-2*np.cos(3*t)-np.cos(4*t)
     x = 0.05
     scale = 1/50.0
-    pos = posRight = [base_pos[0] - 0.5, base_pos[1] + abs(y)*scale , base_pos[2] + z*scale+0.45]
-    posLeft = [base_pos[0] - 0.5, base_pos[1] + -abs(y)*scale, base_pos[2] + z*scale+0.45]
-    # pos = [base_pos[0] + 0.3 * math.cos(t)-0.4,  base_pos[1] + 0.3 * math.sin(t) - 0.1, base_pos[2]+0.2]
+    # pos = posRight = [base_pos[0] - 0.5, base_pos[1] + abs(y)*scale , base_pos[2] + z*scale+0.45]
+    # posLeft = [base_pos[0] - 0.5, base_pos[1] + -abs(y)*scale, base_pos[2] + z*scale+0.45]
+    # posLeft = pos = [base_pos[0] + 0.2 * abs(math.cos(t)) + 0.4,  base_pos[1] + 0.1 * math.sin(t) - 0.3, base_pos[2]+0.4]
+    pos = posLeft = [base_pos[0] + 0.13 * math.cos(t) + 0.51,  base_pos[1] + 0.13 * math.sin(t)-0.11, base_pos[2]+0.35]
+    pos = posRight = [base_pos[0]+  0.21,  base_pos[1] -0.5, base_pos[2]+0.25]
+
     threshold = 0.001
     maxIter = 500
-    jointPoses = accurateCalculateInverseKinematics(ob, endEffectorRightId, posRight,
-                                                        threshold, maxIter)
 
-    if (useSimulation):
-      for i in range(len(freeJoints)):
-        p.setJointMotorControl2(bodyIndex=ob,
-                                jointIndex=freeJoints[i],
-                                controlMode=p.POSITION_CONTROL,
-                                targetPosition=jointPoses[i],
-                                targetVelocity=0,
-                                force=50,
-                                positionGain=0.01,
-                                velocityGain=0.01)
+    if (first):
+        # first = False
+        jointPoses = accurateCalculateInverseKinematics(ob, endEffectorRightId, posRight,
+                                                            threshold, maxIter)
+
+        if (useSimulation):
+          for i in range(len(freeJoints)):
+            p.setJointMotorControl2(bodyIndex=ob,
+                                    jointIndex=freeJoints[i],
+                                    controlMode=p.POSITION_CONTROL,
+                                    targetPosition=jointPoses[i],
+                                    targetVelocity=0,
+                                    force=5,
+                                    positionGain=2,
+                                    velocityGain=0)
 
     jointPoses = accurateCalculateInverseKinematics(ob, endEffectorLeftId, posLeft,
                                                         threshold, maxIter)
