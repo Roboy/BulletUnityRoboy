@@ -1,4 +1,5 @@
 .vs/
+.idea/
 Assembly-CSharp-Editor.csproj
 Assembly-CSharp.csproj
 BulletUnityRoboy.sln
@@ -11,3 +12,5 @@ SteamVR_Input_Editor.csproj
 SteamVR_Windows_EditorHelper.csproj
 Temp/
 obj/
+Assets/vrgineers
+Assets/Urdf/roboy3_models

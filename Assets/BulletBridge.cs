@@ -26,7 +26,6 @@ public class BulletBridge : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
         pybullet = NativeMethods.b3ConnectSharedMemory(NativeConstants.SHARED_MEMORY_KEY2);
         
         if (NativeMethods.b3CanSubmitCommand(pybullet) != 1)
@@ -53,6 +52,11 @@ public class BulletBridge : MonoBehaviour
     public void AddGameObject(GameObject go, int bulletId)
     {
         b3IdMap.Add(go, bulletId);
+    }
+
+    public void RemoveGameObject(GameObject go)
+    {
+        b3IdMap.Remove(go);
     }
 
     public int GetIdByObject(GameObject gameObject)
@@ -104,12 +108,16 @@ public class BulletBridge : MonoBehaviour
 
     public int LoadURDF(string file, Vector3 p, Quaternion q, int useFixedBase = 0)
     {
-        p = RosSharp.TransformExtensions.Unity2Ros(p);
-        q = RosSharp.TransformExtensions.Unity2Ros(q);
+        p = p.Unity2Ros();
+        q = q.Unity2Ros();
         var cmd = NativeMethods.b3LoadUrdfCommandInit(pybullet, file);
         NativeMethods.b3LoadUrdfCommandSetStartPosition(cmd, p.x, p.y, p.z);
         NativeMethods.b3LoadUrdfCommandSetStartOrientation(cmd, q.x, q.y, q.z, q.w);
         NativeMethods.b3LoadUrdfCommandSetUseFixedBase(cmd, useFixedBase);
+
+        //NativeMethods.b3LoadUrdfCommandSetFlags(cmd, (int) (eURDF_Flags.URDF_ENABLE_SLEEPING) | (int) eURDF_Flags.URDF_ENABLE_WAKEUP);
+        NativeMethods.b3LoadUrdfCommandSetFlags(cmd, 264192);
+        
         var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
         var bodyId = NativeMethods.b3GetStatusBodyIndex(status);
         return bodyId;
@@ -162,6 +170,15 @@ public class BulletBridge : MonoBehaviour
 
     public void SetJointPosition(ref IntPtr cmd, int bodyId, int jointIndex, double targetPositionRad)
     {
+        // b3JointInfo ji = new b3JointInfo();
+        // NativeMethods.b3GetJointInfo(pybullet, bodyId, jointIndex, ref ji);
+        // NativeMethods.b3JointControlSetDesiredPosition(cmd, ji.m_qIndex, targetPositionRad);
+        // NativeMethods.b3JointControlSetKp(cmd, ji.m_uIndex, 0.1);
+        // NativeMethods.b3JointControlSetDesiredVelocity(cmd, ji.m_uIndex, 0);
+        // NativeMethods.b3JointControlSetKd(cmd, ji.m_uIndex, 1.0);
+        // NativeMethods.b3JointControlSetMaximumForce(cmd, ji.m_uIndex, 100000.0);
+        
+        
         b3JointInfo ji = new b3JointInfo();
         NativeMethods.b3GetJointInfo(pybullet, bodyId, jointIndex, ref ji);
         NativeMethods.b3JointControlSetDesiredPosition(cmd, ji.m_qIndex, targetPositionRad);

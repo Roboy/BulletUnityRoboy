@@ -4038,6 +4038,9 @@ public partial class NativeMethods
     ///targetOrientation: double*
     [System.Runtime.InteropServices.DllImportAttribute(dllName, EntryPoint = "b3CalculateInverseKinematicsAddTargetPositionWithOrientation")]
     public static extern void b3CalculateInverseKinematicsAddTargetPositionWithOrientation(IntPtr commandHandle, int endEffectorLinkIndex, ref double targetPosition, ref double targetOrientation);
+    
+    [System.Runtime.InteropServices.DllImportAttribute(dllName, EntryPoint = "b3CalculateInverseKinematicsAddTargetPositionWithOrientationEx")]
+    public static extern void b3CalculateInverseKinematicsAddTargetPositionWithOrientationEx(IntPtr commandHandle, int endEffectorLinkIndex, ref double targetPosition, ref double targetOrientation, int numDof, ref double lowerLimit, ref double upperLimit, ref double jointRange, ref double restPose);
 
 
     /// Return Type: void
@@ -4229,6 +4232,10 @@ public partial class NativeMethods
     ///value: double
     [System.Runtime.InteropServices.DllImportAttribute(dllName, EntryPoint = "b3JointControlSetKd")]
     public static extern int b3JointControlSetKd(IntPtr commandHandle, int dofIndex, double value);
+    
+    
+    [System.Runtime.InteropServices.DllImportAttribute(dllName, EntryPoint = "b3JointControlSetAngles")]
+    public static extern int b3JointControlSetAngles(IntPtr commandHandle, int linkIndex, double lowerLimit, double upperLimit);
 
 
     /// Return Type: int
