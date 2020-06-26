@@ -12,28 +12,30 @@ using System.Security.Principal;
 using RosSharp;
 using UnityEngine.Assertions.Must;
 using System.Diagnostics.Eventing.Reader;
+using System.Threading;
 
 [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
 public class BulletBridge : MonoBehaviour
 {
-    
     private IntPtr pybullet;
     public bool isInitialized;
     private Dictionary<GameObject, int> b3IdMap;
     private float lastUpdate;
     private bool reset;
 
+    private Thread _updateThread;
+
     // Start is called before the first frame update
     void Start()
     {
         pybullet = NativeMethods.b3ConnectSharedMemory(NativeConstants.SHARED_MEMORY_KEY2);
-        
+
         if (NativeMethods.b3CanSubmitCommand(pybullet) != 1)
         {
             Debug.LogError("Cannot submit commands to pybullet server. Quitting...");
             Application.Quit();
         }
-        
+
         resetSimulation();
 
         IntPtr cmd = NativeMethods.b3InitSyncBodyInfoCommand(pybullet);
@@ -46,6 +48,7 @@ public class BulletBridge : MonoBehaviour
         setGravity();
         setRealTimeSimualtion(1);
         isInitialized = true;
+
         Debug.Log("pybullet connected");
     }
 
@@ -88,14 +91,6 @@ public class BulletBridge : MonoBehaviour
         yield return new WaitForSeconds(1);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-      
-
-    }
-
 
     public static void MakeKinematic(Rigidbody[] rbs)
     {
@@ -115,12 +110,27 @@ public class BulletBridge : MonoBehaviour
         NativeMethods.b3LoadUrdfCommandSetStartOrientation(cmd, q.x, q.y, q.z, q.w);
         NativeMethods.b3LoadUrdfCommandSetUseFixedBase(cmd, useFixedBase);
 
-        //NativeMethods.b3LoadUrdfCommandSetFlags(cmd, (int) (eURDF_Flags.URDF_ENABLE_SLEEPING) | (int) eURDF_Flags.URDF_ENABLE_WAKEUP);
-        NativeMethods.b3LoadUrdfCommandSetFlags(cmd, 264192);
-        
+        NativeMethods.b3LoadUrdfCommandSetFlags(cmd, 264192); // = ENABLE SLEEPING + ENABLE WAKEUP
+
         var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
         var bodyId = NativeMethods.b3GetStatusBodyIndex(status);
         return bodyId;
+    }
+
+    public int LoadUrdfAsync(string file, Vector3 p, Quaternion q, int useFixedBase = 0)
+    {
+        p = p.Unity2Ros();
+        q = q.Unity2Ros();
+        var cmd = NativeMethods.b3LoadUrdfCommandInit(pybullet, file);
+        NativeMethods.b3LoadUrdfCommandSetStartPosition(cmd, p.x, p.y, p.z);
+        NativeMethods.b3LoadUrdfCommandSetStartOrientation(cmd, q.x, q.y, q.z, q.w);
+        NativeMethods.b3LoadUrdfCommandSetUseFixedBase(cmd, useFixedBase);
+
+        NativeMethods.b3LoadUrdfCommandSetFlags(cmd, 264192); // = ENABLE SLEEPING + ENABLE WAKEUP
+
+        NativeMethods.b3SubmitClientCommand(pybullet, cmd);
+        //var bodyId = NativeMethods.b3GetStatusBodyIndex(status);
+        return 1;
     }
 
     public struct MyPos
@@ -139,7 +149,7 @@ public class BulletBridge : MonoBehaviour
                 NativeMethods.b3RequestActualStateCommandInit(pybullet, bodyId);
             IntPtr status_handle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd_handle);
 
-            EnumSharedMemoryServerStatus status_type = (EnumSharedMemoryServerStatus)NativeMethods.b3GetStatusType(status_handle);
+            EnumSharedMemoryServerStatus status_type = (EnumSharedMemoryServerStatus) NativeMethods.b3GetStatusType(status_handle);
 
             if (status_type == EnumSharedMemoryServerStatus.CMD_ACTUAL_STATE_UPDATE_COMPLETED)
             {
@@ -152,13 +162,13 @@ public class BulletBridge : MonoBehaviour
                 IntPtr joint_reaction_forces = IntPtr.Zero;
 
                 NativeMethods.b3GetStatusActualState(
-                status_handle, ref bodyId, ref numDofQ, ref numDofU,
-                ref inertialFrame, ref actualStateQ,
-                ref actualStateQdot, ref joint_reaction_forces);
+                    status_handle, ref bodyId, ref numDofQ, ref numDofU,
+                    ref inertialFrame, ref actualStateQ,
+                    ref actualStateQdot, ref joint_reaction_forces);
 
-                MyPos mpos = (MyPos)Marshal.PtrToStructure(actualStateQ, typeof(MyPos));
-                Vector3 pos = new Vector3((float)mpos.x, (float)mpos.y, (float)mpos.z);
-                Quaternion orn = new Quaternion((float)mpos.qx, (float)mpos.qy, (float)mpos.qz, (float)mpos.qw);
+                MyPos mpos = (MyPos) Marshal.PtrToStructure(actualStateQ, typeof(MyPos));
+                Vector3 pos = new Vector3((float) mpos.x, (float) mpos.y, (float) mpos.z);
+                Quaternion orn = new Quaternion((float) mpos.qx, (float) mpos.qy, (float) mpos.qz, (float) mpos.qw);
 
                 pos = RosSharp.TransformExtensions.Ros2Unity(pos);
                 orn = RosSharp.TransformExtensions.Ros2Unity(orn);
@@ -177,8 +187,8 @@ public class BulletBridge : MonoBehaviour
         // NativeMethods.b3JointControlSetDesiredVelocity(cmd, ji.m_uIndex, 0);
         // NativeMethods.b3JointControlSetKd(cmd, ji.m_uIndex, 1.0);
         // NativeMethods.b3JointControlSetMaximumForce(cmd, ji.m_uIndex, 100000.0);
-        
-        
+
+
         b3JointInfo ji = new b3JointInfo();
         NativeMethods.b3GetJointInfo(pybullet, bodyId, jointIndex, ref ji);
         NativeMethods.b3JointControlSetDesiredPosition(cmd, ji.m_qIndex, targetPositionRad);
@@ -186,20 +196,19 @@ public class BulletBridge : MonoBehaviour
         NativeMethods.b3JointControlSetDesiredVelocity(cmd, ji.m_uIndex, 0);
         NativeMethods.b3JointControlSetKd(cmd, ji.m_uIndex, 1.0);
         NativeMethods.b3JointControlSetMaximumForce(cmd, ji.m_uIndex, 100000.0);
-
     }
 
     public List<int> GetJointKinematicChain(int bodyId, string ef, string root)
     {
-        
         var start = b3GetLinkId(root, bodyId);
         var efLinkId = b3GetLinkId(ef, bodyId);
         var chain = new List<int>();
-        for (int i=start; i<=efLinkId; i++)
+        for (int i = start; i <= efLinkId; i++)
         {
             chain.Add(i);
             //TODO check if joint is movable
         }
+
         return chain;
     }
 
@@ -207,7 +216,7 @@ public class BulletBridge : MonoBehaviour
     {
         b3JointInfo ji = new b3JointInfo();
         var b3JointsNum = NativeMethods.b3GetNumJoints(pybullet, bodyId);
-        for (int i=0; i<b3JointsNum; i++)
+        for (int i = 0; i < b3JointsNum; i++)
         {
             NativeMethods.b3GetJointInfo(pybullet, bodyId, i, ref ji);
             if (ji.m_linkName == name)
@@ -215,9 +224,9 @@ public class BulletBridge : MonoBehaviour
                 return i;
             }
         }
+
         Debug.LogError("Could not find link id with name " + name);
         return -1;
-        
     }
 
     public string b3GetJointName(int jointId, int bodyId)
@@ -232,6 +241,7 @@ public class BulletBridge : MonoBehaviour
         IntPtr cmd = NativeMethods.b3InitResetSimulationCommand(pybullet);
         IntPtr status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
     }
+
     public void stepSimulation()
     {
         if (pybullet != IntPtr.Zero)
@@ -259,7 +269,6 @@ public class BulletBridge : MonoBehaviour
             NativeMethods.b3PhysicsParamSetGravity(command, 0, 0, -9.8);
             IntPtr statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, command);
         }
-       
     }
 
     public static double ClipAngle(double angle)
@@ -272,6 +281,7 @@ public class BulletBridge : MonoBehaviour
         {
             angle += 360;
         }
+
         return angle;
     }
 
