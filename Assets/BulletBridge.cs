@@ -1,23 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using RosSharp.Urdf;
-using UnityEngine.UI;
 using System.Runtime.InteropServices;
 using System;
-using Valve.VR;
-using UnityEditorInternal;
-using System.Linq;
-using System.Security.Principal;
 using RosSharp;
-using UnityEngine.Assertions.Must;
-using System.Diagnostics.Eventing.Reader;
 using System.Threading;
 
 [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
 public class BulletBridge : MonoBehaviour
 {
     private IntPtr pybullet;
+    
     public bool isInitialized;
     private Dictionary<GameObject, int> b3IdMap;
     private float lastUpdate;

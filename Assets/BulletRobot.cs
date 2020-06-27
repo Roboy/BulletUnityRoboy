@@ -2,22 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using RosSharp.Urdf;
-using UnityEngine.UI;
-using System.Runtime.InteropServices;
 using System;
-using Valve.VR;
-using UnityEditorInternal;
-using System.Linq;
-using System.Security.Principal;
 using System.Threading;
 using JetBrains.Annotations;
 using RosSharp;
-using Unity.Jobs;
-using UnityEngine.PlayerLoop;
 using UnityEngine.Serialization;
-using UnityEngine.SpatialTracking;
-using UnityEngine.XR;
-using Object = System.Object;
 
 
 [RequireComponent(typeof(UrdfRobot))]
@@ -31,12 +20,11 @@ public class BulletRobot : MonoBehaviour
     [SerializeField] private Transform rightHandTarget;
     [SerializeField] private string urdfPath;
 
-    [FormerlySerializedAs("robotStates")] [SerializeField] private List<SyncedRobotInformation> syncedRobots;
+    [FormerlySerializedAs("robotStates")] [SerializeField]
+    private List<SyncedRobotInformation> syncedRobots;
 
     private IntPtr pybullet;
     private BulletBridge bb;
-    private List<IkTarget> IKTargets;
-    private float lastUpdate;
 
     private UrdfRobot urdfRobot;
     private List<int> b3JointIds;
@@ -94,20 +82,23 @@ public class BulletRobot : MonoBehaviour
             return "Time: " + _accumulatedTime / _count;
         }
     }
-    
+
     /**
-     * Struct to store different robot urdf paths. As of now, angle limitations cannot be modified during runtime. Therefore spawn multiple robots in simulation and sync with one.
+     * Class to store different robot urdf paths. As of now, angle limitations cannot be modified during runtime. Therefore spawn multiple robots in simulation and sync with one.
      */
     [Serializable]
     private class SyncedRobotInformation
     {
-        [FormerlySerializedAs("_urdfPath")] [SerializeField] private string urdfPath;
-        [FormerlySerializedAs("_desc")] [SerializeField] private string desc;
-        
+        [FormerlySerializedAs("_urdfPath")] [SerializeField]
+        private string urdfPath;
+
+        [FormerlySerializedAs("_desc")] [SerializeField]
+        private string desc;
+
         private int _b3RobotId;
         private bool _isActive;
         private bool _isLoaded;
-        
+
         public string UrdfPath => urdfPath;
 
         public string Desc => desc;
@@ -132,14 +123,15 @@ public class BulletRobot : MonoBehaviour
     }
 
     /**
-     * Struct holds information about all joints that have to be synced from Bullet to Unity.
+     * Class holds information about all joints that have to be synced from Bullet to Unity.
      */
-    private readonly struct JointSyncInformation
+    private class JointSyncInformation
     {
         private readonly int _b3JointIndex;
         private readonly UrdfJoint _urdfJoint;
         private readonly int _jointIndex;
         private readonly String _jointName;
+        public b3JointSensorState b3JointSensorState;
 
         public UrdfJoint UrdfJoint => _urdfJoint;
 
@@ -148,6 +140,7 @@ public class BulletRobot : MonoBehaviour
         public string JointName => _jointName;
 
         public int B3JointIndex => _b3JointIndex;
+
 
         public JointSyncInformation(int b3JointIndex, [NotNull] UrdfJoint urdfJoint, int jointIndex, string jointName)
         {
@@ -158,25 +151,114 @@ public class BulletRobot : MonoBehaviour
         }
     }
 
-    private struct IkTarget
+    /**
+     * Class holds information for the event when a switch between robots occurs.
+     */
+    private class SwitchRobotData
     {
-        public IkTarget(Transform transform, int endeffectorLinkId, List<int> kinematicChain)
+        private bool _switchRobotFlag;
+        private int _waitCounterA;
+        private int _waitCounterB;
+        private SyncedRobotInformation _prevSyncedRobot;
+        private SyncedRobotInformation _nextSyncedRobot;
+
+        public SwitchRobotData()
         {
-            this.transform = transform;
-            endeffectorLinkID = endeffectorLinkId;
-            this.kinematicChain = kinematicChain;
+            _switchRobotFlag = false;
+            _waitCounterA = -1;
+            _waitCounterB = -1;
+            _prevSyncedRobot = null;
+            _nextSyncedRobot = null;
         }
 
-        private Transform transform;
-        private int endeffectorLinkID;
-        private List<int> kinematicChain;
+        public bool SwitchRobotFlag
+        {
+            get => _switchRobotFlag;
+            set => _switchRobotFlag = value;
+        }
 
-        public Transform Transform => transform;
+        public int WaitCounterA
+        {
+            get => _waitCounterA;
+            set => _waitCounterA = value;
+        }
 
-        public int EndeffectorLinkId => endeffectorLinkID;
+        public int WaitCounterB
+        {
+            get => _waitCounterB;
+            set => _waitCounterB = value;
+        }
 
-        public List<int> KinematicChain => kinematicChain;
+        public SyncedRobotInformation PrevSyncedRobot
+        {
+            get => _prevSyncedRobot;
+            set => _prevSyncedRobot = value;
+        }
+
+        public SyncedRobotInformation NextSyncedRobot
+        {
+            get => _nextSyncedRobot;
+            set => _nextSyncedRobot = value;
+        }
     }
+
+    private readonly SwitchRobotData _switchRobotData = new SwitchRobotData();
+
+    /**
+     * Class holds information about head movement.
+     */
+    private class HeadData
+    {
+        private double _camYOffset;
+        private Vector3 _eulerAngles;
+
+        public double CamYOffset
+        {
+            set => _camYOffset = value;
+        }
+
+        public Vector3 EulerAngles
+        {
+            set => _eulerAngles = value;
+        }
+
+        public double Pitch => _eulerAngles.y - _camYOffset;
+        public double Roll => _eulerAngles.x;
+        public double Yaw => _eulerAngles.z;
+    }
+
+    private readonly HeadData _headData = new HeadData();
+    
+    /**
+     * Class holds information for joints that are tracked (used for IK calculation)
+     */
+    private class IkTargetData
+    {
+        public IkTargetData(Transform transform, int endeffectorLinkId, List<int> kinematicChain)
+        {
+            this._transform = transform;
+            this._endeffectorLinkId = endeffectorLinkId;
+            this._kinematicChain = kinematicChain;
+        }
+
+        private readonly Transform _transform;
+        private readonly int _endeffectorLinkId;
+        private readonly List<int> _kinematicChain;
+
+        public double[] targetPos = {0, 0, 0};
+        public double[] targetOrn = {0, 0, 0, 0};
+
+        public Transform Transform => _transform;
+
+        public int EndeffectorLinkId => _endeffectorLinkId;
+
+        public List<int> KinematicChain => _kinematicChain;
+    }
+
+    private readonly List<IkTargetData> _ikTargetData = new List<IkTargetData>();
+
+    private Thread _stateSyncThread;
+    private readonly int _stateSyncUpdateRate = 15;
 
     // Start is called before the first frame update
     void Start()
@@ -201,11 +283,11 @@ public class BulletRobot : MonoBehaviour
         // TODO: Load all Roboy models (up to robotStates.Count) => Right now huge performance issue!
         for (var i = 0; i < syncedRobots.Count; i++)
         {
-            int _b3RobotId = bb.LoadURDF(syncedRobots[i].UrdfPath, transform.position + (new Vector3(i - 1 + 1, 0, 0)), transform.rotation, 1);
-            Debug.Log("Loaded Robot: " + _b3RobotId);
+            int b3RobotId = bb.LoadURDF(syncedRobots[i].UrdfPath, transform.position + (new Vector3(i - 1 + 1, 0, 0)), transform.rotation, 1);
+            Debug.Log("Loaded Robot: " + b3RobotId);
 
             syncedRobots[i].IsLoaded = true;
-            syncedRobots[i].B3RobotId = _b3RobotId;
+            syncedRobots[i].B3RobotId = b3RobotId;
             syncedRobots[i].IsActive = i == 0;
         }
 
@@ -219,22 +301,18 @@ public class BulletRobot : MonoBehaviour
         // Add inverse kinematic tracking targets
         if (trackIK)
         {
-            IKTargets = new List<IkTarget>();
-
             if (leftHandTarget)
             {
-                IKTargets.Add(new IkTarget(leftHandTarget.transform /*leftHandTarget.GetComponent<RedirectedTransform>().Transform*/, bb.b3GetLinkId("lh_palm", ActiveRobot.B3RobotId),
+                _ikTargetData.Add(new IkTargetData(leftHandTarget.transform /*leftHandTarget.GetComponent<RedirectedTransform>().Transform*/, bb.b3GetLinkId("lh_palm", ActiveRobot.B3RobotId),
                     bb.GetJointKinematicChain(ActiveRobot.B3RobotId, "lh_palm", "shoulder_left_link1")));
             }
 
             if (rightHandTarget)
             {
-                IKTargets.Add(new IkTarget(rightHandTarget.transform /*rightHandTarget.GetComponent<RedirectedTransform>().Transform*/, bb.b3GetLinkId("rh_palm", ActiveRobot.B3RobotId),
+                _ikTargetData.Add(new IkTargetData(rightHandTarget.transform /*rightHandTarget.GetComponent<RedirectedTransform>().Transform*/, bb.b3GetLinkId("rh_palm", ActiveRobot.B3RobotId),
                     bb.GetJointKinematicChain(ActiveRobot.B3RobotId, "rh_palm", "shoulder_right_link1")));
             }
         }
-
-        lastUpdate = Time.time * 1000;
 
         camYOffset = cameraTF.rotation.eulerAngles.y;
 
@@ -248,28 +326,60 @@ public class BulletRobot : MonoBehaviour
         IntPtr wakeUpCommand = NativeMethods.b3InitChangeDynamicsInfo(pybullet);
         NativeMethods.b3ChangeDynamicsInfoSetActivationState(wakeUpCommand, 0, (int) DynamicsActivationState.eActivationStateDisableSleeping | (int) DynamicsActivationState.eActivationStateWakeUp);
         NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, wakeUpCommand);
+
+        // Start state synchronisation
+        _stateSyncThread = new Thread(StateSyncThread);
+        _stateSyncThread.Start();
     }
 
     /// <summary>
-    /// FixedUpdate runs every [Time.fixedDeltaTime] seconds to update joint states and track inverse kinematics targets.
+    /// FixedUpdate runs every [Time.fixedDeltaTime] seconds to update joint states
     /// </summary>
     private void FixedUpdate()
     {
-        SyncRobotJointStates(ref urdfRobot);
+        SyncRobotJointsFromBullet();
 
-        TrackHead();
-        if (trackIK)
-        {
-            foreach (var target in IKTargets)
-                FollowObjectIk(target);
-        }
+        //TrackHead();
+        // if (trackIK)
+        // {
+        //     foreach (var target in IKTargets)
+        //         FollowObjectIk(target);
+        // }
+    }
+
+    private void OnApplicationQuit()
+    {
+        _stateSyncThread.Abort();
     }
 
     private void Update()
     {
+        if (trackIK)
+        {
+            foreach (IkTargetData ikTarget in _ikTargetData)
+            {
+                var targetPosRos = (ikTarget.Transform.position + (new Vector3(ActiveRobot.B3RobotId - 1 + 1, 0, 0))).Unity2Ros(); // ToDo
+                var targetOrnRos = ikTarget.Transform.rotation;
+                targetOrnRos *= Quaternion.AngleAxis(90, new Vector3(0, 1, 0));
+                targetOrnRos *= Quaternion.AngleAxis(180, new Vector3(1, 0, 0));
+                targetOrnRos = targetOrnRos.Unity2Ros();
+
+                ikTarget.targetPos[0] = targetPosRos.x;
+                ikTarget.targetPos[1] = targetPosRos.y;
+                ikTarget.targetPos[2] = targetPosRos.z;
+
+                ikTarget.targetOrn[0] = targetOrnRos.x;
+                ikTarget.targetOrn[1] = targetOrnRos.y;
+                ikTarget.targetOrn[2] = targetOrnRos.z;
+                ikTarget.targetOrn[3] = targetOrnRos.w;
+            }
+        }
+
+        _headData.EulerAngles = cameraTF.rotation.eulerAngles;
+
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            StartCoroutine(SwitchRobotControl());
+            _switchRobotData.SwitchRobotFlag = true;
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -284,36 +394,29 @@ public class BulletRobot : MonoBehaviour
                 NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmdHandle);
             }
         }
-    }
 
-    /**
-     * Switches, which robot is synced. Always chooses the next robot in [syncedRobots].
-     */
-    private IEnumerator SwitchRobotControl()
-    {
-        int currentRobotArrIndex = syncedRobots.IndexOf(ActiveRobot);
-        if (currentRobotArrIndex + 1 > syncedRobots.Count)
+        if (Input.GetKeyDown(KeyCode.A))
         {
-            yield return 0;
+            //NativeMethods.b3ChangeDynamicsInfoSetAngularDamping(cmdHandle, ActiveRobot.B3RobotId, 0.01);
+
+            // Reduces velocity, but just clamps during calculation. Yields weird movements to solve IK.
+            //NativeMethods.b3ChangeDynamicsInfoSetMaxJointVelocity(cmdHandle, ActiveRobot.B3RobotId, 5);
+
+
+            for (int i = 0; i < freeJoints.Count; i++)
+            {
+                IntPtr cmdHandle = NativeMethods.b3InitChangeDynamicsInfo(pybullet);
+                b3JointInfo b3JointInfo = new b3JointInfo();
+                NativeMethods.b3GetJointInfo(pybullet, ActiveRobot.B3RobotId, freeJoints[i], ref b3JointInfo);
+
+                //NativeMethods.b3ChangeDynamicsInfoSetAngularDamping(cmdHandle, ActiveRobot.B3RobotId, 0.1);
+                NativeMethods.b3ChangeDynamicsInfoSetJointDamping(cmdHandle, ActiveRobot.B3RobotId, b3JointInfo.m_uIndex, 0.1);
+                NativeMethods.b3ChangeDynamicsInfoSetContactStiffnessAndDamping(cmdHandle, ActiveRobot.B3RobotId, b3JointInfo.m_uIndex, 100, 0.2);
+                NativeMethods.b3ChangeDynamicsInfoSetLinearDamping(cmdHandle, ActiveRobot.B3RobotId, 0.8);
+                NativeMethods.b3ChangeDynamicsInfoSetAngularDamping(cmdHandle, ActiveRobot.B3RobotId, 0.8);
+                NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmdHandle);
+            }
         }
-
-        SyncedRobotInformation prevSyncedRobot = syncedRobots[currentRobotArrIndex];
-        SyncedRobotInformation nextSyncedRobot = syncedRobots[currentRobotArrIndex + 1];
-        
-        IntPtr wakeUpCommand = NativeMethods.b3InitChangeDynamicsInfo(pybullet);
-        NativeMethods.b3ChangeDynamicsInfoSetActivationState(wakeUpCommand, nextSyncedRobot.B3RobotId, (int) DynamicsActivationState.eActivationStateDisableSleeping | (int) DynamicsActivationState.eActivationStateWakeUp);
-        NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, wakeUpCommand);
-        nextSyncedRobot.IsActive = true;
-        
-        // ToDo: Work out best way. 0.03 should give enough room for initial synchronisation. Still a bit laggy.
-        yield return new WaitForSeconds(0.03f);
-        
-        prevSyncedRobot.IsActive = false;
-        IntPtr sleepCommand = NativeMethods.b3InitChangeDynamicsInfo(pybullet);
-        NativeMethods.b3ChangeDynamicsInfoSetActivationState(sleepCommand, prevSyncedRobot.B3RobotId, (int) DynamicsActivationState.eActivationStateEnableSleeping | (int) DynamicsActivationState.eActivationStateSleep);
-        NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, sleepCommand);
-
-        yield return 1;
     }
 
     /// <summary>
@@ -334,122 +437,151 @@ public class BulletRobot : MonoBehaviour
         //transform.SetPositionAndRotation(p, q);
     }
 
-    private void FollowObjectIk(IkTarget target)
+
+    /**
+     * This function is executed on a different thread. It handles all communication with Bullet server.
+     */
+    private void StateSyncThread()
     {
-        //var targetPosRos = target.targetTF.position.Unity2Ros();
-        var targetPosRos = (target.Transform.position + (new Vector3(ActiveRobot.B3RobotId - 1 + 1, 0, 0))).Unity2Ros(); // ToDo
-        var targetOrnRos = target.Transform.rotation;
-        targetOrnRos *= Quaternion.AngleAxis(90, new Vector3(0, 1, 0));
-        targetOrnRos *= Quaternion.AngleAxis(180, new Vector3(1, 0, 0));
-        targetOrnRos = targetOrnRos.Unity2Ros();
-
-        double[] targetPos = {targetPosRos.x, targetPosRos.y, targetPosRos.z};
-        double[] targetOrn = {targetOrnRos.x, targetOrnRos.y, targetOrnRos.z, targetOrnRos.w};
-
-
-        int dofCount = 0;
-        double[] jointTargets = new double[freeJoints.Count];
-        int bodyId = ActiveRobot.B3RobotId;
-        
-        var cmd = NativeMethods.b3CalculateInverseKinematicsCommandInit(pybullet, ActiveRobot.B3RobotId);
-        NativeMethods.b3CalculateInverseKinematicsAddTargetPositionWithOrientation(cmd, target.EndeffectorLinkId, ref targetPos[0], ref targetOrn[0]);
-        
-        var statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
-
-        NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount, ref jointTargets[0]);
-        
-        foreach (SyncedRobotInformation syncedRobotInformation in syncedRobots.FindAll(item => item.IsLoaded && item.IsActive))
+        while (_stateSyncThread.IsAlive)
         {
-            cmd = NativeMethods.b3JointControlCommandInit2(pybullet, syncedRobotInformation.B3RobotId, (int) EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
-            for (int i = 0; i < jointTargets.Length; i++)
+            // IK
+            foreach (IkTargetData ikTarget in _ikTargetData)
             {
-                if (!target.KinematicChain.Contains(freeJoints[i]))
+                var inverseKinematicsCommand = NativeMethods.b3CalculateInverseKinematicsCommandInit(pybullet, ActiveRobot.B3RobotId);
+                NativeMethods.b3CalculateInverseKinematicsAddTargetPositionWithOrientation(inverseKinematicsCommand, ikTarget.EndeffectorLinkId, ref ikTarget.targetPos[0], ref ikTarget.targetOrn[0]);
+                var statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, inverseKinematicsCommand);
+
+                int dofCount = 0;
+                double[] jointTargets = new double[freeJoints.Count];
+                int bodyId = ActiveRobot.B3RobotId;
+
+                NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount, ref jointTargets[0]);
+
+                foreach (SyncedRobotInformation syncedRobotInformation in syncedRobots.FindAll(item => item.IsLoaded && item.IsActive))
                 {
-                    continue;
+                    inverseKinematicsCommand = NativeMethods.b3JointControlCommandInit2(pybullet, syncedRobotInformation.B3RobotId, (int) EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
+                    for (int i = 0; i < jointTargets.Length; i++)
+                    {
+                        if (!ikTarget.KinematicChain.Contains(freeJoints[i]))
+                        {
+                            continue;
+                        }
+
+                        bb.SetJointPosition(ref inverseKinematicsCommand, syncedRobotInformation.B3RobotId, freeJoints[i], jointTargets[i]);
+                    }
+
+                    NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, inverseKinematicsCommand);
                 }
-                bb.SetJointPosition(ref cmd, syncedRobotInformation.B3RobotId, freeJoints[i], jointTargets[i]);
             }
+
+            // Update State
+            IntPtr actualStateCommand = NativeMethods.b3RequestActualStateCommandInit(pybullet, ActiveRobot.B3RobotId);
+            actualStateCommand = NativeMethods.b3RequestActualStateCommandInit2(actualStateCommand, ActiveRobot.B3RobotId);
+
+            IntPtr jointStatusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, actualStateCommand);
+            EnumSharedMemoryServerStatus statusType = (EnumSharedMemoryServerStatus) NativeMethods.b3GetStatusType(jointStatusHandle);
+            if (statusType == EnumSharedMemoryServerStatus.CMD_ACTUAL_STATE_UPDATE_COMPLETED)
+            {
+                for (int i = 0; i < this.jointsToSync.Count; i++)
+                {
+                    NativeMethods.b3GetJointState(pybullet, jointStatusHandle, this.jointsToSync[i].JointIndex, ref jointsToSync[i].b3JointSensorState);
+                }
+            }
+
+            // Track Head
+            IntPtr cmd = NativeMethods.b3JointControlCommandInit2(pybullet, ActiveRobot.B3RobotId, (int) EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
+            bb.SetJointPosition(ref cmd, ActiveRobot.B3RobotId, headJointIds[0], BulletBridge.ClipAngle(_headData.Roll) * Mathf.Deg2Rad);
+            bb.SetJointPosition(ref cmd, ActiveRobot.B3RobotId, headJointIds[1], BulletBridge.ClipAngle(_headData.Yaw) * Mathf.Deg2Rad);
+            bb.SetJointPosition(ref cmd, ActiveRobot.B3RobotId, headJointIds[2], BulletBridge.ClipAngle(_headData.Pitch) * Mathf.Deg2Rad);
             NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
-        }
-    }
 
-    private void TrackHead()
-    {
-        var eulerAngles = cameraTF.rotation.eulerAngles;
-        double pitch = eulerAngles.y - camYOffset;
-        double roll = eulerAngles.x;
-        double yaw = eulerAngles.z;
-
-        //Debug.Log(BulletBridge.ClipAngle(yaw) * Mathf.Deg2Rad);
-        IntPtr cmd = NativeMethods.b3JointControlCommandInit2(pybullet, ActiveRobot.B3RobotId, 2);
-        bb.SetJointPosition(ref cmd, ActiveRobot.B3RobotId, headJointIds[0], BulletBridge.ClipAngle(roll) * Mathf.Deg2Rad);
-        bb.SetJointPosition(ref cmd, ActiveRobot.B3RobotId, headJointIds[1], BulletBridge.ClipAngle(yaw) * Mathf.Deg2Rad);
-        bb.SetJointPosition(ref cmd, ActiveRobot.B3RobotId, headJointIds[2], BulletBridge.ClipAngle(pitch) * Mathf.Deg2Rad);
-
-        var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
-
-        //commandQueue.Enqueue(cmd);
-
-        lastUpdate = Time.time * 1000;
-    }
-
-    private void SyncRobotJointStates(ref UrdfRobot robot)
-    {
-        IntPtr cmdHandle = NativeMethods.b3RequestActualStateCommandInit(pybullet, ActiveRobot.B3RobotId);
-        cmdHandle = NativeMethods.b3RequestActualStateCommandInit2(cmdHandle, ActiveRobot.B3RobotId);
-
-        IntPtr statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmdHandle);
-
-        EnumSharedMemoryServerStatus statusType = (EnumSharedMemoryServerStatus) NativeMethods.b3GetStatusType(statusHandle);
-
-        if (statusType == EnumSharedMemoryServerStatus.CMD_ACTUAL_STATE_UPDATE_COMPLETED)
-        {
-            for (int i = 0; i < this.jointsToSync.Count; i++)
+            // Switch Robot Control
+            if (_switchRobotData.SwitchRobotFlag || _switchRobotData.WaitCounterA != 0 || _switchRobotData.WaitCounterB != 0)
             {
-                UrdfJoint unityJoint = this.jointsToSync[i].UrdfJoint;
-
-                b3JointSensorState state = new b3JointSensorState();
-                NativeMethods.b3GetJointState(pybullet, statusHandle, this.jointsToSync[i].JointIndex, ref state);
-
-                var diff = (float) state.m_jointPosition - unityJoint.GetPosition();
-
-                if (unityJoint.JointName.Contains("lh_") || unityJoint.JointName.Contains("rh_"))
+                if (_switchRobotData.SwitchRobotFlag)
                 {
-                    continue;
+                    _switchRobotData.SwitchRobotFlag = false;
+                    _switchRobotData.WaitCounterA = 0;
+                    _switchRobotData.WaitCounterB = 0;
 
-                    //var candidates = from gi in glovesInfo
-                    //                 where (gi.isRight && unityJoint.JointName.Contains("rh_")) || (unityJoint.JointName.Contains("lh_") && !gi.isRight)
-                    //                 select gi;
-                    //var gl = candidates.FirstOrDefault();
-                    //if (gl.jointTFs == null) continue;
+                    int currentRobotArrIndex = syncedRobots.IndexOf(ActiveRobot);
+                    if (currentRobotArrIndex + 1 >= syncedRobots.Count)
+                    {
+                        continue;
+                    }
 
-                    //// var gl = (unityJoint.JointName.Contains("rh_")) ? glovesInfo.Find(x => x.isRight) : glovesInfo.Find(x => !x.isRight);
-                    //for (int j = 0; j < gl.thumbPrevSetpoints.Count; j++)
-                    //{
+                    _switchRobotData.PrevSyncedRobot = syncedRobots[currentRobotArrIndex];
+                    _switchRobotData.NextSyncedRobot = syncedRobots[currentRobotArrIndex + 1];
 
-                    //    if (b3JointIds[i] == gl.handJointsIds[0][j])
-                    //    {
-                    //        diff = (float)(state.m_jointPosition - gl.thumbPrevSetpoints[j]);
-                    //        gl.thumbPrevSetpoints[j] = state.m_jointPosition;
-                    //        //Quaternion rot = Quaternion.AngleAxis(-diff * Mathf.Rad2Deg, new Vector3(0, 0, 1));// unityJoint.UnityJoint.axis);
-                    //        //unityJoint.transform.rotation = unityJoint.transform.rotation * rot;
-                    //        //unityJoint.GetComponentInChildren<Rigidbody>().transform.rotation = unityJoint.transform.rotation * rot;
-                    //        unityJoint.UpdateJointState(diff);
-                    //        break;
-                    //    }
+                    Debug.Log("Switchting from " + _switchRobotData.PrevSyncedRobot.B3RobotId + " to " + _switchRobotData.NextSyncedRobot.B3RobotId);
 
-                    //}
+                    IntPtr wakeUpCommand = NativeMethods.b3InitChangeDynamicsInfo(pybullet);
+                    NativeMethods.b3ChangeDynamicsInfoSetActivationState(wakeUpCommand, _switchRobotData.NextSyncedRobot.B3RobotId,
+                        (int) DynamicsActivationState.eActivationStateDisableSleeping | (int) DynamicsActivationState.eActivationStateWakeUp);
+                    NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, wakeUpCommand);
+                    _switchRobotData.NextSyncedRobot.IsActive = true;
                 }
 
-                unityJoint.UpdateJointState(diff);
-            }
-        }
+                // Happens after 2*[_stateSyncUpdateRate]
+                if (_switchRobotData.WaitCounterA == 2)
+                {
+                    _switchRobotData.WaitCounterA = -1;
 
-        // else
-        // {
-        //     Debug.LogWarning("Cannot get robot state");
-        // }
+                    _switchRobotData.PrevSyncedRobot.IsActive = false;
+                    IntPtr sleepCommand = NativeMethods.b3InitChangeDynamicsInfo(pybullet);
+                    NativeMethods.b3ChangeDynamicsInfoSetActivationState(sleepCommand, _switchRobotData.PrevSyncedRobot.B3RobotId,
+                        (int) DynamicsActivationState.eActivationStateEnableSleeping | (int) DynamicsActivationState.eActivationStateSleep);
+                    NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, sleepCommand);
+                    continue;
+                }
+                
+                if (_switchRobotData.WaitCounterA != -1)
+                {
+                    _switchRobotData.WaitCounterA++;
+                }
+
+                // Happens after 13*[_stateSyncUpdateRate]
+                // Not sure, why necessary. But if the state command is not set again after a bit of time, performance decreases.
+                if (_switchRobotData.WaitCounterB == 13)
+                {
+                    _switchRobotData.WaitCounterB = -1;
+
+                    IntPtr sleepCommand2 = NativeMethods.b3InitChangeDynamicsInfo(pybullet);
+                    NativeMethods.b3ChangeDynamicsInfoSetActivationState(sleepCommand2, _switchRobotData.PrevSyncedRobot.B3RobotId, (int) DynamicsActivationState.eActivationStateSleep);
+                    NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, sleepCommand2);
+
+                    _switchRobotData.PrevSyncedRobot = null;
+                    _switchRobotData.NextSyncedRobot = null;
+                    continue;
+                }
+
+                if (_switchRobotData.WaitCounterB != -1)
+                {
+                    _switchRobotData.WaitCounterB++;
+                }
+            }
+
+            Thread.Sleep(_stateSyncUpdateRate);
+        }
     }
+
+    private void SyncRobotJointsFromBullet()
+    {
+        for (int i = 0; i < this.jointsToSync.Count; i++)
+        {
+            UrdfJoint unityJoint = this.jointsToSync[i].UrdfJoint;
+            var diff = (float) jointsToSync[i].b3JointSensorState.m_jointPosition - unityJoint.GetPosition();
+            if (unityJoint.JointName.Contains("lh_") || unityJoint.JointName.Contains("rh_"))
+            {
+                // ToDo: SenseGloves Stuff
+                continue;
+            }
+
+            unityJoint.UpdateJointState(diff);
+        }
+    }
+
 
     private void SetupRobotJoints()
     {
@@ -510,4 +642,164 @@ public class BulletRobot : MonoBehaviour
             jointsToSync.Find(item => item.JointName == "wrist_right_axis2").B3JointIndex,
         };
     }
+
+    #region Deprecated Functions
+
+    [System.Obsolete("Deprecated. Replaced by Threads.")]
+    private void SyncRobotJointStates(ref UrdfRobot robot)
+    {
+        IntPtr cmdHandle = NativeMethods.b3RequestActualStateCommandInit(pybullet, ActiveRobot.B3RobotId);
+        cmdHandle = NativeMethods.b3RequestActualStateCommandInit2(cmdHandle, ActiveRobot.B3RobotId);
+
+        IntPtr statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmdHandle);
+
+        EnumSharedMemoryServerStatus statusType = (EnumSharedMemoryServerStatus) NativeMethods.b3GetStatusType(statusHandle);
+
+        if (statusType == EnumSharedMemoryServerStatus.CMD_ACTUAL_STATE_UPDATE_COMPLETED)
+        {
+            for (int i = 0; i < this.jointsToSync.Count; i++)
+            {
+                UrdfJoint unityJoint = this.jointsToSync[i].UrdfJoint;
+
+                b3JointSensorState state = new b3JointSensorState();
+                NativeMethods.b3GetJointState(pybullet, statusHandle, this.jointsToSync[i].JointIndex, ref state);
+
+                var diff = (float) state.m_jointPosition - unityJoint.GetPosition();
+
+                if (unityJoint.JointName.Contains("lh_") || unityJoint.JointName.Contains("rh_"))
+                {
+                    continue;
+
+                    //var candidates = from gi in glovesInfo
+                    //                 where (gi.isRight && unityJoint.JointName.Contains("rh_")) || (unityJoint.JointName.Contains("lh_") && !gi.isRight)
+                    //                 select gi;
+                    //var gl = candidates.FirstOrDefault();
+                    //if (gl.jointTFs == null) continue;
+
+                    //// var gl = (unityJoint.JointName.Contains("rh_")) ? glovesInfo.Find(x => x.isRight) : glovesInfo.Find(x => !x.isRight);
+                    //for (int j = 0; j < gl.thumbPrevSetpoints.Count; j++)
+                    //{
+
+                    //    if (b3JointIds[i] == gl.handJointsIds[0][j])
+                    //    {
+                    //        diff = (float)(state.m_jointPosition - gl.thumbPrevSetpoints[j]);
+                    //        gl.thumbPrevSetpoints[j] = state.m_jointPosition;
+                    //        //Quaternion rot = Quaternion.AngleAxis(-diff * Mathf.Rad2Deg, new Vector3(0, 0, 1));// unityJoint.UnityJoint.axis);
+                    //        //unityJoint.transform.rotation = unityJoint.transform.rotation * rot;
+                    //        //unityJoint.GetComponentInChildren<Rigidbody>().transform.rotation = unityJoint.transform.rotation * rot;
+                    //        unityJoint.UpdateJointState(diff);
+                    //        break;
+                    //    }
+
+                    //}
+                }
+
+                unityJoint.UpdateJointState(diff);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Cannot get robot state");
+        }
+    }
+
+    [System.Obsolete("Deprecated. Replaced by Threads.")]
+    private void FollowObjectIk(IkTargetData targetData)
+    {
+        //var targetPosRos = target.targetTF.position.Unity2Ros();
+        var targetPosRos = (targetData.Transform.position + (new Vector3(ActiveRobot.B3RobotId - 1 + 1, 0, 0))).Unity2Ros(); // ToDo
+        var targetOrnRos = targetData.Transform.rotation;
+        targetOrnRos *= Quaternion.AngleAxis(90, new Vector3(0, 1, 0));
+        targetOrnRos *= Quaternion.AngleAxis(180, new Vector3(1, 0, 0));
+        targetOrnRos = targetOrnRos.Unity2Ros();
+
+        double[] targetPos = {targetPosRos.x, targetPosRos.y, targetPosRos.z};
+        double[] targetOrn = {targetOrnRos.x, targetOrnRos.y, targetOrnRos.z, targetOrnRos.w};
+
+        int dofCount = 0;
+        double[] jointTargets = new double[freeJoints.Count];
+        int bodyId = ActiveRobot.B3RobotId;
+
+        var cmd = NativeMethods.b3CalculateInverseKinematicsCommandInit(pybullet, ActiveRobot.B3RobotId);
+        NativeMethods.b3CalculateInverseKinematicsAddTargetPositionWithOrientation(cmd, targetData.EndeffectorLinkId, ref targetPos[0], ref targetOrn[0]);
+
+        var statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+
+        NativeMethods.b3GetStatusInverseKinematicsJointPositions(statusHandle, ref bodyId, ref dofCount, ref jointTargets[0]);
+
+        foreach (SyncedRobotInformation syncedRobotInformation in syncedRobots.FindAll(item => item.IsLoaded && item.IsActive))
+        {
+            cmd = NativeMethods.b3JointControlCommandInit2(pybullet, syncedRobotInformation.B3RobotId, (int) EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
+            for (int i = 0; i < jointTargets.Length; i++)
+            {
+                if (!targetData.KinematicChain.Contains(freeJoints[i]))
+                {
+                    continue;
+                }
+
+                bb.SetJointPosition(ref cmd, syncedRobotInformation.B3RobotId, freeJoints[i], jointTargets[i]);
+            }
+
+            NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+        }
+    }
+
+    [System.Obsolete("Deprecated. Replaced by Threads.")]
+    private void TrackHead()
+    {
+        var eulerAngles = cameraTF.rotation.eulerAngles;
+        double pitch = eulerAngles.y - camYOffset;
+        double roll = eulerAngles.x;
+        double yaw = eulerAngles.z;
+
+        //Debug.Log(BulletBridge.ClipAngle(yaw) * Mathf.Deg2Rad);
+        IntPtr cmd = NativeMethods.b3JointControlCommandInit2(pybullet, ActiveRobot.B3RobotId, 2);
+        bb.SetJointPosition(ref cmd, ActiveRobot.B3RobotId, headJointIds[0], BulletBridge.ClipAngle(roll) * Mathf.Deg2Rad);
+        bb.SetJointPosition(ref cmd, ActiveRobot.B3RobotId, headJointIds[1], BulletBridge.ClipAngle(yaw) * Mathf.Deg2Rad);
+        bb.SetJointPosition(ref cmd, ActiveRobot.B3RobotId, headJointIds[2], BulletBridge.ClipAngle(pitch) * Mathf.Deg2Rad);
+
+        var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+    }
+
+    /**
+     * Switches, which robot is synced. Always chooses the next robot in [syncedRobots].
+     */
+    [System.Obsolete("Deprecated. Replaced by Threads.")]
+    private IEnumerator SwitchRobotControl()
+    {
+        int currentRobotArrIndex = syncedRobots.IndexOf(ActiveRobot);
+        if (currentRobotArrIndex + 1 >= syncedRobots.Count)
+        {
+            yield return 0;
+        }
+
+        SyncedRobotInformation prevSyncedRobot = syncedRobots[currentRobotArrIndex];
+        SyncedRobotInformation nextSyncedRobot = syncedRobots[currentRobotArrIndex + 1];
+
+        Debug.Log("Switchting from " + prevSyncedRobot.B3RobotId + " to " + nextSyncedRobot.B3RobotId);
+
+        IntPtr wakeUpCommand = NativeMethods.b3InitChangeDynamicsInfo(pybullet);
+        NativeMethods.b3ChangeDynamicsInfoSetActivationState(wakeUpCommand, nextSyncedRobot.B3RobotId,
+            (int) DynamicsActivationState.eActivationStateDisableSleeping | (int) DynamicsActivationState.eActivationStateWakeUp);
+        NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, wakeUpCommand);
+        nextSyncedRobot.IsActive = true;
+
+        // ToDo: Work out best way. 0.03 should give enough room for initial synchronisation. Still a bit laggy.
+        yield return new WaitForSeconds(0.03f);
+
+        prevSyncedRobot.IsActive = false;
+        IntPtr sleepCommand = NativeMethods.b3InitChangeDynamicsInfo(pybullet);
+        NativeMethods.b3ChangeDynamicsInfoSetActivationState(sleepCommand, prevSyncedRobot.B3RobotId, (int) DynamicsActivationState.eActivationStateEnableSleeping | (int) DynamicsActivationState.eActivationStateSleep);
+        NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, sleepCommand);
+
+        yield return new WaitForSeconds(0.25f); // ToDo: May be possible to chose even smaller. Don't know though why it is necessary
+
+        IntPtr sleepCommand2 = NativeMethods.b3InitChangeDynamicsInfo(pybullet);
+        NativeMethods.b3ChangeDynamicsInfoSetActivationState(sleepCommand2, prevSyncedRobot.B3RobotId, (int) DynamicsActivationState.eActivationStateSleep);
+        NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, sleepCommand2);
+
+        yield return 1;
+    }
+
+    #endregion
 }
