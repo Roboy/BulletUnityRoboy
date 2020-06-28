@@ -12,15 +12,17 @@ using UnityEngine.Serialization;
 [RequireComponent(typeof(UrdfRobot))]
 public class BulletRobot : MonoBehaviour
 {
-    [Header("Tracking Update")]
-    [SerializeField] private float trackingUpdateRate = 0.02f;
-    [Space(10)]
-    
-    [Header("Limitations")]
-    [Range(0.0f, 500.0f)] [SerializeField] private float trackingDelay = 0.0f;
-    [Space(10)]
+    [Header("Tracking Update")] [Tooltip("How often the state gathered from Bullet is synchronized to the Unity joints.")] [SerializeField]
+    private float trackingUpdateRate = 0.02f;
 
-    [SerializeField] private Transform cameraTF;
+    [Space(10)] [Header("Limitations")] [Tooltip("How often the state is gathered from Bullet.")] [Range(0.0f, 500.0f)] [SerializeField]
+    private readonly int _stateSyncUpdateRate = 15;
+
+    [Space(10)] [Header("Limitations")] [Range(0.0f, 500.0f)] [SerializeField]
+    private float trackingDelay = 0.0f;
+
+
+    [Space(10)] [SerializeField] private Transform cameraTF;
     [SerializeField] private bool trackIK;
     [SerializeField] private Transform leftHandTarget;
     [SerializeField] private Transform rightHandTarget;
@@ -138,7 +140,6 @@ public class BulletRobot : MonoBehaviour
         private readonly int _jointIndex;
         private readonly String _jointName;
 
-        public b3JointSensorState b3JointSensorState;
         public Queue<b3JointSensorStateWrapper> b3JointSensorStates = new Queue<b3JointSensorStateWrapper>();
 
         public UrdfJoint UrdfJoint => _urdfJoint;
@@ -278,7 +279,6 @@ public class BulletRobot : MonoBehaviour
     private readonly List<IkTargetData> _ikTargetData = new List<IkTargetData>();
 
     private Thread _stateSyncThread;
-    private readonly int _stateSyncUpdateRate = 15;
 
     private float _currentTime = 0.0f;
 
@@ -556,8 +556,8 @@ public class BulletRobot : MonoBehaviour
                     _switchRobotData.NextSyncedRobot.IsActive = true;
                 }
 
-                // Happens after 2*[_stateSyncUpdateRate]
-                if (_switchRobotData.WaitCounterA == 2)
+                // Happens after 15*[_stateSyncUpdateRate], to give time for the simulation to update state
+                if (_switchRobotData.WaitCounterA == 15)
                 {
                     _switchRobotData.WaitCounterA = -1;
 
@@ -574,9 +574,9 @@ public class BulletRobot : MonoBehaviour
                     _switchRobotData.WaitCounterA++;
                 }
 
-                // Happens after 13*[_stateSyncUpdateRate]
+                // Happens after 30*[_stateSyncUpdateRate]
                 // Not sure, why necessary. But if the state command is not set again after a bit of time, performance decreases.
-                if (_switchRobotData.WaitCounterB == 13)
+                if (_switchRobotData.WaitCounterB == 30)
                 {
                     _switchRobotData.WaitCounterB = -1;
 
