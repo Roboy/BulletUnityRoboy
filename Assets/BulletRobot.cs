@@ -12,7 +12,13 @@ using UnityEngine.Serialization;
 [RequireComponent(typeof(UrdfRobot))]
 public class BulletRobot : MonoBehaviour
 {
+    [Header("Tracking Update")]
     [SerializeField] private float trackingUpdateRate = 0.02f;
+    [Space(10)]
+    
+    [Header("Limitations")]
+    [Range(0.0f, 500.0f)] [SerializeField] private float trackingDelay = 0.0f;
+    [Space(10)]
 
     [SerializeField] private Transform cameraTF;
     [SerializeField] private bool trackIK;
@@ -131,7 +137,9 @@ public class BulletRobot : MonoBehaviour
         private readonly UrdfJoint _urdfJoint;
         private readonly int _jointIndex;
         private readonly String _jointName;
+
         public b3JointSensorState b3JointSensorState;
+        public Queue<b3JointSensorStateWrapper> b3JointSensorStates = new Queue<b3JointSensorStateWrapper>();
 
         public UrdfJoint UrdfJoint => _urdfJoint;
 
@@ -148,6 +156,18 @@ public class BulletRobot : MonoBehaviour
             this._jointIndex = jointIndex;
             this._jointName = jointName;
             this._b3JointIndex = b3JointIndex;
+        }
+    }
+
+    private class b3JointSensorStateWrapper
+    {
+        public b3JointSensorState b3JointSensorState;
+        public float currentTime;
+
+        public b3JointSensorStateWrapper(b3JointSensorState b3JointSensorState, float currentTime)
+        {
+            this.b3JointSensorState = b3JointSensorState;
+            this.currentTime = currentTime;
         }
     }
 
@@ -228,7 +248,7 @@ public class BulletRobot : MonoBehaviour
     }
 
     private readonly HeadData _headData = new HeadData();
-    
+
     /**
      * Class holds information for joints that are tracked (used for IK calculation)
      */
@@ -260,6 +280,8 @@ public class BulletRobot : MonoBehaviour
     private Thread _stateSyncThread;
     private readonly int _stateSyncUpdateRate = 15;
 
+    private float _currentTime = 0.0f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -280,7 +302,6 @@ public class BulletRobot : MonoBehaviour
         // Load Roboy model
         urdfRobot = GetComponent<UrdfRobot>();
 
-        // TODO: Load all Roboy models (up to robotStates.Count) => Right now huge performance issue!
         for (var i = 0; i < syncedRobots.Count; i++)
         {
             int b3RobotId = bb.LoadURDF(syncedRobots[i].UrdfPath, transform.position + (new Vector3(i - 1 + 1, 0, 0)), transform.rotation, 1);
@@ -289,6 +310,11 @@ public class BulletRobot : MonoBehaviour
             syncedRobots[i].IsLoaded = true;
             syncedRobots[i].B3RobotId = b3RobotId;
             syncedRobots[i].IsActive = i == 0;
+
+            // Every robot is sleeping by default
+            IntPtr sleepCommand = NativeMethods.b3InitChangeDynamicsInfo(pybullet);
+            NativeMethods.b3ChangeDynamicsInfoSetActivationState(sleepCommand, b3RobotId, (int) DynamicsActivationState.eActivationStateSleep);
+            NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, sleepCommand);
         }
 
         bb.AddGameObject(gameObject, ActiveRobot.B3RobotId);
@@ -354,6 +380,8 @@ public class BulletRobot : MonoBehaviour
 
     private void Update()
     {
+        _currentTime = Time.realtimeSinceStartup * 1000.0f;
+
         if (trackIK)
         {
             foreach (IkTargetData ikTarget in _ikTargetData)
@@ -485,7 +513,12 @@ public class BulletRobot : MonoBehaviour
             {
                 for (int i = 0; i < this.jointsToSync.Count; i++)
                 {
-                    NativeMethods.b3GetJointState(pybullet, jointStatusHandle, this.jointsToSync[i].JointIndex, ref jointsToSync[i].b3JointSensorState);
+                    b3JointSensorState b3JointSensorState = new b3JointSensorState();
+                    NativeMethods.b3GetJointState(pybullet, jointStatusHandle, this.jointsToSync[i].JointIndex, ref b3JointSensorState);
+                    b3JointSensorStateWrapper b3JointSensorStateWrapper = new b3JointSensorStateWrapper(b3JointSensorState, _currentTime + trackingDelay);
+                    this.jointsToSync[i].b3JointSensorStates.Enqueue(b3JointSensorStateWrapper);
+
+                    //NativeMethods.b3GetJointState(pybullet, jointStatusHandle, this.jointsToSync[i].JointIndex, ref jointsToSync[i].b3JointSensorState);
                 }
             }
 
@@ -535,7 +568,7 @@ public class BulletRobot : MonoBehaviour
                     NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, sleepCommand);
                     continue;
                 }
-                
+
                 if (_switchRobotData.WaitCounterA != -1)
                 {
                     _switchRobotData.WaitCounterA++;
@@ -570,8 +603,24 @@ public class BulletRobot : MonoBehaviour
     {
         for (int i = 0; i < this.jointsToSync.Count; i++)
         {
+            if (this.jointsToSync[i].b3JointSensorStates.Count == 0)
+            {
+                continue;
+            }
+
+            if (this.jointsToSync[i].b3JointSensorStates.Peek().currentTime > _currentTime)
+            {
+                continue;
+            }
+
+            b3JointSensorStateWrapper b3JointSensorStateWrapper = this.jointsToSync[i].b3JointSensorStates.Dequeue();
+            while (this.jointsToSync[i].b3JointSensorStates.Count > 0 && this.jointsToSync[i].b3JointSensorStates.Peek().currentTime <= _currentTime)
+            {
+                b3JointSensorStateWrapper = this.jointsToSync[i].b3JointSensorStates.Dequeue();
+            }
+
             UrdfJoint unityJoint = this.jointsToSync[i].UrdfJoint;
-            var diff = (float) jointsToSync[i].b3JointSensorState.m_jointPosition - unityJoint.GetPosition();
+            var diff = (float) b3JointSensorStateWrapper.b3JointSensorState.m_jointPosition - unityJoint.GetPosition();
             if (unityJoint.JointName.Contains("lh_") || unityJoint.JointName.Contains("rh_"))
             {
                 // ToDo: SenseGloves Stuff
