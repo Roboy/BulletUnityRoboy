@@ -96,8 +96,8 @@ public class BulletBridge : MonoBehaviour
 
     public int LoadURDF(string file, Vector3 p, Quaternion q, int useFixedBase = 0)
     {
-        p = p.Unity2Ros();
-        q = q.Unity2Ros();
+        //p = p.Unity2Ros();
+        //q = q.Unity2Ros();
         var cmd = NativeMethods.b3LoadUrdfCommandInit(pybullet, file);
         NativeMethods.b3LoadUrdfCommandSetStartPosition(cmd, p.x, p.y, p.z);
         NativeMethods.b3LoadUrdfCommandSetStartOrientation(cmd, q.x, q.y, q.z, q.w);
