@@ -33,7 +33,7 @@ public class BulletRobot : MonoBehaviour
     [FormerlySerializedAs("robotStates")] [SerializeField]
     private List<SyncedRobotInformation> syncedRobots;
 
-    
+
     private IntPtr _pybullet;
     private BulletBridge bb;
 
@@ -186,13 +186,13 @@ public class BulletRobot : MonoBehaviour
 
     private class b3JointSensorStateWrapper
     {
-        public b3JointSensorState b3JointSensorState;
-        public float currentTime;
+        public readonly b3JointSensorState b3JointSensorState;
+        public readonly float atTime;
 
-        public b3JointSensorStateWrapper(b3JointSensorState b3JointSensorState, float currentTime)
+        public b3JointSensorStateWrapper(b3JointSensorState b3JointSensorState, float atTime)
         {
             this.b3JointSensorState = b3JointSensorState;
-            this.currentTime = currentTime;
+            this.atTime = atTime;
         }
     }
 
@@ -384,6 +384,17 @@ public class BulletRobot : MonoBehaviour
         // Start state synchronisation
         _stateSyncThread = new Thread(StateSyncThread);
         _stateSyncThread.Start();
+
+        InvokeRepeating("PrintResults", 5.0f, 5.0f);
+    }
+
+    private void PrintResults()
+    {
+        Debug.Log(_measurePointA.PrintResult());
+        Debug.Log("_____");
+
+        _measurePointA.AccumulatedTime = 0;
+        _measurePointA.Count = 0;
     }
 
     /// <summary>
@@ -407,6 +418,7 @@ public class BulletRobot : MonoBehaviour
     }
 
     private bool _moveRobotFlag = false;
+
     private void Update()
     {
         _currentTime = Time.realtimeSinceStartup * 1000.0f;
@@ -439,7 +451,7 @@ public class BulletRobot : MonoBehaviour
         {
             _moveRobotFlag = true;
         }
-        
+
         if (Input.GetKeyDown(KeyCode.Return))
         {
             _switchRobotData.SwitchRobotFlag = true;
@@ -500,6 +512,7 @@ public class BulletRobot : MonoBehaviour
         //transform.SetPositionAndRotation(p, q);
     }
 
+    private MeasureStruct _measurePointA = new MeasureStruct(0.0f, 0.0f);
 
     /**
      * This function is executed on a different thread. It handles all communication with Bullet server.
@@ -508,6 +521,7 @@ public class BulletRobot : MonoBehaviour
     {
         while (_stateSyncThread.IsAlive)
         {
+            float _startTime = _currentTime;
             // IK
             foreach (IkTargetData ikTarget in _ikTargetData)
             {
@@ -551,7 +565,10 @@ public class BulletRobot : MonoBehaviour
                     b3JointSensorState b3JointSensorState = new b3JointSensorState();
                     NativeMethods.b3GetJointState(_pybullet, jointStatusHandle, this.jointsToSync[i].JointIndex, ref b3JointSensorState);
                     b3JointSensorStateWrapper b3JointSensorStateWrapper = new b3JointSensorStateWrapper(b3JointSensorState, _currentTime + trackingDelay);
-                    this.jointsToSync[i].b3JointSensorStates.Enqueue(b3JointSensorStateWrapper);
+                    lock (this.jointsToSync[i])
+                    {
+                        this.jointsToSync[i].b3JointSensorStates.Enqueue(b3JointSensorStateWrapper);
+                    }
 
                     //NativeMethods.b3GetJointState(pybullet, jointStatusHandle, this.jointsToSync[i].JointIndex, ref jointsToSync[i].b3JointSensorState);
                 }
@@ -595,23 +612,26 @@ public class BulletRobot : MonoBehaviour
                 if (_switchRobotData.WaitCounterA == 15)
                 {
                     _switchRobotData.WaitCounterA = -1;
-                    
+
                     // The next robot moves to the position of the old robot
                     _switchRobotData.NextSyncedRobot.Position = _switchRobotData.PrevSyncedRobot.Position;
 
                     // Old robot moves to an (arbitray) different position, this robot is not used anymore
-                    _switchRobotData.PrevSyncedRobot.Position = new Vector3(_switchRobotData.PrevSyncedRobot.Position.x - ((_switchRobotData.PrevSyncedRobot.B3RobotId + 1) * 1.5f), _switchRobotData.PrevSyncedRobot.Position.y, _switchRobotData.PrevSyncedRobot.Position.z);
-                    
+                    _switchRobotData.PrevSyncedRobot.Position = new Vector3(_switchRobotData.PrevSyncedRobot.Position.x - ((_switchRobotData.PrevSyncedRobot.B3RobotId + 1) * 1.5f),
+                        _switchRobotData.PrevSyncedRobot.Position.y, _switchRobotData.PrevSyncedRobot.Position.z);
+
                     // Move old robot to its new position
                     IntPtr movePrevRobotCmdHandle = NativeMethods.b3CreatePoseCommandInit(_pybullet, _switchRobotData.PrevSyncedRobot.B3RobotId);
-                    NativeMethods.b3CreatePoseCommandSetBasePosition(movePrevRobotCmdHandle, _switchRobotData.PrevSyncedRobot.Position.x, _switchRobotData.PrevSyncedRobot.Position.y, _switchRobotData.PrevSyncedRobot.Position.z);
+                    NativeMethods.b3CreatePoseCommandSetBasePosition(movePrevRobotCmdHandle, _switchRobotData.PrevSyncedRobot.Position.x, _switchRobotData.PrevSyncedRobot.Position.y,
+                        _switchRobotData.PrevSyncedRobot.Position.z);
                     NativeMethods.b3SubmitClientCommandAndWaitStatus(_pybullet, movePrevRobotCmdHandle);
 
                     // Move new robot to its new position
                     IntPtr moveNextRobotCmdHandle = NativeMethods.b3CreatePoseCommandInit(_pybullet, _switchRobotData.NextSyncedRobot.B3RobotId);
-                    NativeMethods.b3CreatePoseCommandSetBasePosition(moveNextRobotCmdHandle, _switchRobotData.NextSyncedRobot.Position.x, _switchRobotData.NextSyncedRobot.Position.y, _switchRobotData.NextSyncedRobot.Position.z + 0.625); // ToDo: Why is the Z value not right?
+                    NativeMethods.b3CreatePoseCommandSetBasePosition(moveNextRobotCmdHandle, _switchRobotData.NextSyncedRobot.Position.x, _switchRobotData.NextSyncedRobot.Position.y,
+                        _switchRobotData.NextSyncedRobot.Position.z + 0.625); // ToDo: Why is the Z value not right?
                     NativeMethods.b3SubmitClientCommandAndWaitStatus(_pybullet, moveNextRobotCmdHandle);
-                    
+
                     _switchRobotData.PrevSyncedRobot.IsActive = false;
                     IntPtr sleepCommand = NativeMethods.b3InitChangeDynamicsInfo(_pybullet);
                     NativeMethods.b3ChangeDynamicsInfoSetActivationState(sleepCommand, _switchRobotData.PrevSyncedRobot.B3RobotId,
@@ -654,7 +674,9 @@ public class BulletRobot : MonoBehaviour
                 NativeMethods.b3SubmitClientCommandAndWaitStatus(_pybullet, cmdHandle);
             }
 
-            Thread.Sleep(_stateSyncUpdateRate);
+            _measurePointA.Count++;
+            _measurePointA.AccumulatedTime += (_currentTime - _startTime);
+            //Thread.Sleep(_stateSyncUpdateRate);
         }
     }
 
@@ -662,22 +684,50 @@ public class BulletRobot : MonoBehaviour
     {
         for (int i = 0; i < this.jointsToSync.Count; i++)
         {
-            if (this.jointsToSync[i].b3JointSensorStates.Count == 0)
+            b3JointSensorStateWrapper b3JointSensorStateWrapper = null;
+
+            try
+            {
+                if (jointsToSync[i] == null)
+                {
+                    continue;
+                }
+
+                if (jointsToSync[i].b3JointSensorStates == null)
+                {
+                    continue;
+                }
+
+                if (this.jointsToSync[i].b3JointSensorStates.Count == 0)
+                {
+                    continue;
+                }
+
+
+                lock (this.jointsToSync[i])
+                {
+                    // During a delayed scenario, there might be only actions that shall happen after the current time
+                    if (this.jointsToSync[i].b3JointSensorStates.Count > 0 && this.jointsToSync[i].b3JointSensorStates.Peek() != null && this.jointsToSync[i].b3JointSensorStates.Peek().atTime > _currentTime)
+                    {
+                        continue;
+                    }
+
+                    // There where eventually multiple updates between the calls of this function. Therefore skip all updates, if there is a "newer" one that is still smaller than the current time
+                    do
+                    {
+                        b3JointSensorStateWrapper = this.jointsToSync[i].b3JointSensorStates.Dequeue();
+                    } while (this.jointsToSync[i].b3JointSensorStates.Count > 0 && this.jointsToSync[i].b3JointSensorStates.Peek() != null && this.jointsToSync[i].b3JointSensorStates.Peek().atTime <= _currentTime);
+                }
+            }
+            catch (Exception e)
             {
                 continue;
             }
 
-            // During a delayed scenario, there might be only actions that shall happen after the current time
-            if (this.jointsToSync[i].b3JointSensorStates.Peek().currentTime > _currentTime)
+
+            if (b3JointSensorStateWrapper == null)
             {
                 continue;
-            }
-
-            b3JointSensorStateWrapper b3JointSensorStateWrapper = this.jointsToSync[i].b3JointSensorStates.Dequeue();
-            // There where eventually multiple updates between the calls of this function. Therefore skip all updates, if there is a "newer" one that is still smaller than the current time
-            while (this.jointsToSync[i].b3JointSensorStates.Count > 0 && this.jointsToSync[i].b3JointSensorStates.Peek().currentTime <= _currentTime)
-            {
-                b3JointSensorStateWrapper = this.jointsToSync[i].b3JointSensorStates.Dequeue();
             }
 
             UrdfJoint unityJoint = this.jointsToSync[i].UrdfJoint;
