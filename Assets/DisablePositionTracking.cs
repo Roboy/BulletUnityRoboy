@@ -10,12 +10,13 @@ public class DisablePositionTracking : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        XRDevice.DisableAutoXRCameraTracking(mainCamera, true);
+        //XRDevice.DisableAutoXRCameraTracking(mainCamera, true);
         //UnityEngine.XR.InputTracking.disablePositionalTracking = true;
     }
 
     // Update is called once per frame
     void Update()
     {
+        mainCamera.transform.position = Vector3.zero;
     }
 }

@@ -216,6 +216,50 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 6913724092466858075}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &15499267
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 15499268}
+  - component: {fileID: 15499269}
+  m_Layer: 0
+  m_Name: SceneController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &15499268
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 15499267}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1533074531}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &15499269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 15499267}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb925dc7430b1014cae42d68faa590d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  roboyHead: {fileID: 216516274}
 --- !u!1 &29943370
 GameObject:
   m_ObjectHideFlags: 0
@@ -3906,7 +3950,7 @@ GameObject:
   - component: {fileID: 1240322237}
   m_Layer: 0
   m_Name: BulletBridge
-  m_TagString: Untagged
+  m_TagString: BulletConnectionController
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4504,7 +4548,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2bfb02108a1927458c390326b39f67f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_myId: 2
+  m_myId: 4
 --- !u!114 &1280945693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4512,7 +4556,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1280945691}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 147654a2969871240bdd3163dbaab749, type: 3}
   m_Name: 
@@ -5643,7 +5687,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1281062269}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 693fac398410d874da28a80656ebe404, type: 3}
   m_Name: 
@@ -5656,7 +5700,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1281062269}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5a2a9c34df4095f47b9ca8f975175f5b, type: 3}
   m_Name: 
@@ -10143,7 +10187,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1533074531}
-  - component: {fileID: 1533074530}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -10151,19 +10194,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1533074530
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1533074529}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb925dc7430b1014cae42d68faa590d5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  roboyHead: {fileID: 216516274}
 --- !u!4 &1533074531
 Transform:
   m_ObjectHideFlags: 0
@@ -10174,7 +10204,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 1808248821}
+  - {fileID: 1746341889}
+  - {fileID: 15499268}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -11131,6 +11164,50 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 6913724091567499410}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1746341888
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1746341889}
+  - component: {fileID: 1746341890}
+  m_Layer: 0
+  m_Name: BulletSyncController
+  m_TagString: BulletSyncController
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1746341889
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1746341888}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1533074531}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1746341890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1746341888}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11c5a55da4444344bb5e26ae7553e0a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncedRobots: []
 --- !u!4 &1759454107 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: ffc010488f01dfe44b69d2da300a806f,
@@ -11234,6 +11311,53 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   geometryType: 3
+--- !u!1 &1808248820
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1808248821}
+  - component: {fileID: 1808248822}
+  m_Layer: 0
+  m_Name: LimitationController
+  m_TagString: LimitationController
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1808248821
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1808248820}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1533074531}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1808248822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1808248820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5999a146a610394f8fd83365227ae95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trackingDelay: 0
+  maxVelocity: 10
+  updateVelocity: 0
+  switchRobot: 0
 --- !u!1 &1809265949 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: eedbf5d31cd4a6a49a3f21d973389767,
@@ -33192,7 +33316,7 @@ GameObject:
   - component: {fileID: 6913724091397102604}
   m_Layer: 0
   m_Name: upper_body
-  m_TagString: Untagged
+  m_TagString: BulletRobotController
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -33238,19 +33362,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1849b65b09816eb468d846f07a57602e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trackingUpdateRate: 0.02
-  cameraTF: {fileID: 1281286681}
-  trackIK: 1
+  trackingUpdateRate: 0.005
+  enableIk: 1
   leftHandTarget: {fileID: 0}
   rightHandTarget: {fileID: 1281325227}
-  urdfPath: \\Urdf\\roboy3_models\\upper_body\\bullet.urdf
-  robotStates:
-  - _urdfPath: \\Urdf\\roboy3_models\\upper_body\\bullet3.urdf
-    _desc: 
-  - _urdfPath: \\Urdf\\roboy3_models\\upper_body\\bullet2.urdf
-    _desc: 
-  - _urdfPath: \\Urdf\\roboy3_models\\upper_body\\bullet3.urdf
-    _desc: 
+  cameraTF: {fileID: 1281286681}
+  syncedRobots:
+  - urdfPath: \\Urdf\\roboy3_models\\upper_body\\bullet3.urdf
+    desc: 
+  - urdfPath: \\Urdf\\roboy3_models\\upper_body\\bullet2.urdf
+    desc: 
+  - urdfPath: \\Urdf\\roboy3_models\\upper_body\\bullet.urdf
+    desc: 
 --- !u!1 &6913724091397240500
 GameObject:
   m_ObjectHideFlags: 0

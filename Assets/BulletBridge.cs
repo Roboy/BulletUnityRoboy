@@ -9,7 +9,10 @@ using System.Threading;
 [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
 public class BulletBridge : MonoBehaviour
 {
-    private IntPtr pybullet;
+    private IntPtr _pybullet;
+
+    public IntPtr Pybullet => _pybullet;
+
     
     public bool isInitialized;
     private Dictionary<GameObject, int> b3IdMap;
@@ -21,9 +24,9 @@ public class BulletBridge : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        pybullet = NativeMethods.b3ConnectSharedMemory(NativeConstants.SHARED_MEMORY_KEY2);
+        _pybullet = NativeMethods.b3ConnectSharedMemory(NativeConstants.SHARED_MEMORY_KEY2);
 
-        if (NativeMethods.b3CanSubmitCommand(pybullet) != 1)
+        if (NativeMethods.b3CanSubmitCommand(_pybullet) != 1)
         {
             Debug.LogError("Cannot submit commands to pybullet server. Quitting...");
             Application.Quit();
@@ -31,8 +34,8 @@ public class BulletBridge : MonoBehaviour
 
         resetSimulation();
 
-        IntPtr cmd = NativeMethods.b3InitSyncBodyInfoCommand(pybullet);
-        IntPtr status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+        IntPtr cmd = NativeMethods.b3InitSyncBodyInfoCommand(_pybullet);
+        IntPtr status = NativeMethods.b3SubmitClientCommandAndWaitStatus(_pybullet, cmd);
 
         b3IdMap = new Dictionary<GameObject, int>();
 
@@ -66,7 +69,7 @@ public class BulletBridge : MonoBehaviour
     {
         if (isInitialized)
         {
-            return pybullet;
+            return _pybullet;
         }
         else
         {
@@ -98,32 +101,16 @@ public class BulletBridge : MonoBehaviour
     {
         //p = p.Unity2Ros();
         //q = q.Unity2Ros();
-        var cmd = NativeMethods.b3LoadUrdfCommandInit(pybullet, file);
+        var cmd = NativeMethods.b3LoadUrdfCommandInit(_pybullet, file);
         NativeMethods.b3LoadUrdfCommandSetStartPosition(cmd, p.x, p.y, p.z);
         NativeMethods.b3LoadUrdfCommandSetStartOrientation(cmd, q.x, q.y, q.z, q.w);
         NativeMethods.b3LoadUrdfCommandSetUseFixedBase(cmd, useFixedBase);
 
         NativeMethods.b3LoadUrdfCommandSetFlags(cmd, 264192); // = ENABLE SLEEPING + ENABLE WAKEUP
 
-        var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+        var status = NativeMethods.b3SubmitClientCommandAndWaitStatus(_pybullet, cmd);
         var bodyId = NativeMethods.b3GetStatusBodyIndex(status);
         return bodyId;
-    }
-
-    public int LoadUrdfAsync(string file, Vector3 p, Quaternion q, int useFixedBase = 0)
-    {
-        p = p.Unity2Ros();
-        q = q.Unity2Ros();
-        var cmd = NativeMethods.b3LoadUrdfCommandInit(pybullet, file);
-        NativeMethods.b3LoadUrdfCommandSetStartPosition(cmd, p.x, p.y, p.z);
-        NativeMethods.b3LoadUrdfCommandSetStartOrientation(cmd, q.x, q.y, q.z, q.w);
-        NativeMethods.b3LoadUrdfCommandSetUseFixedBase(cmd, useFixedBase);
-
-        NativeMethods.b3LoadUrdfCommandSetFlags(cmd, 264192); // = ENABLE SLEEPING + ENABLE WAKEUP
-
-        NativeMethods.b3SubmitClientCommand(pybullet, cmd);
-        //var bodyId = NativeMethods.b3GetStatusBodyIndex(status);
-        return 1;
     }
 
     public struct MyPos
@@ -139,8 +126,8 @@ public class BulletBridge : MonoBehaviour
         if (bodyId >= 0)
         {
             IntPtr cmd_handle =
-                NativeMethods.b3RequestActualStateCommandInit(pybullet, bodyId);
-            IntPtr status_handle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd_handle);
+                NativeMethods.b3RequestActualStateCommandInit(_pybullet, bodyId);
+            IntPtr status_handle = NativeMethods.b3SubmitClientCommandAndWaitStatus(_pybullet, cmd_handle);
 
             EnumSharedMemoryServerStatus status_type = (EnumSharedMemoryServerStatus) NativeMethods.b3GetStatusType(status_handle);
 
@@ -183,7 +170,7 @@ public class BulletBridge : MonoBehaviour
 
 
         b3JointInfo ji = new b3JointInfo();
-        NativeMethods.b3GetJointInfo(pybullet, bodyId, jointIndex, ref ji);
+        NativeMethods.b3GetJointInfo(_pybullet, bodyId, jointIndex, ref ji);
         NativeMethods.b3JointControlSetDesiredPosition(cmd, ji.m_qIndex, targetPositionRad);
         NativeMethods.b3JointControlSetKp(cmd, ji.m_uIndex, 0.1);
         NativeMethods.b3JointControlSetDesiredVelocity(cmd, ji.m_uIndex, 0);
@@ -208,10 +195,10 @@ public class BulletBridge : MonoBehaviour
     public int b3GetLinkId(string name, int bodyId)
     {
         b3JointInfo ji = new b3JointInfo();
-        var b3JointsNum = NativeMethods.b3GetNumJoints(pybullet, bodyId);
+        var b3JointsNum = NativeMethods.b3GetNumJoints(_pybullet, bodyId);
         for (int i = 0; i < b3JointsNum; i++)
         {
-            NativeMethods.b3GetJointInfo(pybullet, bodyId, i, ref ji);
+            NativeMethods.b3GetJointInfo(_pybullet, bodyId, i, ref ji);
             if (ji.m_linkName == name)
             {
                 return i;
@@ -225,42 +212,42 @@ public class BulletBridge : MonoBehaviour
     public string b3GetJointName(int jointId, int bodyId)
     {
         b3JointInfo ji = new b3JointInfo();
-        NativeMethods.b3GetJointInfo(pybullet, bodyId, jointId, ref ji);
+        NativeMethods.b3GetJointInfo(_pybullet, bodyId, jointId, ref ji);
         return ji.m_jointName;
     }
 
     public void resetSimulation()
     {
-        IntPtr cmd = NativeMethods.b3InitResetSimulationCommand(pybullet);
-        IntPtr status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+        IntPtr cmd = NativeMethods.b3InitResetSimulationCommand(_pybullet);
+        IntPtr status = NativeMethods.b3SubmitClientCommandAndWaitStatus(_pybullet, cmd);
     }
 
     public void stepSimulation()
     {
-        if (pybullet != IntPtr.Zero)
+        if (_pybullet != IntPtr.Zero)
         {
-            IntPtr cmd = NativeMethods.b3InitStepSimulationCommand(pybullet);
-            IntPtr status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+            IntPtr cmd = NativeMethods.b3InitStepSimulationCommand(_pybullet);
+            IntPtr status = NativeMethods.b3SubmitClientCommandAndWaitStatus(_pybullet, cmd);
         }
     }
 
     public void setRealTimeSimualtion(int flag)
     {
-        if (pybullet != IntPtr.Zero)
+        if (_pybullet != IntPtr.Zero)
         {
-            IntPtr cmd = NativeMethods.b3InitPhysicsParamCommand(pybullet);
+            IntPtr cmd = NativeMethods.b3InitPhysicsParamCommand(_pybullet);
             NativeMethods.b3PhysicsParamSetRealTimeSimulation(cmd, flag);
-            IntPtr status = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, cmd);
+            IntPtr status = NativeMethods.b3SubmitClientCommandAndWaitStatus(_pybullet, cmd);
         }
     }
 
     public void setGravity()
     {
-        if (pybullet != IntPtr.Zero)
+        if (_pybullet != IntPtr.Zero)
         {
-            IntPtr command = NativeMethods.b3InitPhysicsParamCommand(pybullet);
+            IntPtr command = NativeMethods.b3InitPhysicsParamCommand(_pybullet);
             NativeMethods.b3PhysicsParamSetGravity(command, 0, 0, -9.8);
-            IntPtr statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(pybullet, command);
+            IntPtr statusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(_pybullet, command);
         }
     }
 
@@ -280,9 +267,9 @@ public class BulletBridge : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (pybullet != IntPtr.Zero)
+        if (_pybullet != IntPtr.Zero)
         {
-            NativeMethods.b3DisconnectSharedMemory(pybullet);
+            NativeMethods.b3DisconnectSharedMemory(_pybullet);
         }
     }
 }

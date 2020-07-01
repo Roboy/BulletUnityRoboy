@@ -7,6 +7,10 @@ TagManager:
   - HelpObject
   - Roboy_Head
   - CameraContainer
+  - BulletConnectionController
+  - BulletRobotController
+  - BulletSyncController
+  - LimitationController
   layers:
   - Default
   - TransparentFX
