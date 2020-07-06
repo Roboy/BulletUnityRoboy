@@ -3386,6 +3386,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   geometryType: 3
+--- !u!1 &1075615425 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1930565668688434, guid: 2e42b35c3e2cacf47bce0888d6ebf256,
+    type: 3}
+  m_PrefabInstance: {fileID: 612479048}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1078931843
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4548,7 +4554,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2bfb02108a1927458c390326b39f67f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_myId: 4
+  m_myId: 3
 --- !u!114 &1280945693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -33366,6 +33372,9 @@ MonoBehaviour:
   enableIk: 1
   leftHandTarget: {fileID: 0}
   rightHandTarget: {fileID: 1281325227}
+  enableGloves: 1
+  leftHandGlove: {fileID: 0}
+  rightHandGlove: {fileID: 1075615425}
   cameraTF: {fileID: 1281286681}
   syncedRobots:
   - urdfPath: \\Urdf\\roboy3_models\\upper_body\\bullet3.urdf

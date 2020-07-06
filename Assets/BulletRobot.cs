@@ -27,13 +27,19 @@ public class BulletRobot : MonoBehaviour
     [SerializeField] private Transform leftHandTarget;
     [SerializeField] private Transform rightHandTarget;
 
+    [Space(10)] [Header("SenseGloves")] [SerializeField]
+    private bool enableGloves;
+
+    [SerializeField] private GameObject leftHandGlove;
+    [SerializeField] private GameObject rightHandGlove;
+
     [Space(10)] [Header("Misc")] [SerializeField]
     private Transform cameraTF;
 
     [FormerlySerializedAs("robotStates")] [SerializeField]
     private List<SyncedRobotInformation> syncedRobots;
-    
-    
+
+
     private BulletBridge _bulletBridge;
 
     private UrdfRobot urdfRobot;
@@ -50,17 +56,19 @@ public class BulletRobot : MonoBehaviour
     private Vector3 initRobotPosition;
 
     private readonly List<SyncedJointsInformation> _jointsToSync = new List<SyncedJointsInformation>();
-    
+
     private UrdfJoint[] robotJoints;
-    
+
     // Always returns the robot, that is actively tracked
     public SyncedRobotInformation ActiveRobot => syncedRobots.Find(syncedRobot => syncedRobot.IsLoaded && syncedRobot.IsActive);
-    
+
     private readonly SyncedRobotSwitchInformation _syncedRobotSwitchInformation = new SyncedRobotSwitchInformation();
 
     private readonly SyncedHeadInformation _syncedHeadInformation = new SyncedHeadInformation();
 
     private readonly List<SyncedIkTargetInformation> _syncedIkTargetInformations = new List<SyncedIkTargetInformation>();
+
+    private readonly List<SyncedGloveInformation> _syncedGloveInformations = new List<SyncedGloveInformation>();
 
     public List<int> FreeJoints => freeJoints;
 
@@ -71,6 +79,8 @@ public class BulletRobot : MonoBehaviour
     public SyncedHeadInformation SyncedHeadInformation => _syncedHeadInformation;
 
     public List<SyncedIkTargetInformation> SyncedIkTargetInformations => _syncedIkTargetInformations;
+
+    public List<SyncedGloveInformation> SyncedGloveInformations => _syncedGloveInformations;
 
     public List<SyncedRobotInformation> SyncedRobots => syncedRobots;
 
@@ -87,7 +97,7 @@ public class BulletRobot : MonoBehaviour
             Debug.LogError("no bullet bridge");
             Application.Quit();
         }
-        
+
         Debug.Log("Connected " + name + " to bullet server.");
 
         BulletBridge.MakeKinematic(GetComponentsInChildren<Rigidbody>());
@@ -128,14 +138,29 @@ public class BulletRobot : MonoBehaviour
         {
             if (leftHandTarget)
             {
-                _syncedIkTargetInformations.Add(new SyncedIkTargetInformation(leftHandTarget.transform /*leftHandTarget.GetComponent<RedirectedTransform>().Transform*/, _bulletBridge.b3GetLinkId("lh_palm", ActiveRobot.B3RobotId),
+                _syncedIkTargetInformations.Add(new SyncedIkTargetInformation(leftHandTarget.transform /*leftHandTarget.GetComponent<RedirectedTransform>().Transform*/,
+                    _bulletBridge.b3GetLinkId("lh_palm", ActiveRobot.B3RobotId),
                     _bulletBridge.GetJointKinematicChain(ActiveRobot.B3RobotId, "lh_palm", "shoulder_left_link1")));
             }
 
             if (rightHandTarget)
             {
-                _syncedIkTargetInformations.Add(new SyncedIkTargetInformation(rightHandTarget.transform /*rightHandTarget.GetComponent<RedirectedTransform>().Transform*/, _bulletBridge.b3GetLinkId("rh_palm", ActiveRobot.B3RobotId),
+                _syncedIkTargetInformations.Add(new SyncedIkTargetInformation(rightHandTarget.transform /*rightHandTarget.GetComponent<RedirectedTransform>().Transform*/,
+                    _bulletBridge.b3GetLinkId("rh_palm", ActiveRobot.B3RobotId),
                     _bulletBridge.GetJointKinematicChain(ActiveRobot.B3RobotId, "rh_palm", "shoulder_right_link1")));
+            }
+        }
+
+        if (enableGloves)
+        {
+            if (rightHandGlove)
+            {
+                _syncedGloveInformations.Add(new SyncedGloveInformation(rightHandGlove, "rh_", _jointsToSync));
+            }
+
+            if (leftHandGlove)
+            {
+                _syncedGloveInformations.Add(new SyncedGloveInformation(leftHandGlove, "lh_", _jointsToSync));
             }
         }
 
@@ -151,9 +176,6 @@ public class BulletRobot : MonoBehaviour
         IntPtr wakeUpCommand = NativeMethods.b3InitChangeDynamicsInfo(_bulletBridge.Pybullet);
         NativeMethods.b3ChangeDynamicsInfoSetActivationState(wakeUpCommand, 0, (int) DynamicsActivationState.eActivationStateDisableSleeping | (int) DynamicsActivationState.eActivationStateWakeUp);
         NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, wakeUpCommand);
-
-
-        //InvokeRepeating("PrintResults", 5.0f, 5.0f);
     }
 
     /// <summary>
@@ -163,7 +185,7 @@ public class BulletRobot : MonoBehaviour
     {
         SyncRobotJointsFromBullet();
     }
-    
+
     private void Update()
     {
         _currentTime = Time.realtimeSinceStartup * 1000.0f;
@@ -189,6 +211,63 @@ public class BulletRobot : MonoBehaviour
             }
         }
 
+        if (enableGloves)
+        {
+            foreach (SyncedGloveInformation syncedGloveInformation in _syncedGloveInformations)
+            {
+                for (var i = 0; i < syncedGloveInformation.HandJointInformation.Count; i++)
+                {
+                    List<SyncedGloveJoint> syncedGloveJoints = syncedGloveInformation.HandJointInformation[i];
+                    for (var j = 0; j < syncedGloveJoints.Count; j++)
+                    {
+                        //SyncedGloveJoint syncedGloveJoint = syncedGloveJoints[j];
+                        Quaternion quaternion = Quaternion.identity;
+
+                        if (i == 0)
+                        {
+                            // Thumb
+                            // ToDo: Improve Identification
+                            switch (j)
+                            {
+                                case 0:
+                                    quaternion = (syncedGloveInformation.HandJointInformation[i][j].JointTransform[0].rotation * syncedGloveInformation.JointCorrections[i][0]).Unity2Ros();
+                                    syncedGloveInformation.HandJointInformation[i][j].TargetJointPos = BulletBridge.ClipAngle(quaternion.eulerAngles.x) * Mathf.Deg2Rad + 0.6;
+                                    break;
+                                case 1:
+                                    quaternion = (syncedGloveInformation.HandJointInformation[i][j].JointTransform[0].rotation * syncedGloveInformation.JointCorrections[i][0]).Unity2Ros();
+                                    syncedGloveInformation.HandJointInformation[i][j].TargetJointPos = BulletBridge.ClipAngle(quaternion.eulerAngles.y) * Mathf.Deg2Rad;
+                                    break;
+                                case 2:
+                                    quaternion = (syncedGloveInformation.HandJointInformation[i][j].JointTransform[0].rotation * syncedGloveInformation.JointCorrections[i][0]).Unity2Ros();
+                                    syncedGloveInformation.HandJointInformation[i][j].TargetJointPos = BulletBridge.ClipAngle(-quaternion.eulerAngles.z) * Mathf.Deg2Rad;
+                                    break;
+                                default:
+                                    quaternion = (syncedGloveInformation.HandJointInformation[i][j].JointTransform[j - 2].rotation * syncedGloveInformation.JointCorrections[i][j - 2]).Unity2Ros();
+                                    syncedGloveInformation.HandJointInformation[i][j].TargetJointPos = BulletBridge.ClipAngle(quaternion.eulerAngles.x) * Mathf.Deg2Rad;
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            quaternion = (syncedGloveInformation.HandJointInformation[i][j].JointTransform[j].rotation * syncedGloveInformation.JointCorrections[i][j]).Unity2Ros();
+                            switch (j)
+                            {
+                                case 0:
+                                    syncedGloveInformation.HandJointInformation[i][j].TargetJointPos = BulletBridge.ClipAngle(-quaternion.eulerAngles.z + 100) * Mathf.Deg2Rad;
+                                    break;
+                                case 1:
+                                    syncedGloveInformation.HandJointInformation[i][j].TargetJointPos = BulletBridge.ClipAngle(-quaternion.eulerAngles.z + 60) * Mathf.Deg2Rad;
+                                    break;
+                                default:
+                                    syncedGloveInformation.HandJointInformation[i][j].TargetJointPos = BulletBridge.ClipAngle(-quaternion.eulerAngles.z - 20) * Mathf.Deg2Rad;
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         _syncedHeadInformation.EulerAngles = cameraTF.rotation.eulerAngles;
     }
 
@@ -209,7 +288,7 @@ public class BulletRobot : MonoBehaviour
         //Quaternion q = Quaternion.Euler(0, cam_rotation.y - 90, 0);
         //transform.SetPositionAndRotation(p, q);
     }
-    
+
     private void SyncRobotJointsFromBullet()
     {
         for (int i = 0; i < this._jointsToSync.Count; i++)
@@ -262,11 +341,11 @@ public class BulletRobot : MonoBehaviour
 
             UrdfJoint unityJoint = this._jointsToSync[i].UrdfJoint;
             var diff = (float) b3JointSensorStateWrapper.b3JointSensorState.m_jointPosition - unityJoint.GetPosition();
-            if (unityJoint.JointName.Contains("lh_") || unityJoint.JointName.Contains("rh_"))
-            {
-                // ToDo: SenseGloves Stuff
-                continue;
-            }
+            // if (unityJoint.JointName.Contains("lh_") || unityJoint.JointName.Contains("rh_"))
+            // {
+            //     // ToDo: SenseGloves Stuff
+            //     continue;
+            // }
 
             unityJoint.UpdateJointState(diff);
         }

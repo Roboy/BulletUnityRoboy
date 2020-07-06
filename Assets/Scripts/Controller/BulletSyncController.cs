@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Controller.Helper;
 using UnityEngine;
@@ -51,6 +52,8 @@ namespace Controller
         {
             while (_stateSyncThread.IsAlive)
             {
+                #region IK
+
                 // IK
                 foreach (SyncedIkTargetInformation ikTarget in _bulletRobot.SyncedIkTargetInformations)
                 {
@@ -81,6 +84,10 @@ namespace Controller
                     }
                 }
 
+                #endregion
+
+                #region Update State
+
                 // Update State
                 IntPtr actualStateCommand = NativeMethods.b3RequestActualStateCommandInit(_bulletBridge.Pybullet, _bulletRobot.ActiveRobot.B3RobotId);
                 actualStateCommand = NativeMethods.b3RequestActualStateCommandInit2(actualStateCommand, _bulletRobot.ActiveRobot.B3RobotId);
@@ -101,12 +108,57 @@ namespace Controller
                     }
                 }
 
+                #endregion
+
+                #region Track Head
+
                 // Track Head
-                IntPtr cmd = NativeMethods.b3JointControlCommandInit2(_bulletBridge.Pybullet, _bulletRobot.ActiveRobot.B3RobotId, (int) EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
-                _bulletBridge.SetJointPosition(ref cmd, _bulletRobot.ActiveRobot.B3RobotId, _bulletRobot.HeadJointIds[0], BulletBridge.ClipAngle(_bulletRobot.SyncedHeadInformation.Roll) * Mathf.Deg2Rad);
-                _bulletBridge.SetJointPosition(ref cmd, _bulletRobot.ActiveRobot.B3RobotId, _bulletRobot.HeadJointIds[1], BulletBridge.ClipAngle(_bulletRobot.SyncedHeadInformation.Yaw) * Mathf.Deg2Rad);
-                _bulletBridge.SetJointPosition(ref cmd, _bulletRobot.ActiveRobot.B3RobotId, _bulletRobot.HeadJointIds[2], BulletBridge.ClipAngle(_bulletRobot.SyncedHeadInformation.Pitch) * Mathf.Deg2Rad);
-                NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, cmd);
+                IntPtr trackHeadCommand = NativeMethods.b3JointControlCommandInit2(_bulletBridge.Pybullet, _bulletRobot.ActiveRobot.B3RobotId, (int) EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
+                _bulletBridge.SetJointPosition(ref trackHeadCommand, _bulletRobot.ActiveRobot.B3RobotId, _bulletRobot.HeadJointIds[0], BulletBridge.ClipAngle(_bulletRobot.SyncedHeadInformation.Roll) * Mathf.Deg2Rad);
+                _bulletBridge.SetJointPosition(ref trackHeadCommand, _bulletRobot.ActiveRobot.B3RobotId, _bulletRobot.HeadJointIds[1], BulletBridge.ClipAngle(_bulletRobot.SyncedHeadInformation.Yaw) * Mathf.Deg2Rad);
+                _bulletBridge.SetJointPosition(ref trackHeadCommand, _bulletRobot.ActiveRobot.B3RobotId, _bulletRobot.HeadJointIds[2], BulletBridge.ClipAngle(_bulletRobot.SyncedHeadInformation.Pitch) * Mathf.Deg2Rad);
+                NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, trackHeadCommand);
+
+                #endregion
+
+                #region Track Fingers
+
+                // Track Fingers
+                IntPtr trackFingersCommand = NativeMethods.b3JointControlCommandInit2(_bulletBridge.Pybullet, _bulletRobot.ActiveRobot.B3RobotId, (int) EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
+                foreach (SyncedGloveInformation bulletRobotSyncedGloveInformation in _bulletRobot.SyncedGloveInformations)
+                {
+                    foreach (List<SyncedGloveJoint> syncedGloveJoints in bulletRobotSyncedGloveInformation.HandJointInformation)
+                    {
+                        foreach (SyncedGloveJoint syncedGloveJoint in syncedGloveJoints)
+                        {
+                            _bulletBridge.SetJointPosition(ref trackFingersCommand, _bulletRobot.ActiveRobot.B3RobotId, syncedGloveJoint.JointIndex, syncedGloveJoint.TargetJointPos);
+                        }
+                    }
+                }
+
+                NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, trackFingersCommand);
+
+                #endregion
+
+                #region Finger Collisions
+
+                b3ContactInformation b3ContactInformation = new b3ContactInformation();
+                IntPtr collisionCommand = NativeMethods.b3InitRequestContactPointInformation(_bulletBridge.Pybullet);
+                NativeMethods.b3SetContactFilterBodyA(collisionCommand, _bulletRobot.ActiveRobot.B3RobotId);
+                // NativeMethods.b3SetContactFilterLinkA(); // ToDo: Eventually only for specific finger links
+                NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, collisionCommand);
+                
+                NativeMethods.b3GetContactPointInformation(_bulletBridge.Pybullet, ref b3ContactInformation);
+
+                for (int i = 0; i < b3ContactInformation.m_numContactPoints; i++)
+                {
+                    b3ContactPointData b3ContactPointData = (b3ContactPointData)Marshal.PtrToStructure(b3ContactInformation.m_contactPointData, typeof(b3VisualShapeData));
+                    Debug.Log(JsonUtility.ToJson(b3ContactPointData));
+                }
+
+                #endregion
+
+                #region Switch Robot Control
 
                 // Switch Robot Control
                 if (_limitationController.SwitchRobot == true)
@@ -173,7 +225,7 @@ namespace Controller
                         NativeMethods.b3ChangeDynamicsInfoSetActivationState(sleepCommand, _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.B3RobotId,
                             (int) DynamicsActivationState.eActivationStateEnableSleeping | (int) DynamicsActivationState.eActivationStateSleep);
                         NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, sleepCommand);
-                        
+
                         // Eventually apply MaxVelocity
                         _limitationController.UpdateVelocity = true;
                     }
@@ -203,6 +255,10 @@ namespace Controller
                     }
                 }
 
+                #endregion
+
+                #region Change Max Velocity
+
                 // Change Max Velocity
                 if (_limitationController.UpdateVelocity == true)
                 {
@@ -220,6 +276,8 @@ namespace Controller
                         NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, cmdHandle);
                     }
                 }
+
+                #endregion
             }
         }
     }
