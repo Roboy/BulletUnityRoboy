@@ -341,11 +341,20 @@ public class BulletRobot : MonoBehaviour
 
             UrdfJoint unityJoint = this._jointsToSync[i].UrdfJoint;
             var diff = (float) b3JointSensorStateWrapper.b3JointSensorState.m_jointPosition - unityJoint.GetPosition();
-            // if (unityJoint.JointName.Contains("lh_") || unityJoint.JointName.Contains("rh_"))
-            // {
-            //     // ToDo: SenseGloves Stuff
-            //     continue;
-            // }
+            if (unityJoint.JointName.Contains("lh_") || unityJoint.JointName.Contains("rh_"))
+            {
+                // ToDo: SenseGloves Stuff
+                var pos = new Vector3((float)b3JointSensorStateWrapper.b3LinkState.m_worldPosition[0], (float)b3JointSensorStateWrapper.b3LinkState.m_worldPosition[1], (float)b3JointSensorStateWrapper.b3LinkState.m_worldPosition[2]);
+                var orn = new Quaternion((float)b3JointSensorStateWrapper.b3LinkState.m_worldOrientation[0], (float)b3JointSensorStateWrapper.b3LinkState.m_worldOrientation[1], (float)b3JointSensorStateWrapper.b3LinkState.m_worldOrientation[2], (float)b3JointSensorStateWrapper.b3LinkState.m_worldOrientation[3]);
+
+                pos = pos.Ros2Unity();
+                orn = orn.Ros2Unity();
+                
+                var tf = this._jointsToSync[i].UrdfLink.transform.position;
+                this._jointsToSync[i].UrdfLink.transform.SetPositionAndRotation(pos, orn);
+                
+                continue;
+            }
 
             unityJoint.UpdateJointState(diff);
         }
@@ -358,6 +367,7 @@ public class BulletRobot : MonoBehaviour
         var b3JointsNum = NativeMethods.b3GetNumJoints(_bulletBridge.Pybullet, ActiveRobot.B3RobotId);
         b3JointNames = new List<string>();
         b3JointIds = new List<int>();
+        List<int> b3LinkIds = new List<int>();
         freeJoints = new List<int>();
         excludeFromIkJoints = new List<int>();
 
@@ -365,6 +375,7 @@ public class BulletRobot : MonoBehaviour
         {
             NativeMethods.b3GetJointInfo(_bulletBridge.Pybullet, ActiveRobot.B3RobotId, i, ref jointInfo);
             b3JointNames.Add(jointInfo.m_jointName);
+            b3LinkIds.Add(i);
             if (jointInfo.m_jointType == 0) //JointType.eRevoluteType)
             {
                 freeJoints.Add(i);
@@ -389,8 +400,11 @@ public class BulletRobot : MonoBehaviour
         {
             if (b3JointNames.Contains(j.JointName))
             {
+                UrdfLink urdfLink = j.gameObject.GetComponent<UrdfLink>();
+                
                 int b3JointIndex = b3JointNames.IndexOf(j.JointName);
-                _jointsToSync.Add(new SyncedJointsInformation(b3JointIndex, j, b3JointNames.IndexOf(j.JointName), j.JointName));
+                int b3LinkIndex = b3LinkIds[b3JointNames.IndexOf(j.JointName)];
+                _jointsToSync.Add(new SyncedJointsInformation(b3JointIndex, j, b3JointNames.IndexOf(j.JointName), j.JointName, b3LinkIndex, urdfLink));
             }
             else
             {

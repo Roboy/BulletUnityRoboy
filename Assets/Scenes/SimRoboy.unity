@@ -4554,7 +4554,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2bfb02108a1927458c390326b39f67f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_myId: 3
+  m_myId: 4
 --- !u!114 &1280945693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15110,7 +15110,7 @@ HingeJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: -0, y: 0, z: 1}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0.00000003234465, y: 0.031999994, z: -0.000000053971952}
+  m_ConnectedAnchor: {x: -0.00000007103221, y: 0.03200006, z: -0.00000000554322}
   m_UseSpring: 0
   m_Spring:
     spring: NaN
@@ -15200,7 +15200,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6913724090401455869
 Transform:
   m_ObjectHideFlags: 0
@@ -30409,7 +30409,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6913724091226296773
 Transform:
   m_ObjectHideFlags: 0

@@ -11,9 +11,11 @@ namespace Controller.Helper
     public class SyncedJointsInformation
     {
         private readonly int _b3JointIndex;
+        private readonly int _b3LinkIndex;
         private readonly UrdfJoint _urdfJoint;
         private readonly int _jointIndex;
         private readonly String _jointName;
+        private readonly UrdfLink _urdfLink;
 
         public Queue<b3JointSensorStateWrapper> b3JointSensorStates = new Queue<b3JointSensorStateWrapper>();
 
@@ -25,13 +27,18 @@ namespace Controller.Helper
 
         public int B3JointIndex => _b3JointIndex;
 
+        public UrdfLink UrdfLink => _urdfLink;
 
-        public SyncedJointsInformation(int b3JointIndex, [NotNull] UrdfJoint urdfJoint, int jointIndex, string jointName)
+        public int B3LinkIndex => _b3LinkIndex;
+
+        public SyncedJointsInformation(int b3JointIndex, [NotNull] UrdfJoint urdfJoint, int jointIndex, string jointName, int b3LinkIndex, UrdfLink urdfLink)
         {
             this._urdfJoint = urdfJoint ? urdfJoint : throw new ArgumentNullException(nameof(urdfJoint));
             this._jointIndex = jointIndex;
             this._jointName = jointName;
             this._b3JointIndex = b3JointIndex;
+            this._urdfLink = urdfLink;
+            this._b3LinkIndex = b3LinkIndex;
         }
     }
 }

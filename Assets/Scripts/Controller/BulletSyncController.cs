@@ -98,9 +98,15 @@ namespace Controller
                 {
                     foreach (var jointToSync in _bulletRobot.JointsToSync)
                     {
+                        // Update Joint
                         b3JointSensorState b3JointSensorState = new b3JointSensorState();
                         NativeMethods.b3GetJointState(_bulletBridge.Pybullet, jointStatusHandle, jointToSync.JointIndex, ref b3JointSensorState);
-                        b3JointSensorStateWrapper b3JointSensorStateWrapper = new b3JointSensorStateWrapper(b3JointSensorState, _currentTime + _limitationController.TrackingDelay);
+
+                        // Update Link
+                        b3LinkState b3LinkState = new b3LinkState();
+                        NativeMethods.b3GetLinkState(_bulletBridge.Pybullet, jointStatusHandle, jointToSync.B3LinkIndex, ref b3LinkState);
+                        
+                        b3JointSensorStateWrapper b3JointSensorStateWrapper = new b3JointSensorStateWrapper(b3JointSensorState, b3LinkState, _currentTime + _limitationController.TrackingDelay);
                         lock (jointToSync)
                         {
                             jointToSync.b3JointSensorStates.Enqueue(b3JointSensorStateWrapper);
