@@ -94,6 +94,11 @@ namespace Controller.Helper
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "THJ2").JointName,
                         _senseGloveVirtualHand.thumbJoints
                     ),
+                    new SyncedGloveJoint(
+                        syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "THJ1").JointIndex,
+                        syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "THJ1").JointName,
+                        _senseGloveVirtualHand.thumbJoints
+                    ),
                 },
                 // indexFingerJoints
                 new List<SyncedGloveJoint>

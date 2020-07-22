@@ -246,7 +246,7 @@ public class BulletRobot : MonoBehaviour
                                     syncedGloveInformation.HandJointInformation[i][j].TargetJointPos = BulletBridge.ClipAngle(-quaternion.eulerAngles.z) * Mathf.Deg2Rad;
                                     break;
                                 default:
-                                    quaternion = (syncedGloveInformation.HandJointInformation[i][j].JointTransform[j - 2].rotation * syncedGloveInformation.JointCorrections[i][j - 2]).Unity2Ros();
+                                    quaternion = (syncedGloveInformation.HandJointInformation[i][j].JointTransform[1].rotation * syncedGloveInformation.JointCorrections[i][1]).Unity2Ros();
                                     syncedGloveInformation.HandJointInformation[i][j].TargetJointPos = BulletBridge.ClipAngle(quaternion.eulerAngles.x) * Mathf.Deg2Rad;
                                     break;
                             }
@@ -390,6 +390,24 @@ public class BulletRobot : MonoBehaviour
             if (jointInfo.m_jointName.Contains("rh_") || jointInfo.m_jointName.Contains("lh_") || jointInfo.m_jointName.Contains("head"))
             {
                 excludeFromIkJoints.Add(i);
+            }
+
+            if (jointInfo.m_jointIndex == 34)
+            {
+                Debug.Log("D1");
+                Debug.Log(JsonUtility.ToJson(jointInfo));
+            }
+
+            if (jointInfo.m_qIndex == 34)
+            {
+                Debug.Log("D2");
+                Debug.Log(JsonUtility.ToJson(jointInfo));
+            }
+
+            if (jointInfo.m_uIndex == 34)
+            {
+                Debug.Log("D3");
+                Debug.Log(JsonUtility.ToJson(jointInfo));
             }
 
             //if (jointInfo.m_jointName.Contains("lh"))
