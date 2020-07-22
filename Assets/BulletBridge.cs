@@ -97,13 +97,14 @@ public class BulletBridge : MonoBehaviour
         }
     }
 
-    public int LoadURDF(string file, Vector3 p, Quaternion q, int useFixedBase = 0)
+    public int LoadURDF(string file, Vector3 p, Quaternion q, double s, int useFixedBase = 0)
     {
         //p = p.Unity2Ros();
         //q = q.Unity2Ros();
         var cmd = NativeMethods.b3LoadUrdfCommandInit(_pybullet, file);
         NativeMethods.b3LoadUrdfCommandSetStartPosition(cmd, p.x, p.y, p.z);
         NativeMethods.b3LoadUrdfCommandSetStartOrientation(cmd, q.x, q.y, q.z, q.w);
+        NativeMethods.b3LoadUrdfCommandSetGlobalScaling(cmd, s);
         NativeMethods.b3LoadUrdfCommandSetUseFixedBase(cmd, useFixedBase);
 
         NativeMethods.b3LoadUrdfCommandSetFlags(cmd, 264192); // = ENABLE SLEEPING + ENABLE WAKEUP

@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Bullet;
+using Bullet.Helper;
 using Controller.Helper;
+using RosSharp;
 using UnityEngine;
 
 namespace Controller
@@ -18,6 +21,7 @@ namespace Controller
         private BulletBridge _bulletBridge;
         private BulletRobot _bulletRobot;
         private LimitationController _limitationController;
+        private List<BulletObject> _bulletObjects = new List<BulletObject>();
 
         private Thread _stateSyncThread;
 
@@ -29,6 +33,16 @@ namespace Controller
             _bulletRobot = GameObject.FindGameObjectWithTag("BulletRobotController").GetComponent<BulletRobot>();
 
             _limitationController = GameObject.FindGameObjectWithTag("LimitationController").GetComponent<LimitationController>();
+
+            GameObject[] bulletObjectGameObjects = GameObject.FindGameObjectsWithTag("BulletObject");
+            foreach (GameObject bulletObjectGameObject in bulletObjectGameObjects)
+            {
+                BulletObject bulletObject = bulletObjectGameObject.GetComponent<BulletObject>();
+                if (bulletObject)
+                {
+                    _bulletObjects.Add(bulletObject);
+                }
+            }
 
             // Start state synchronisation
             _stateSyncThread = new Thread(StateSyncThread);
@@ -52,7 +66,7 @@ namespace Controller
         {
             while (_stateSyncThread.IsAlive)
             {
-                #region IK
+                #region Tracking: Inverse Kinematics
 
                 // IK
                 foreach (SyncedIkTargetInformation ikTarget in _bulletRobot.SyncedIkTargetInformations)
@@ -86,13 +100,13 @@ namespace Controller
 
                 #endregion
 
-                #region Update State
+                #region Tracking: Update Robot Joints
 
                 // Update State
-                IntPtr actualStateCommand = NativeMethods.b3RequestActualStateCommandInit(_bulletBridge.Pybullet, _bulletRobot.ActiveRobot.B3RobotId);
-                actualStateCommand = NativeMethods.b3RequestActualStateCommandInit2(actualStateCommand, _bulletRobot.ActiveRobot.B3RobotId);
+                IntPtr actualRobotStateCommand = NativeMethods.b3RequestActualStateCommandInit(_bulletBridge.Pybullet, _bulletRobot.ActiveRobot.B3RobotId);
+                actualRobotStateCommand = NativeMethods.b3RequestActualStateCommandInit2(actualRobotStateCommand, _bulletRobot.ActiveRobot.B3RobotId);
 
-                IntPtr jointStatusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, actualStateCommand);
+                IntPtr jointStatusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, actualRobotStateCommand);
                 EnumSharedMemoryServerStatus statusType = (EnumSharedMemoryServerStatus) NativeMethods.b3GetStatusType(jointStatusHandle);
                 if (statusType == EnumSharedMemoryServerStatus.CMD_ACTUAL_STATE_UPDATE_COMPLETED)
                 {
@@ -105,7 +119,7 @@ namespace Controller
                         // Update Link
                         b3LinkState b3LinkState = new b3LinkState();
                         NativeMethods.b3GetLinkState(_bulletBridge.Pybullet, jointStatusHandle, jointToSync.B3LinkIndex, ref b3LinkState);
-                        
+
                         b3JointSensorStateWrapper b3JointSensorStateWrapper = new b3JointSensorStateWrapper(b3JointSensorState, b3LinkState, _currentTime + _limitationController.TrackingDelay);
                         lock (jointToSync)
                         {
@@ -116,7 +130,7 @@ namespace Controller
 
                 #endregion
 
-                #region Track Head
+                #region Tracking: Head Movements
 
                 // Track Head
                 IntPtr trackHeadCommand = NativeMethods.b3JointControlCommandInit2(_bulletBridge.Pybullet, _bulletRobot.ActiveRobot.B3RobotId, (int) EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
@@ -127,7 +141,7 @@ namespace Controller
 
                 #endregion
 
-                #region Track Fingers
+                #region Tracking: Fingers
 
                 // Track Fingers
                 IntPtr trackFingersCommand = NativeMethods.b3JointControlCommandInit2(_bulletBridge.Pybullet, _bulletRobot.ActiveRobot.B3RobotId, (int) EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
@@ -146,25 +160,25 @@ namespace Controller
 
                 #endregion
 
-                #region Finger Collisions
+                #region SenseGlove: Finger Collisions
 
                 b3ContactInformation b3ContactInformation = new b3ContactInformation();
                 IntPtr collisionCommand = NativeMethods.b3InitRequestContactPointInformation(_bulletBridge.Pybullet);
                 NativeMethods.b3SetContactFilterBodyA(collisionCommand, _bulletRobot.ActiveRobot.B3RobotId);
                 // NativeMethods.b3SetContactFilterLinkA(); // ToDo: Eventually only for specific finger links
                 NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, collisionCommand);
-                
+
                 NativeMethods.b3GetContactPointInformation(_bulletBridge.Pybullet, ref b3ContactInformation);
 
                 for (int i = 0; i < b3ContactInformation.m_numContactPoints; i++)
                 {
-                    b3ContactPointData b3ContactPointData = (b3ContactPointData)Marshal.PtrToStructure(b3ContactInformation.m_contactPointData, typeof(b3VisualShapeData));
-                    Debug.Log(JsonUtility.ToJson(b3ContactPointData));
+                    b3ContactPointData b3ContactPointData = (b3ContactPointData) Marshal.PtrToStructure(b3ContactInformation.m_contactPointData, typeof(b3ContactPointData));
+                    //Debug.Log(JsonUtility.ToJson(b3ContactPointData));
                 }
 
                 #endregion
 
-                #region Switch Robot Control
+                #region Limitation: Switch Robot Control
 
                 // Switch Robot Control
                 if (_limitationController.SwitchRobot == true)
@@ -263,7 +277,7 @@ namespace Controller
 
                 #endregion
 
-                #region Change Max Velocity
+                #region Limitation: Maximum Velocity
 
                 // Change Max Velocity
                 if (_limitationController.UpdateVelocity == true)
@@ -280,6 +294,57 @@ namespace Controller
                         IntPtr cmdHandle = NativeMethods.b3JointControlCommandInit2(_bulletBridge.Pybullet, _bulletRobot.ActiveRobot.B3RobotId, (int) EnumControlMode.CONTROL_MODE_POSITION_VELOCITY_PD);
                         NativeMethods.b3JointControlSetMaximumVelocity(cmdHandle, b3JointInfo.m_uIndex, _limitationController.MaxVelocity);
                         NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, cmdHandle);
+                    }
+                }
+
+                #endregion
+
+                #region Bullet Objects: Instantiation
+
+                foreach (BulletObject bulletObject in _bulletObjects)
+                {
+                    if (!bulletObject.BulletBodyInformation.Instantiated)
+                    {
+                        bulletObject.BulletBodyInformation.Instantiated = true;
+                        bulletObject.BulletBodyInformation.BodyId = _bulletBridge.LoadURDF(bulletObject.BulletBodyInformation.UrdfPadth, bulletObject.BulletBodyInformation.Position.Unity2Ros(),
+                            bulletObject.BulletBodyInformation.Rotation.Unity2Ros(), bulletObject.BulletBodyInformation.Scaling, bulletObject.BulletBodyInformation.IsStatic ? 1 : 0);
+                        Debug.Log("[Object] Instantiated " + bulletObject.BulletBodyInformation.UrdfPadth + " with bodyId " + bulletObject.BulletBodyInformation.BodyId);
+                    }
+                }
+
+                #endregion
+
+                #region Bullet Objects: Position / Rotation
+
+                foreach (BulletObject bulletObject in _bulletObjects)
+                {
+                    if (!bulletObject.BulletBodyInformation.IsStatic && bulletObject.BulletBodyInformation.Instantiated)
+                    {
+                        IntPtr actualObjectStateCommand = NativeMethods.b3RequestActualStateCommandInit(_bulletBridge.Pybullet, bulletObject.BulletBodyInformation.BodyId);
+                        IntPtr actualObjectStateStatusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, actualObjectStateCommand);
+
+                        EnumSharedMemoryServerStatus actualObjectStateStatusType = (EnumSharedMemoryServerStatus) NativeMethods.b3GetStatusType(actualObjectStateStatusHandle);
+                        if (actualObjectStateStatusType == EnumSharedMemoryServerStatus.CMD_ACTUAL_STATE_UPDATE_COMPLETED)
+                        {
+                            int bodyUniqueId = -1;
+                            int numDegreeOfFreedomQ = 0;
+                            int numDegreeOfFreedomU = 0;
+                            IntPtr rootLocalInertialFrame = IntPtr.Zero;
+                            IntPtr actualStateQ = IntPtr.Zero;
+                            IntPtr actualStateQdot = IntPtr.Zero;
+                            IntPtr jointReactionForces = IntPtr.Zero;
+
+                            NativeMethods.b3GetStatusActualState(actualObjectStateStatusHandle, ref bodyUniqueId, ref numDegreeOfFreedomQ, ref numDegreeOfFreedomU, ref rootLocalInertialFrame, ref actualStateQ,
+                                ref actualStateQdot, ref jointReactionForces);
+
+                            BulletPosition bulletPosition = (BulletPosition) Marshal.PtrToStructure(actualStateQ, typeof(BulletPosition));
+
+                            Vector3 newPos = new Vector3((float) bulletPosition.x, (float) bulletPosition.y, (float) bulletPosition.z).Ros2Unity();
+                            Quaternion newOrn = new Quaternion((float) bulletPosition.qx, (float) bulletPosition.qy, (float) bulletPosition.qz, (float) bulletPosition.qw).Ros2Unity();
+
+                            bulletObject.BulletBodyInformation.Position = newPos;
+                            bulletObject.BulletBodyInformation.Rotation = newOrn;
+                        }
                     }
                 }
 

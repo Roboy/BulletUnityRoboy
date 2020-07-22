@@ -113,7 +113,7 @@ public class BulletRobot : MonoBehaviour
             syncedRobots[i].Position = (transform.position + new Vector3(i * 1.5f, 0, 0)).Unity2Ros(); // Base position with 2 units distance
             syncedRobots[i].Rotation = transform.rotation.Unity2Ros();
 
-            int b3RobotId = _bulletBridge.LoadURDF(syncedRobots[i].UrdfPath, syncedRobots[i].Position, syncedRobots[i].Rotation, 1);
+            int b3RobotId = _bulletBridge.LoadURDF(syncedRobots[i].UrdfPath, syncedRobots[i].Position, syncedRobots[i].Rotation, 1, 1);
             Debug.Log("Loaded Robot: " + b3RobotId);
 
             syncedRobots[i].IsLoaded = true;
@@ -176,6 +176,10 @@ public class BulletRobot : MonoBehaviour
         IntPtr wakeUpCommand = NativeMethods.b3InitChangeDynamicsInfo(_bulletBridge.Pybullet);
         NativeMethods.b3ChangeDynamicsInfoSetActivationState(wakeUpCommand, 0, (int) DynamicsActivationState.eActivationStateDisableSleeping | (int) DynamicsActivationState.eActivationStateWakeUp);
         NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, wakeUpCommand);
+
+        // Test other objects
+        //_bulletBridge.LoadURDF("\\Urdf\\simple_box\\simple_box.urdf", new Vector3(-0.2f, 0, -2.3f), Quaternion.identity, 1);
+        //_bulletBridge.LoadURDF("\\Urdf\\table2\\table.urdf", new Vector3(-0.2f, 0, -2.4f), Quaternion.identity, 1);
     }
 
     /// <summary>
@@ -344,15 +348,17 @@ public class BulletRobot : MonoBehaviour
             if (unityJoint.JointName.Contains("lh_") || unityJoint.JointName.Contains("rh_"))
             {
                 // ToDo: SenseGloves Stuff
-                var pos = new Vector3((float)b3JointSensorStateWrapper.b3LinkState.m_worldPosition[0], (float)b3JointSensorStateWrapper.b3LinkState.m_worldPosition[1], (float)b3JointSensorStateWrapper.b3LinkState.m_worldPosition[2]);
-                var orn = new Quaternion((float)b3JointSensorStateWrapper.b3LinkState.m_worldOrientation[0], (float)b3JointSensorStateWrapper.b3LinkState.m_worldOrientation[1], (float)b3JointSensorStateWrapper.b3LinkState.m_worldOrientation[2], (float)b3JointSensorStateWrapper.b3LinkState.m_worldOrientation[3]);
+                var pos = new Vector3((float) b3JointSensorStateWrapper.b3LinkState.m_worldPosition[0], (float) b3JointSensorStateWrapper.b3LinkState.m_worldPosition[1],
+                    (float) b3JointSensorStateWrapper.b3LinkState.m_worldPosition[2]);
+                var orn = new Quaternion((float) b3JointSensorStateWrapper.b3LinkState.m_worldOrientation[0], (float) b3JointSensorStateWrapper.b3LinkState.m_worldOrientation[1],
+                    (float) b3JointSensorStateWrapper.b3LinkState.m_worldOrientation[2], (float) b3JointSensorStateWrapper.b3LinkState.m_worldOrientation[3]);
 
                 pos = pos.Ros2Unity();
                 orn = orn.Ros2Unity();
-                
+
                 var tf = this._jointsToSync[i].UrdfLink.transform.position;
                 this._jointsToSync[i].UrdfLink.transform.SetPositionAndRotation(pos, orn);
-                
+
                 continue;
             }
 
@@ -401,7 +407,7 @@ public class BulletRobot : MonoBehaviour
             if (b3JointNames.Contains(j.JointName))
             {
                 UrdfLink urdfLink = j.gameObject.GetComponent<UrdfLink>();
-                
+
                 int b3JointIndex = b3JointNames.IndexOf(j.JointName);
                 int b3LinkIndex = b3LinkIds[b3JointNames.IndexOf(j.JointName)];
                 _jointsToSync.Add(new SyncedJointsInformation(b3JointIndex, j, b3JointNames.IndexOf(j.JointName), j.JointName, b3LinkIndex, urdfLink));

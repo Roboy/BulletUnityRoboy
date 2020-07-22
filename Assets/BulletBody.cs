@@ -49,11 +49,11 @@ public class BulletBody : MonoBehaviour
             var newPos = baseFrame.position + baseFrame.InverseTransformPoint(translation);
             var newOrn = rotation + baseFrame.rotation.eulerAngles;
             transform.SetPositionAndRotation(newPos, Quaternion.Euler(newOrn));
-            b3BodyId = bb.LoadURDF(Application.dataPath + urdfPath, newPos, Quaternion.Euler(newOrn), useFixedBase ? 1 : 0);
+            b3BodyId = bb.LoadURDF(Application.dataPath + urdfPath, newPos, Quaternion.Euler(newOrn), 1, useFixedBase ? 1 : 0);
         }
         else
         {
-            b3BodyId = bb.LoadURDF(Application.dataPath + urdfPath, transform.position, transform.rotation, useFixedBase ? 1 : 0);
+            b3BodyId = bb.LoadURDF(Application.dataPath + urdfPath, transform.position, transform.rotation, 1, useFixedBase ? 1 : 0);
         }
         
         bb.AddGameObject(gameObject, b3BodyId);

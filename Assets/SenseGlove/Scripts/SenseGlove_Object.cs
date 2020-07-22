@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using SenseGloveCs;
 using SenseGloveCs.Kinematics;
@@ -870,11 +871,24 @@ public class SenseGlove_Object : MonoBehaviour
         this.CheckForDeviceManager();
     }
 
+    protected void FixedUpdate()
+    {
+    }
+
+    // SenseGloves are a huge FPS drainer. Therefore, updates are only performed every [_updateGloveTimeout] frames.
+    private int _updateGloveTimeout = 3;
+
     // Update is called once per frame
     protected virtual void Update()
     {
-        this.UpdateGlove();
+        if (_updateGloveTimeout == 0)
+        {
+            this.UpdateGlove();
+            _updateGloveTimeout = 3;
+        }
         this.CheckConnection(); //must be placed after checkConnection, otherwise a nullref might occur.
+
+        _updateGloveTimeout--;
     }
 
     //Fires after all the updates.
