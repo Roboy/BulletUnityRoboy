@@ -3,6 +3,7 @@ using System.Collections;
 using Bullet.Helper;
 using RosSharp;
 using UnityEngine;
+using Utils;
 
 namespace Bullet
 {
@@ -56,13 +57,10 @@ namespace Bullet
             if (!_bulletBodyInformation.Instantiated) return;
             if (_bulletBodyInformation.IsStatic) return;
 
-            Vector3 tmpPosition = new Vector3(_bulletBodyInformation.Position.x, _bulletBodyInformation.Position.y, _bulletBodyInformation.Position.z);
-            Quaternion tmpOrientation = new Quaternion(_bulletBodyInformation.Rotation.x, _bulletBodyInformation.Rotation.y, _bulletBodyInformation.Rotation.z, _bulletBodyInformation.Rotation.w);
-
-            if (transform.position != tmpPosition || transform.rotation != tmpOrientation)
+            transform.position = _bulletBodyInformation.Position;
+            if (Math3d.AreQuaternionsClose(transform.rotation, _bulletBodyInformation.Rotation))
             {
-                transform.position = tmpPosition;
-                transform.rotation = tmpOrientation.normalized;
+                transform.rotation = _bulletBodyInformation.Rotation;
             }
         }
     }

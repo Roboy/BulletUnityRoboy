@@ -2089,7 +2089,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 526613722}
   m_LocalRotation: {x: -0, y: -0.7071068, z: 0, w: -0.7071068}
-  m_LocalPosition: {x: 0, y: -1.075, z: 0.672}
+  m_LocalPosition: {x: 0, y: -1.025, z: 0.672}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 183520887}
@@ -2574,6 +2574,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2e42b35c3e2cacf47bce0888d6ebf256, type: 3}
+--- !u!114 &612479049 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114261016576306958, guid: 2e42b35c3e2cacf47bce0888d6ebf256,
+    type: 3}
+  m_PrefabInstance: {fileID: 612479048}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1075615425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d09c5170c4e77d40aaaa6a88cc47cdc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &622879732 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 1f5685c573599ef4ea53321b89b8b92b,
@@ -5709,7 +5721,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2bfb02108a1927458c390326b39f67f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_myId: 4
+  m_myId: 2
 --- !u!114 &1280945693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11546,6 +11558,7 @@ Transform:
   - {fileID: 1808248821}
   - {fileID: 1746341889}
   - {fileID: 15499268}
+  - {fileID: 1548114401}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -11594,6 +11607,50 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GeometryType: 3
+--- !u!1 &1548114400
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1548114401}
+  - component: {fileID: 1548114402}
+  m_Layer: 0
+  m_Name: GloveController
+  m_TagString: GloveController
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1548114401
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1548114400}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1533074531}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1548114402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1548114400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52d995dde6db4d35b3b0ec22edd97c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trackedGlove: {fileID: 612479049}
 --- !u!1001 &1583966062
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12590,7 +12647,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11c5a55da4444344bb5e26ae7553e0a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncedRobots: []
 --- !u!4 &1759454107 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: ffc010488f01dfe44b69d2da300a806f,

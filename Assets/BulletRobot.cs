@@ -392,24 +392,6 @@ public class BulletRobot : MonoBehaviour
                 excludeFromIkJoints.Add(i);
             }
 
-            if (jointInfo.m_jointIndex == 34)
-            {
-                Debug.Log("D1");
-                Debug.Log(JsonUtility.ToJson(jointInfo));
-            }
-
-            if (jointInfo.m_qIndex == 34)
-            {
-                Debug.Log("D2");
-                Debug.Log(JsonUtility.ToJson(jointInfo));
-            }
-
-            if (jointInfo.m_uIndex == 34)
-            {
-                Debug.Log("D3");
-                Debug.Log(JsonUtility.ToJson(jointInfo));
-            }
-
             //if (jointInfo.m_jointName.Contains("lh"))
             //{
             //    setJointPosition(ref cmd, i, 0);

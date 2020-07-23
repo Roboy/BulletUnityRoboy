@@ -12,15 +12,10 @@ namespace Controller
 {
     public class BulletSyncController : MonoBehaviour
     {
-        #region Inspector
-
-        [SerializeField] private List<SyncedRobotInformation> syncedRobots;
-
-        #endregion
-
         private BulletBridge _bulletBridge;
         private BulletRobot _bulletRobot;
         private LimitationController _limitationController;
+        private GloveController _gloveController;
         private List<BulletObject> _bulletObjects = new List<BulletObject>();
 
         private Thread _stateSyncThread;
@@ -33,6 +28,7 @@ namespace Controller
             _bulletRobot = GameObject.FindGameObjectWithTag("BulletRobotController").GetComponent<BulletRobot>();
 
             _limitationController = GameObject.FindGameObjectWithTag("LimitationController").GetComponent<LimitationController>();
+            _gloveController = GameObject.FindGameObjectWithTag("GloveController").GetComponent<GloveController>();
 
             GameObject[] bulletObjectGameObjects = GameObject.FindGameObjectsWithTag("BulletObject");
             foreach (GameObject bulletObjectGameObject in bulletObjectGameObjects)
@@ -130,6 +126,44 @@ namespace Controller
 
                 #endregion
 
+                #region Bullet Objects: Position / Rotation
+
+                foreach (BulletObject bulletObject in _bulletObjects)
+                {
+                    if (!bulletObject.BulletBodyInformation.IsStatic && bulletObject.BulletBodyInformation.Instantiated)
+                    {
+                        IntPtr actualObjectStateCommand = NativeMethods.b3RequestActualStateCommandInit(_bulletBridge.Pybullet, bulletObject.BulletBodyInformation.BodyId);
+                        actualObjectStateCommand = NativeMethods.b3RequestActualStateCommandInit2(actualObjectStateCommand, bulletObject.BulletBodyInformation.BodyId);
+
+                        IntPtr actualObjectStateStatusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, actualObjectStateCommand);
+
+                        EnumSharedMemoryServerStatus actualObjectStateStatusType = (EnumSharedMemoryServerStatus) NativeMethods.b3GetStatusType(actualObjectStateStatusHandle);
+                        if (actualObjectStateStatusType == EnumSharedMemoryServerStatus.CMD_ACTUAL_STATE_UPDATE_COMPLETED)
+                        {
+                            int bodyUniqueId = -1;
+                            int numDegreeOfFreedomQ = 0;
+                            int numDegreeOfFreedomU = 0;
+                            IntPtr rootLocalInertialFrame = IntPtr.Zero;
+                            IntPtr actualStateQ = IntPtr.Zero;
+                            IntPtr actualStateQdot = IntPtr.Zero;
+                            IntPtr jointReactionForces = IntPtr.Zero;
+
+                            NativeMethods.b3GetStatusActualState(actualObjectStateStatusHandle, ref bodyUniqueId, ref numDegreeOfFreedomQ, ref numDegreeOfFreedomU, ref rootLocalInertialFrame, ref actualStateQ,
+                                ref actualStateQdot, ref jointReactionForces);
+
+                            BulletPosition bulletPosition = (BulletPosition) Marshal.PtrToStructure(actualStateQ, typeof(BulletPosition));
+
+                            Vector3 newPos = new Vector3((float) bulletPosition.x, (float) bulletPosition.y, (float) bulletPosition.z).Ros2Unity();
+                            Quaternion newOrn = new Quaternion((float) bulletPosition.qx, (float) bulletPosition.qy, (float) bulletPosition.qz, (float) bulletPosition.qw).normalized;
+
+                            bulletObject.BulletBodyInformation.Position = newPos;
+                            bulletObject.BulletBodyInformation.Rotation = newOrn;
+                        }
+                    }
+                }
+
+                #endregion
+
                 #region Tracking: Head Movements
 
                 // Track Head
@@ -165,15 +199,51 @@ namespace Controller
                 b3ContactInformation b3ContactInformation = new b3ContactInformation();
                 IntPtr collisionCommand = NativeMethods.b3InitRequestContactPointInformation(_bulletBridge.Pybullet);
                 NativeMethods.b3SetContactFilterBodyA(collisionCommand, _bulletRobot.ActiveRobot.B3RobotId);
-                // NativeMethods.b3SetContactFilterLinkA(); // ToDo: Eventually only for specific finger links
+
+                NativeMethods.b3SetContactFilterBodyB(collisionCommand, 4); // ToDo: Dynamic!
+
+                // Not working, would need one command per Link
+                // NativeMethods.b3SetContactFilterLinkA(collisionCommand, 13); // Index
+                // NativeMethods.b3SetContactFilterLinkA(collisionCommand, 18); // Middle
+                // NativeMethods.b3SetContactFilterLinkA(collisionCommand, 23); // Ring
+                // NativeMethods.b3SetContactFilterLinkA(collisionCommand, 29); // Pinky
+                // NativeMethods.b3SetContactFilterLinkA(collisionCommand, 35); // Thumb
+
                 NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, collisionCommand);
 
                 NativeMethods.b3GetContactPointInformation(_bulletBridge.Pybullet, ref b3ContactInformation);
 
+                List<b3ContactPointData> b3ContactPointDatas = new List<b3ContactPointData>();
+
                 for (int i = 0; i < b3ContactInformation.m_numContactPoints; i++)
                 {
                     b3ContactPointData b3ContactPointData = (b3ContactPointData) Marshal.PtrToStructure(b3ContactInformation.m_contactPointData, typeof(b3ContactPointData));
-                    //Debug.Log(JsonUtility.ToJson(b3ContactPointData));
+                    b3ContactPointDatas.Add(b3ContactPointData);
+                }
+
+                lock (_gloveController.GloveContactStatus.ThumbQueue)
+                {
+                    _gloveController.GloveContactStatus.ThumbQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 35)));
+                }
+
+                lock (_gloveController.GloveContactStatus.IndexQueue)
+                {
+                    _gloveController.GloveContactStatus.IndexQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 13)));
+                }
+
+                lock (_gloveController.GloveContactStatus.MiddleQueue)
+                {
+                    _gloveController.GloveContactStatus.MiddleQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 18)));
+                }
+
+                lock (_gloveController.GloveContactStatus.RingQueue)
+                {
+                    _gloveController.GloveContactStatus.RingQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 23)));
+                }
+
+                lock (_gloveController.GloveContactStatus.PinkyQueue)
+                {
+                    _gloveController.GloveContactStatus.PinkyQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 29)));
                 }
 
                 #endregion
@@ -309,42 +379,6 @@ namespace Controller
                         bulletObject.BulletBodyInformation.BodyId = _bulletBridge.LoadURDF(bulletObject.BulletBodyInformation.UrdfPadth, bulletObject.BulletBodyInformation.Position.Unity2Ros(),
                             bulletObject.BulletBodyInformation.Rotation.Unity2Ros(), bulletObject.BulletBodyInformation.Scaling, bulletObject.BulletBodyInformation.IsStatic ? 1 : 0);
                         Debug.Log("[Object] Instantiated " + bulletObject.BulletBodyInformation.UrdfPadth + " with bodyId " + bulletObject.BulletBodyInformation.BodyId);
-                    }
-                }
-
-                #endregion
-
-                #region Bullet Objects: Position / Rotation
-
-                foreach (BulletObject bulletObject in _bulletObjects)
-                {
-                    if (!bulletObject.BulletBodyInformation.IsStatic && bulletObject.BulletBodyInformation.Instantiated)
-                    {
-                        IntPtr actualObjectStateCommand = NativeMethods.b3RequestActualStateCommandInit(_bulletBridge.Pybullet, bulletObject.BulletBodyInformation.BodyId);
-                        IntPtr actualObjectStateStatusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, actualObjectStateCommand);
-
-                        EnumSharedMemoryServerStatus actualObjectStateStatusType = (EnumSharedMemoryServerStatus) NativeMethods.b3GetStatusType(actualObjectStateStatusHandle);
-                        if (actualObjectStateStatusType == EnumSharedMemoryServerStatus.CMD_ACTUAL_STATE_UPDATE_COMPLETED)
-                        {
-                            int bodyUniqueId = -1;
-                            int numDegreeOfFreedomQ = 0;
-                            int numDegreeOfFreedomU = 0;
-                            IntPtr rootLocalInertialFrame = IntPtr.Zero;
-                            IntPtr actualStateQ = IntPtr.Zero;
-                            IntPtr actualStateQdot = IntPtr.Zero;
-                            IntPtr jointReactionForces = IntPtr.Zero;
-
-                            NativeMethods.b3GetStatusActualState(actualObjectStateStatusHandle, ref bodyUniqueId, ref numDegreeOfFreedomQ, ref numDegreeOfFreedomU, ref rootLocalInertialFrame, ref actualStateQ,
-                                ref actualStateQdot, ref jointReactionForces);
-
-                            BulletPosition bulletPosition = (BulletPosition) Marshal.PtrToStructure(actualStateQ, typeof(BulletPosition));
-
-                            Vector3 newPos = new Vector3((float) bulletPosition.x, (float) bulletPosition.y, (float) bulletPosition.z).Ros2Unity();
-                            Quaternion newOrn = new Quaternion((float) bulletPosition.qx, (float) bulletPosition.qy, (float) bulletPosition.qz, (float) bulletPosition.qw).Ros2Unity();
-
-                            bulletObject.BulletBodyInformation.Position = newPos;
-                            bulletObject.BulletBodyInformation.Rotation = newOrn;
-                        }
                     }
                 }
 
