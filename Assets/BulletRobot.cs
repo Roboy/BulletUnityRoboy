@@ -226,11 +226,10 @@ public class BulletRobot : MonoBehaviour
                     {
                         //SyncedGloveJoint syncedGloveJoint = syncedGloveJoints[j];
                         Quaternion quaternion = Quaternion.identity;
-
-                        if (i == 0)
+                        
+                        if (syncedGloveJoints[j].JointHandType == SyncedGloveJoint.HandType.Thumb)
                         {
                             // Thumb
-                            // ToDo: Improve Identification
                             switch (j)
                             {
                                 case 0:

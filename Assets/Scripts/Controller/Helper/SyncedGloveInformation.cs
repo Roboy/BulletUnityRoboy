@@ -6,16 +6,27 @@ namespace Controller.Helper
 {
     public class SyncedGloveJoint
     {
+        public enum HandType
+        {
+            Thumb,
+            Index,
+            Middle,
+            Ring,
+            Pinky
+        }
+
         private int _jointIndex;
         private String _jointName;
         private double _targetJointPos;
         private List<Transform> _jointTransform;
+        private readonly HandType _jointHandType;
 
-        public SyncedGloveJoint(int jointIndex, string jointName, List<Transform> jointTransform)
+        public SyncedGloveJoint(int jointIndex, string jointName, List<Transform> jointTransform, HandType handType)
         {
             _jointIndex = jointIndex;
             _jointName = jointName;
             _jointTransform = jointTransform;
+            _jointHandType = handType;
         }
 
         public int JointIndex
@@ -41,6 +52,8 @@ namespace Controller.Helper
             get => _jointTransform;
             set => _jointTransform = value;
         }
+
+        public HandType JointHandType => _jointHandType;
     }
 
     public class SyncedGloveInformation
@@ -77,27 +90,32 @@ namespace Controller.Helper
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "THJ5").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "THJ5").JointName,
-                        _senseGloveVirtualHand.thumbJoints
+                        _senseGloveVirtualHand.thumbJoints,
+                        SyncedGloveJoint.HandType.Thumb
                     ),
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "THJ4").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "THJ4").JointName,
-                        _senseGloveVirtualHand.thumbJoints
+                        _senseGloveVirtualHand.thumbJoints,
+                        SyncedGloveJoint.HandType.Thumb
                     ),
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "THJ3").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "THJ3").JointName,
-                        _senseGloveVirtualHand.thumbJoints
+                        _senseGloveVirtualHand.thumbJoints,
+                        SyncedGloveJoint.HandType.Thumb
                     ),
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "THJ2").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "THJ2").JointName,
-                        _senseGloveVirtualHand.thumbJoints
+                        _senseGloveVirtualHand.thumbJoints,
+                        SyncedGloveJoint.HandType.Thumb
                     ),
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "THJ1").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "THJ1").JointName,
-                        _senseGloveVirtualHand.thumbJoints
+                        _senseGloveVirtualHand.thumbJoints,
+                        SyncedGloveJoint.HandType.Thumb
                     ),
                 },
                 // indexFingerJoints
@@ -106,17 +124,20 @@ namespace Controller.Helper
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "FFJ3").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "FFJ3").JointName,
-                        _senseGloveVirtualHand.indexFingerJoints
+                        _senseGloveVirtualHand.indexFingerJoints,
+                        SyncedGloveJoint.HandType.Index
                     ),
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "FFJ2").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "FFJ2").JointName,
-                        _senseGloveVirtualHand.indexFingerJoints
+                        _senseGloveVirtualHand.indexFingerJoints,
+                        SyncedGloveJoint.HandType.Index
                     ),
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "FFJ1").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "FFJ1").JointName,
-                        _senseGloveVirtualHand.indexFingerJoints
+                        _senseGloveVirtualHand.indexFingerJoints,
+                        SyncedGloveJoint.HandType.Index
                     ),
                 },
                 // middleFingerJoints
@@ -125,17 +146,20 @@ namespace Controller.Helper
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "MFJ3").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "MFJ3").JointName,
-                        _senseGloveVirtualHand.middleFingerJoints
+                        _senseGloveVirtualHand.middleFingerJoints,
+                        SyncedGloveJoint.HandType.Middle
                     ),
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "MFJ2").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "MFJ2").JointName,
-                        _senseGloveVirtualHand.middleFingerJoints
+                        _senseGloveVirtualHand.middleFingerJoints,
+                        SyncedGloveJoint.HandType.Middle
                     ),
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "MFJ1").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "MFJ1").JointName,
-                        _senseGloveVirtualHand.middleFingerJoints
+                        _senseGloveVirtualHand.middleFingerJoints,
+                        SyncedGloveJoint.HandType.Middle
                     ),
                 },
                 // ringFingerJoints
@@ -144,17 +168,20 @@ namespace Controller.Helper
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "RFJ3").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "RFJ3").JointName,
-                        _senseGloveVirtualHand.ringFingerJoints
+                        _senseGloveVirtualHand.ringFingerJoints,
+                        SyncedGloveJoint.HandType.Ring
                     ),
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "RFJ2").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "RFJ2").JointName,
-                        _senseGloveVirtualHand.ringFingerJoints
+                        _senseGloveVirtualHand.ringFingerJoints,
+                        SyncedGloveJoint.HandType.Ring
                     ),
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "RFJ1").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "RFJ1").JointName,
-                        _senseGloveVirtualHand.ringFingerJoints
+                        _senseGloveVirtualHand.ringFingerJoints,
+                        SyncedGloveJoint.HandType.Ring
                     ),
                 },
                 // pinkyJoints
@@ -163,17 +190,20 @@ namespace Controller.Helper
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "LFJ3").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "LFJ3").JointName,
-                        _senseGloveVirtualHand.pinkyJoints
+                        _senseGloveVirtualHand.pinkyJoints,
+                        SyncedGloveJoint.HandType.Pinky
                     ),
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "LFJ2").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "LFJ2").JointName,
-                        _senseGloveVirtualHand.pinkyJoints
+                        _senseGloveVirtualHand.pinkyJoints,
+                        SyncedGloveJoint.HandType.Pinky
                     ),
                     new SyncedGloveJoint(
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "LFJ1").JointIndex,
                         syncedJointsInformations.Find((jointToSync) => jointToSync.JointName == handPrefix + "LFJ1").JointName,
-                        _senseGloveVirtualHand.pinkyJoints
+                        _senseGloveVirtualHand.pinkyJoints,
+                        SyncedGloveJoint.HandType.Pinky
                     ),
                 }
             };

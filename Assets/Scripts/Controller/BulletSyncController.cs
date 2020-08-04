@@ -199,16 +199,7 @@ namespace Controller
                 b3ContactInformation b3ContactInformation = new b3ContactInformation();
                 IntPtr collisionCommand = NativeMethods.b3InitRequestContactPointInformation(_bulletBridge.Pybullet);
                 NativeMethods.b3SetContactFilterBodyA(collisionCommand, _bulletRobot.ActiveRobot.B3RobotId);
-
-                NativeMethods.b3SetContactFilterBodyB(collisionCommand, 4); // ToDo: Dynamic!
-
-                // Not working, would need one command per Link
-                // NativeMethods.b3SetContactFilterLinkA(collisionCommand, 13); // Index
-                // NativeMethods.b3SetContactFilterLinkA(collisionCommand, 18); // Middle
-                // NativeMethods.b3SetContactFilterLinkA(collisionCommand, 23); // Ring
-                // NativeMethods.b3SetContactFilterLinkA(collisionCommand, 29); // Pinky
-                // NativeMethods.b3SetContactFilterLinkA(collisionCommand, 35); // Thumb
-
+                NativeMethods.b3SetContactFilterBodyB(collisionCommand, 4); // ToDo: Dynamic! Right now: Static cube to grab...
                 NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, collisionCommand);
 
                 NativeMethods.b3GetContactPointInformation(_bulletBridge.Pybullet, ref b3ContactInformation);
@@ -218,32 +209,33 @@ namespace Controller
                 for (int i = 0; i < b3ContactInformation.m_numContactPoints; i++)
                 {
                     b3ContactPointData b3ContactPointData = (b3ContactPointData) Marshal.PtrToStructure(b3ContactInformation.m_contactPointData, typeof(b3ContactPointData));
+                    b3ContactInformation.m_contactPointData = new IntPtr(b3ContactInformation.m_contactPointData.ToInt64() + (Marshal.SizeOf(typeof(b3ContactPointData))));
                     b3ContactPointDatas.Add(b3ContactPointData);
                 }
 
                 lock (_gloveController.GloveContactStatus.ThumbQueue)
                 {
-                    _gloveController.GloveContactStatus.ThumbQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 35)));
+                    _gloveController.GloveContactStatus.ThumbQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 35 || data.m_linkIndexA == 34))); // Distal + Middle Thumb
                 }
 
                 lock (_gloveController.GloveContactStatus.IndexQueue)
                 {
-                    _gloveController.GloveContactStatus.IndexQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 13)));
+                    _gloveController.GloveContactStatus.IndexQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 13 || data.m_linkIndexA == 12))); // Distal + Middle Index
                 }
 
                 lock (_gloveController.GloveContactStatus.MiddleQueue)
                 {
-                    _gloveController.GloveContactStatus.MiddleQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 18)));
+                    _gloveController.GloveContactStatus.MiddleQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 18 || data.m_linkIndexA == 17))); // Distal + Middle Middle
                 }
 
                 lock (_gloveController.GloveContactStatus.RingQueue)
                 {
-                    _gloveController.GloveContactStatus.RingQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 23)));
+                    _gloveController.GloveContactStatus.RingQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 23 || data.m_linkIndexA == 22))); // Distal + Middle Ring
                 }
 
                 lock (_gloveController.GloveContactStatus.PinkyQueue)
                 {
-                    _gloveController.GloveContactStatus.PinkyQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 29)));
+                    _gloveController.GloveContactStatus.PinkyQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 29 || data.m_linkIndexA == 28))); // Distal + Middle Pinky
                 }
 
                 #endregion
