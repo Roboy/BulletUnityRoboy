@@ -21,6 +21,7 @@ namespace Controller.Helper
         private bool _isLoaded;
         private Vector3 _position;
         private Quaternion _rotation;
+        private float _scaling = .75f;
         private Vector3 _trackingPosition; // Position, if this robot is being tracked (to make it accessible from a thread)
 
         public string UrdfPath => urdfPath;
@@ -56,6 +57,8 @@ namespace Controller.Helper
             get => _rotation;
             set => _rotation = value;
         }
+
+        public float Scaling => _scaling;
 
         public Vector3 TrackingPosition
         {

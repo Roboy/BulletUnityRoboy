@@ -20,8 +20,6 @@ namespace Controller
 
         private Thread _stateSyncThread;
 
-        private float _currentTime = 0.0f;
-
         void Start()
         {
             _bulletBridge = GameObject.FindGameObjectWithTag("BulletConnectionController").GetComponent<BulletBridge>();
@@ -43,11 +41,6 @@ namespace Controller
             // Start state synchronisation
             _stateSyncThread = new Thread(StateSyncThread);
             _stateSyncThread.Start();
-        }
-
-        void Update()
-        {
-            _currentTime = Time.realtimeSinceStartup * 1000.0f;
         }
 
         private void OnApplicationQuit()
@@ -116,7 +109,7 @@ namespace Controller
                         b3LinkState b3LinkState = new b3LinkState();
                         NativeMethods.b3GetLinkState(_bulletBridge.Pybullet, jointStatusHandle, jointToSync.B3LinkIndex, ref b3LinkState);
 
-                        b3JointSensorStateWrapper b3JointSensorStateWrapper = new b3JointSensorStateWrapper(b3JointSensorState, b3LinkState, _currentTime + _limitationController.TrackingDelay);
+                        b3JointSensorStateWrapper b3JointSensorStateWrapper = new b3JointSensorStateWrapper(b3JointSensorState, b3LinkState, _bulletBridge.CurrentTime + _limitationController.TrackingDelay);
                         lock (jointToSync)
                         {
                             jointToSync.b3JointSensorStates.Enqueue(b3JointSensorStateWrapper);
@@ -150,14 +143,14 @@ namespace Controller
 
                             NativeMethods.b3GetStatusActualState(actualObjectStateStatusHandle, ref bodyUniqueId, ref numDegreeOfFreedomQ, ref numDegreeOfFreedomU, ref rootLocalInertialFrame, ref actualStateQ,
                                 ref actualStateQdot, ref jointReactionForces);
-
+ 
                             BulletPosition bulletPosition = (BulletPosition) Marshal.PtrToStructure(actualStateQ, typeof(BulletPosition));
 
                             Vector3 newPos = new Vector3((float) bulletPosition.x, (float) bulletPosition.y, (float) bulletPosition.z).Ros2Unity();
-                            Quaternion newOrn = new Quaternion((float) bulletPosition.qx, (float) bulletPosition.qy, (float) bulletPosition.qz, (float) bulletPosition.qw).normalized;
+                            Quaternion newOrn = new Quaternion((float) bulletPosition.qx, (float) bulletPosition.qy, (float) bulletPosition.qz, (float) bulletPosition.qw).normalized.Ros2Unity().normalized;
 
-                            bulletObject.BulletBodyInformation.Position = newPos;
-                            bulletObject.BulletBodyInformation.Rotation = newOrn;
+                            b3ObjectStateWrapper b3ObjectStateWrapper = new b3ObjectStateWrapper(newPos, newOrn, _bulletBridge.CurrentTime + _limitationController.TrackingDelay);
+                            bulletObject.BulletBodyInformation.b3ObjectStates.Enqueue(b3ObjectStateWrapper);
                         }
                     }
                 }
@@ -280,9 +273,35 @@ namespace Controller
                     {
                         _bulletRobot.SyncedRobotSwitchInformation.WaitCounterA = -1;
 
-                        // The next robot moves to the position of the old robot
-                        _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.Position = _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.Position;
+                        // Get State of previous robot to determine position of new robot
+                        IntPtr actualObjectStateCommand = NativeMethods.b3RequestActualStateCommandInit(_bulletBridge.Pybullet, _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.B3RobotId);
+                        actualObjectStateCommand = NativeMethods.b3RequestActualStateCommandInit2(actualObjectStateCommand, _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.B3RobotId);
+                        IntPtr actualObjectStateStatusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, actualObjectStateCommand);
+                        EnumSharedMemoryServerStatus actualObjectStateStatusType = (EnumSharedMemoryServerStatus) NativeMethods.b3GetStatusType(actualObjectStateStatusHandle);
+                        
+                        Vector3 b3PrevRobotPosition = Vector3.zero;
+                        if (actualObjectStateStatusType == EnumSharedMemoryServerStatus.CMD_ACTUAL_STATE_UPDATE_COMPLETED)
+                        {
+                            int bodyUniqueId = -1;
+                            int numDegreeOfFreedomQ = 0;
+                            int numDegreeOfFreedomU = 0;
+                            IntPtr rootLocalInertialFrame = IntPtr.Zero;
+                            IntPtr actualStateQ = IntPtr.Zero;
+                            IntPtr actualStateQdot = IntPtr.Zero;
+                            IntPtr jointReactionForces = IntPtr.Zero;
 
+                            NativeMethods.b3GetStatusActualState(actualObjectStateStatusHandle, ref bodyUniqueId, ref numDegreeOfFreedomQ, ref numDegreeOfFreedomU, ref rootLocalInertialFrame, ref actualStateQ,
+                                ref actualStateQdot, ref jointReactionForces);
+ 
+                            BulletPosition bulletPosition = (BulletPosition) Marshal.PtrToStructure(actualStateQ, typeof(BulletPosition));
+
+                            b3PrevRobotPosition = new Vector3((float) bulletPosition.x, (float) bulletPosition.y, (float) bulletPosition.z);
+                        }
+                        
+                        // The next robot moves to the position of the old robot
+                        //_bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.Position = _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.Position;
+                        _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.Position = b3PrevRobotPosition;
+                        
                         // Old robot moves to an (arbitray) different position, this robot is not used anymore
                         _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.Position = new Vector3(
                             _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.Position.x - ((_bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.B3RobotId + 1) * 1.5f),
@@ -299,7 +318,7 @@ namespace Controller
                         IntPtr moveNextRobotCmdHandle = NativeMethods.b3CreatePoseCommandInit(_bulletBridge.Pybullet, _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.B3RobotId);
                         NativeMethods.b3CreatePoseCommandSetBasePosition(moveNextRobotCmdHandle, _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.Position.x,
                             _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.Position.y,
-                            _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.Position.z + 0.625); // ToDo: Why is the Z value not right?
+                            _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.Position.z); 
                         NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, moveNextRobotCmdHandle);
 
                         _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.IsActive = false;

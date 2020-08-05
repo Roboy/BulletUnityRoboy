@@ -20,6 +20,9 @@ public class BulletBridge : MonoBehaviour
     private bool reset;
 
     private Thread _updateThread;
+    private float _currentTime = 0.0f;
+
+    public float CurrentTime => _currentTime;
 
     // Start is called before the first frame update
     void Start()
@@ -46,6 +49,11 @@ public class BulletBridge : MonoBehaviour
         isInitialized = true;
 
         Debug.Log("pybullet connected");
+    }
+
+    private void Update()
+    {
+        _currentTime = Time.realtimeSinceStartup * 1000.0f;
     }
 
     public void AddGameObject(GameObject go, int bulletId)

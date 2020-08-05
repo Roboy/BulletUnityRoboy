@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using Bullet.Helper;
+using Controller.Helper;
 using RosSharp;
 using UnityEngine;
 using Utils;
@@ -57,10 +58,42 @@ namespace Bullet
             if (!_bulletBodyInformation.Instantiated) return;
             if (_bulletBodyInformation.IsStatic) return;
 
-            transform.position = _bulletBodyInformation.Position;
-            if (Math3d.AreQuaternionsClose(transform.rotation, _bulletBodyInformation.Rotation))
+            if (_bulletBodyInformation.b3ObjectStates.Count == 0) return;
+
+            b3ObjectStateWrapper b3ObjectStateWrapper = null;
+
+            try
             {
-                transform.rotation = _bulletBodyInformation.Rotation;
+                lock (_bulletBodyInformation.b3ObjectStates)
+                {
+                    // During a delayed scenario, there might be only actions that shall happen after the current time
+                    if (_bulletBodyInformation.b3ObjectStates.Count > 0 && _bulletBodyInformation.b3ObjectStates.Peek() != null && _bulletBodyInformation.b3ObjectStates.Peek().atTime > _bulletBridge.CurrentTime)
+                    {
+                        return;
+                    }
+
+                    // There where eventually multiple updates between the calls of this function. Therefore skip all updates, if there is a "newer" one that is still smaller than the current time
+                    do
+                    {
+                        b3ObjectStateWrapper = _bulletBodyInformation.b3ObjectStates.Dequeue();
+                    } while (_bulletBodyInformation.b3ObjectStates.Count > 0 && _bulletBodyInformation.b3ObjectStates.Peek() != null && _bulletBodyInformation.b3ObjectStates.Peek().atTime <= _bulletBridge.CurrentTime);
+                }
+            }
+            catch (Exception e)
+            {
+                return;
+            }
+
+
+            if (b3ObjectStateWrapper == null)
+            {
+                return;
+            }
+
+            transform.position = _bulletBodyInformation.Position = b3ObjectStateWrapper.objectPosition;
+            if (Math3d.AreQuaternionsClose(transform.rotation, b3ObjectStateWrapper.objectRotation))
+            {
+                transform.rotation = _bulletBodyInformation.Rotation = b3ObjectStateWrapper.objectRotation;
             }
         }
     }

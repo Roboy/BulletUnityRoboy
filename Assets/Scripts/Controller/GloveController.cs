@@ -45,9 +45,6 @@ namespace Controller
 
         private void Update()
         {
-            bool[] fingersActive = new[] {_gloveContactStatus.Thumb, _gloveContactStatus.Index, _gloveContactStatus.Middle, _gloveContactStatus.Ring, _gloveContactStatus.Pinky};
-
-            //trackedGlove.SendBuzzCmd(fingersActive, 100, 200, BuzzMotorPattern.Constant);
             trackedGlove.SendBrakeCmd(_gloveContactStatus.Thumb ? 100 : 0, _gloveContactStatus.Index ? 100 : 0, _gloveContactStatus.Middle ? 100 : 0, _gloveContactStatus.Ring ? 100 : 0,
                 _gloveContactStatus.Pinky ? 100 : 0);
         }

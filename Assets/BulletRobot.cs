@@ -88,6 +88,8 @@ public class BulletRobot : MonoBehaviour
 
     private float _currentTime = 0.0f;
 
+    public Vector3 UnityPos => transform.position;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -113,7 +115,7 @@ public class BulletRobot : MonoBehaviour
             syncedRobots[i].Position = (transform.position + new Vector3(i * 1.5f, 0, 0)).Unity2Ros(); // Base position with 2 units distance
             syncedRobots[i].Rotation = transform.rotation.Unity2Ros();
 
-            int b3RobotId = _bulletBridge.LoadURDF(syncedRobots[i].UrdfPath, syncedRobots[i].Position, syncedRobots[i].Rotation, 1, 1);
+            int b3RobotId = _bulletBridge.LoadURDF(syncedRobots[i].UrdfPath, syncedRobots[i].Position, syncedRobots[i].Rotation, syncedRobots[i].Scaling, 1);
             Debug.Log("Loaded Robot: " + b3RobotId);
 
             syncedRobots[i].IsLoaded = true;

@@ -1,4 +1,6 @@
-﻿using SenseGloveCs.Kinematics;
+﻿using System.Collections.Generic;
+using Controller.Helper;
+using SenseGloveCs.Kinematics;
 using UnityEngine;
 
 namespace Bullet.Helper
@@ -13,6 +15,8 @@ namespace Bullet.Helper
         private Vector3 position;
         private Quaternion rotation;
         private double scaling;
+        
+        public Queue<b3ObjectStateWrapper> b3ObjectStates = new Queue<b3ObjectStateWrapper>();
 
         public int BodyId
         {
