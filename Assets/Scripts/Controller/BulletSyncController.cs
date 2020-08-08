@@ -125,6 +125,19 @@ namespace Controller
                 {
                     if (!bulletObject.BulletBodyInformation.IsStatic && bulletObject.BulletBodyInformation.Instantiated)
                     {
+                        if (bulletObject.BulletBodyInformation.UpdatePositionAndRotation)
+                        {
+                            bulletObject.BulletBodyInformation.UpdatePositionAndRotation = false;
+                            
+                            IntPtr moveObjectCmdHandle = NativeMethods.b3CreatePoseCommandInit(_bulletBridge.Pybullet, bulletObject.BulletBodyInformation.BodyId);
+                            NativeMethods.b3CreatePoseCommandSetBasePosition(moveObjectCmdHandle, bulletObject.BulletBodyInformation.NewPosition.x,
+                                bulletObject.BulletBodyInformation.NewPosition.y,
+                                bulletObject.BulletBodyInformation.NewPosition.z);
+                            NativeMethods.b3CreatePoseCommandSetBaseOrientation(moveObjectCmdHandle, bulletObject.BulletBodyInformation.NewRotation.x, bulletObject.BulletBodyInformation.NewRotation.y,
+                                bulletObject.BulletBodyInformation.NewRotation.z, bulletObject.BulletBodyInformation.NewRotation.w);
+                            NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, moveObjectCmdHandle);
+                        }
+
                         IntPtr actualObjectStateCommand = NativeMethods.b3RequestActualStateCommandInit(_bulletBridge.Pybullet, bulletObject.BulletBodyInformation.BodyId);
                         actualObjectStateCommand = NativeMethods.b3RequestActualStateCommandInit2(actualObjectStateCommand, bulletObject.BulletBodyInformation.BodyId);
 
@@ -143,7 +156,7 @@ namespace Controller
 
                             NativeMethods.b3GetStatusActualState(actualObjectStateStatusHandle, ref bodyUniqueId, ref numDegreeOfFreedomQ, ref numDegreeOfFreedomU, ref rootLocalInertialFrame, ref actualStateQ,
                                 ref actualStateQdot, ref jointReactionForces);
- 
+
                             BulletPosition bulletPosition = (BulletPosition) Marshal.PtrToStructure(actualStateQ, typeof(BulletPosition));
 
                             Vector3 newPos = new Vector3((float) bulletPosition.x, (float) bulletPosition.y, (float) bulletPosition.z).Ros2Unity();
@@ -278,7 +291,7 @@ namespace Controller
                         actualObjectStateCommand = NativeMethods.b3RequestActualStateCommandInit2(actualObjectStateCommand, _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.B3RobotId);
                         IntPtr actualObjectStateStatusHandle = NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, actualObjectStateCommand);
                         EnumSharedMemoryServerStatus actualObjectStateStatusType = (EnumSharedMemoryServerStatus) NativeMethods.b3GetStatusType(actualObjectStateStatusHandle);
-                        
+
                         Vector3 b3PrevRobotPosition = Vector3.zero;
                         if (actualObjectStateStatusType == EnumSharedMemoryServerStatus.CMD_ACTUAL_STATE_UPDATE_COMPLETED)
                         {
@@ -292,16 +305,16 @@ namespace Controller
 
                             NativeMethods.b3GetStatusActualState(actualObjectStateStatusHandle, ref bodyUniqueId, ref numDegreeOfFreedomQ, ref numDegreeOfFreedomU, ref rootLocalInertialFrame, ref actualStateQ,
                                 ref actualStateQdot, ref jointReactionForces);
- 
+
                             BulletPosition bulletPosition = (BulletPosition) Marshal.PtrToStructure(actualStateQ, typeof(BulletPosition));
 
                             b3PrevRobotPosition = new Vector3((float) bulletPosition.x, (float) bulletPosition.y, (float) bulletPosition.z);
                         }
-                        
+
                         // The next robot moves to the position of the old robot
                         //_bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.Position = _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.Position;
                         _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.Position = b3PrevRobotPosition;
-                        
+
                         // Old robot moves to an (arbitray) different position, this robot is not used anymore
                         _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.Position = new Vector3(
                             _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.Position.x - ((_bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.B3RobotId + 1) * 1.5f),
@@ -318,7 +331,7 @@ namespace Controller
                         IntPtr moveNextRobotCmdHandle = NativeMethods.b3CreatePoseCommandInit(_bulletBridge.Pybullet, _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.B3RobotId);
                         NativeMethods.b3CreatePoseCommandSetBasePosition(moveNextRobotCmdHandle, _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.Position.x,
                             _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.Position.y,
-                            _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.Position.z); 
+                            _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot.Position.z);
                         NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, moveNextRobotCmdHandle);
 
                         _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot.IsActive = false;

@@ -3,6 +3,7 @@ using System.Collections;
 using Bullet.Helper;
 using Controller.Helper;
 using RosSharp;
+using SenseGloveCs.Kinematics;
 using UnityEngine;
 using Utils;
 
@@ -51,6 +52,13 @@ namespace Bullet
             _bulletBodyInformation.Instantiated = false;
 
             yield return true;
+        }
+
+        public void UpdatePositionAndRotation(Vector3 newPosition, Quaternion newRotation)
+        {
+            BulletBodyInformation.NewPosition = newPosition;
+            BulletBodyInformation.NewRotation = newRotation;
+            BulletBodyInformation.UpdatePositionAndRotation = true;
         }
 
         private void Update()

@@ -12,9 +12,13 @@ namespace Bullet.Helper
         private bool _instantiated = true;
         private bool _isStatic = true;
 
-        private Vector3 position;
-        private Quaternion rotation;
-        private double scaling;
+        private Vector3 _position;
+        private Quaternion _rotation;
+        private double _scaling;
+
+        private Vector3 _newPosition;
+        private Quaternion _newRotation;
+        private bool _updatePositionAndRotation = false;
         
         public Queue<b3ObjectStateWrapper> b3ObjectStates = new Queue<b3ObjectStateWrapper>();
 
@@ -38,26 +42,44 @@ namespace Bullet.Helper
 
         public Vector3 Position
         {
-            get => position;
-            set => position = value;
+            get => _position;
+            set => _position = value;
         }
 
         public Quaternion Rotation
         {
-            get => rotation;
-            set => rotation = value;
+            get => _rotation;
+            set => _rotation = value;
         }
 
         public double Scaling
         {
-            get => scaling;
-            set => scaling = value;
+            get => _scaling;
+            set => _scaling = value;
         }
 
         public bool IsStatic
         {
             get => _isStatic;
             set => _isStatic = value;
+        }
+
+        public Vector3 NewPosition
+        {
+            get => _newPosition;
+            set => _newPosition = value;
+        }
+
+        public Quaternion NewRotation
+        {
+            get => _newRotation;
+            set => _newRotation = value;
+        }
+
+        public bool UpdatePositionAndRotation
+        {
+            get => _updatePositionAndRotation;
+            set => _updatePositionAndRotation = value;
         }
     }
 }

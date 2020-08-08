@@ -16,9 +16,17 @@ public class LimitationController : MonoBehaviour
     [Space(10)] [Header("Joint Limits")] [SerializeField]
     private bool switchRobot = false;
     
-    public float TrackingDelay => trackingDelay;
+    public float TrackingDelay
+    {
+        get => trackingDelay;
+        set => trackingDelay = value;
+    }
 
-    public float MaxVelocity => maxVelocity;
+    public float MaxVelocity
+    {
+        get => maxVelocity;
+        set => maxVelocity = value;
+    }
 
     public bool UpdateVelocity
     {
