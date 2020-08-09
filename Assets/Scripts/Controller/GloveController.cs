@@ -1,10 +1,29 @@
-﻿using SenseGloveCs;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using SenseGloveCs;
 using TreeEditor;
 using UnityEngine;
 using Utils;
 
 namespace Controller
 {
+    public class GloveFingerContactInformation
+    {
+        private bool _hasCollision;
+        private float _atTime;
+
+        public bool HasCollision => _hasCollision;
+
+        public float AtTime => _atTime;
+
+        public GloveFingerContactInformation(bool hasCollision, float atTime)
+        {
+            _hasCollision = hasCollision;
+            _atTime = atTime;
+        }
+    }
+
     public class GloveController : MonoBehaviour
     {
         [SerializeField] [Header("SenseGlove (Right Hand)")]
@@ -12,36 +31,96 @@ namespace Controller
 
         public class GloveContactStatusInformation
         {
-            private readonly CircularQueue<bool> _thumbQueue = new CircularQueue<bool>(25);
-            private readonly CircularQueue<bool> _indexQueue = new CircularQueue<bool>(25);
-            private readonly CircularQueue<bool> _middleQueue = new CircularQueue<bool>(25);
-            private readonly CircularQueue<bool> _ringQueue = new CircularQueue<bool>(25);
-            private readonly CircularQueue<bool> _pinkyQueue = new CircularQueue<bool>(25);
+            private BulletBridge _bulletBridge;
 
-            public bool Thumb => _thumbQueue.CountVar(true) > 10;
+            public int MaxObjectsPerQueue { get; } = 250;
+            public int RelevantObjectsPerLookup { get; } = 25;
 
-            public bool Index => _indexQueue.CountVar(true) > 10;
+            public GloveContactStatusInformation(BulletBridge bulletBridge)
+            {
+                _bulletBridge = bulletBridge;
+            }
 
-            public bool Middle => _middleQueue.CountVar(true) > 10;
+            private readonly List<GloveFingerContactInformation> _thumbQueue = new List<GloveFingerContactInformation>();
+            private readonly List<GloveFingerContactInformation> _indexQueue = new List<GloveFingerContactInformation>();
+            private readonly List<GloveFingerContactInformation> _middleQueue = new List<GloveFingerContactInformation>();
+            private readonly List<GloveFingerContactInformation> _ringQueue = new List<GloveFingerContactInformation>();
+            private readonly List<GloveFingerContactInformation> _pinkyQueue = new List<GloveFingerContactInformation>();
 
-            public bool Ring => _ringQueue.CountVar(true) > 10;
 
-            public bool Pinky => _pinkyQueue.CountVar(true) > 10;
+            public bool Thumb
+            {
+                get
+                {
+                    bool shouldBrake = _thumbQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) > 10;
 
-            public CircularQueue<bool> ThumbQueue => _thumbQueue;
+                    return shouldBrake;
+                }
+            }
 
-            public CircularQueue<bool> IndexQueue => _indexQueue;
+            public bool Index
+            {
+                get
+                {
+                    bool shouldBrake = _indexQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) > 10;
 
-            public CircularQueue<bool> MiddleQueue => _middleQueue;
+                    return shouldBrake;
+                }
+            }
 
-            public CircularQueue<bool> RingQueue => _ringQueue;
+            public bool Middle
+            {
+                get
+                {
+                    bool shouldBrake = _middleQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) > 10;
 
-            public CircularQueue<bool> PinkyQueue => _pinkyQueue;
+                    return shouldBrake;
+                }
+            }
+
+            public bool Ring
+            {
+                get
+                {
+                    bool shouldBrake = _ringQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) > 10;
+
+                    return shouldBrake;
+                }
+            }
+
+            public bool Pinky
+            {
+                get
+                {
+                    bool shouldBrake = _pinkyQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) > 10;
+
+                    return shouldBrake;
+                }
+            }
+
+            public List<GloveFingerContactInformation> ThumbQueue => _thumbQueue;
+
+            public List<GloveFingerContactInformation> IndexQueue => _indexQueue;
+
+            public List<GloveFingerContactInformation> MiddleQueue => _middleQueue;
+
+            public List<GloveFingerContactInformation> RingQueue => _ringQueue;
+
+            public List<GloveFingerContactInformation> PinkyQueue => _pinkyQueue;
         }
 
-        private readonly GloveContactStatusInformation _gloveContactStatus = new GloveContactStatusInformation();
+        private BulletBridge _bulletBridge;
+        private LimitationController _limitationController;
+        private GloveContactStatusInformation _gloveContactStatus;
 
         public GloveContactStatusInformation GloveContactStatus => _gloveContactStatus;
+
+        private void Start()
+        {
+            _bulletBridge = GameObject.FindGameObjectWithTag("BulletConnectionController").GetComponent<BulletBridge>();
+
+            _gloveContactStatus = new GloveContactStatusInformation(_bulletBridge);
+        }
 
         private void Update()
         {

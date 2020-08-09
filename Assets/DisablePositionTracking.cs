@@ -15,8 +15,8 @@ public class DisablePositionTracking : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
-        mainCamera.transform.position = Vector3.zero;
+        mainCamera.transform.position = new Vector3(0, 0, 0.09f);
     }
 }

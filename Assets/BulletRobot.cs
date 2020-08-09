@@ -200,7 +200,7 @@ public class BulletRobot : MonoBehaviour
         {
             foreach (SyncedIkTargetInformation syncedIkTargetInformation in _syncedIkTargetInformations)
             {
-                var targetPosRos = (syncedIkTargetInformation.Transform.position).Unity2Ros();
+                var targetPosRos = (syncedIkTargetInformation.Transform.position - (new Vector3(0, 0.02f, 0))).Unity2Ros(); // Correct circumstance, that tracker is slightly above hand
                 var targetOrnRos = syncedIkTargetInformation.Transform.rotation;
                 targetOrnRos *= Quaternion.AngleAxis(90, new Vector3(0, 1, 0));
                 targetOrnRos *= Quaternion.AngleAxis(180, new Vector3(1, 0, 0));

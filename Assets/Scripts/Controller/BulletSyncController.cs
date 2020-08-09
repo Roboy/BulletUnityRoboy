@@ -128,7 +128,7 @@ namespace Controller
                         if (bulletObject.BulletBodyInformation.UpdatePositionAndRotation)
                         {
                             bulletObject.BulletBodyInformation.UpdatePositionAndRotation = false;
-                            
+
                             IntPtr moveObjectCmdHandle = NativeMethods.b3CreatePoseCommandInit(_bulletBridge.Pybullet, bulletObject.BulletBodyInformation.BodyId);
                             NativeMethods.b3CreatePoseCommandSetBasePosition(moveObjectCmdHandle, bulletObject.BulletBodyInformation.NewPosition.x,
                                 bulletObject.BulletBodyInformation.NewPosition.y,
@@ -136,6 +136,12 @@ namespace Controller
                             NativeMethods.b3CreatePoseCommandSetBaseOrientation(moveObjectCmdHandle, bulletObject.BulletBodyInformation.NewRotation.x, bulletObject.BulletBodyInformation.NewRotation.y,
                                 bulletObject.BulletBodyInformation.NewRotation.z, bulletObject.BulletBodyInformation.NewRotation.w);
                             NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, moveObjectCmdHandle);
+
+                            // Object might be asleep, wake it up to be sure
+                            IntPtr wakeUpCommand = NativeMethods.b3InitChangeDynamicsInfo(_bulletBridge.Pybullet);
+                            NativeMethods.b3ChangeDynamicsInfoSetActivationState(wakeUpCommand, bulletObject.BulletBodyInformation.BodyId,
+                                (int) DynamicsActivationState.eActivationStateDisableSleeping | (int) DynamicsActivationState.eActivationStateWakeUp);
+                            NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, wakeUpCommand);
                         }
 
                         IntPtr actualObjectStateCommand = NativeMethods.b3RequestActualStateCommandInit(_bulletBridge.Pybullet, bulletObject.BulletBodyInformation.BodyId);
@@ -221,27 +227,57 @@ namespace Controller
 
                 lock (_gloveController.GloveContactStatus.ThumbQueue)
                 {
-                    _gloveController.GloveContactStatus.ThumbQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 35 || data.m_linkIndexA == 34))); // Distal + Middle Thumb
+                    if (_gloveController.GloveContactStatus.ThumbQueue.Count > _gloveController.GloveContactStatus.MaxObjectsPerQueue)
+                    {
+                        _gloveController.GloveContactStatus.ThumbQueue.RemoveAt(0);
+                    }
+
+                    _gloveController.GloveContactStatus.ThumbQueue.Add(new GloveFingerContactInformation(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 35 || data.m_linkIndexA == 34)),
+                        _bulletBridge.CurrentTime + _limitationController.TrackingDelay));
                 }
 
                 lock (_gloveController.GloveContactStatus.IndexQueue)
                 {
-                    _gloveController.GloveContactStatus.IndexQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 13 || data.m_linkIndexA == 12))); // Distal + Middle Index
+                    if (_gloveController.GloveContactStatus.IndexQueue.Count > _gloveController.GloveContactStatus.MaxObjectsPerQueue)
+                    {
+                        _gloveController.GloveContactStatus.IndexQueue.RemoveAt(0);
+                    }
+
+                    _gloveController.GloveContactStatus.IndexQueue.Add(new GloveFingerContactInformation(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 13 || data.m_linkIndexA == 12)),
+                        _bulletBridge.CurrentTime + _limitationController.TrackingDelay)); // Distal + Middle Index
                 }
 
                 lock (_gloveController.GloveContactStatus.MiddleQueue)
                 {
-                    _gloveController.GloveContactStatus.MiddleQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 18 || data.m_linkIndexA == 17))); // Distal + Middle Middle
+                    if (_gloveController.GloveContactStatus.MiddleQueue.Count > _gloveController.GloveContactStatus.MaxObjectsPerQueue)
+                    {
+                        _gloveController.GloveContactStatus.MiddleQueue.RemoveAt(0);
+                    }
+
+                    _gloveController.GloveContactStatus.MiddleQueue.Add(new GloveFingerContactInformation(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 18 || data.m_linkIndexA == 17)),
+                        _bulletBridge.CurrentTime + _limitationController.TrackingDelay)); // Distal + Middle Middle
                 }
 
                 lock (_gloveController.GloveContactStatus.RingQueue)
                 {
-                    _gloveController.GloveContactStatus.RingQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 23 || data.m_linkIndexA == 22))); // Distal + Middle Ring
+                    if (_gloveController.GloveContactStatus.RingQueue.Count > _gloveController.GloveContactStatus.MaxObjectsPerQueue)
+                    {
+                        _gloveController.GloveContactStatus.RingQueue.RemoveAt(0);
+                    }
+
+                    _gloveController.GloveContactStatus.RingQueue.Add(new GloveFingerContactInformation(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 23 || data.m_linkIndexA == 22)),
+                        _bulletBridge.CurrentTime + _limitationController.TrackingDelay)); // Distal + Middle Ring
                 }
 
                 lock (_gloveController.GloveContactStatus.PinkyQueue)
                 {
-                    _gloveController.GloveContactStatus.PinkyQueue.Add(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 29 || data.m_linkIndexA == 28))); // Distal + Middle Pinky
+                    if (_gloveController.GloveContactStatus.PinkyQueue.Count > _gloveController.GloveContactStatus.MaxObjectsPerQueue)
+                    {
+                        _gloveController.GloveContactStatus.PinkyQueue.RemoveAt(0);
+                    }
+
+                    _gloveController.GloveContactStatus.PinkyQueue.Add(new GloveFingerContactInformation(b3ContactPointDatas.Exists((data => data.m_linkIndexA == 29 || data.m_linkIndexA == 28)),
+                        _bulletBridge.CurrentTime + _limitationController.TrackingDelay)); // Distal + Middle Pinky
                 }
 
                 #endregion

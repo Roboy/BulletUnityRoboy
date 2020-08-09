@@ -26,7 +26,6 @@ namespace Controller.Helper.Study
 
         // Meta
         private readonly DateTime _startTime;
-        private readonly Guid _guid;
         private readonly String _filePath;
         private readonly StudyController.StudyLanguage _language;
         private readonly LimitationController _limitationController;
@@ -73,11 +72,10 @@ namespace Controller.Helper.Study
             _type = studyType;
 
             _startTime = DateTime.Now;
-            _guid = Guid.NewGuid();
             _language = language;
             _limitationController = limitationController;
 
-            _filePath = StudyController.savePath + "/" + _startTime.ToShortDateString() + "_" + _guid.ToString() + "/" + Type.ToString() + ".json";
+            _filePath = StudyController.savePath + "/" + _startTime.ToShortDateString() + "_" + StudyUserData.Instance.Forename + "-" + StudyUserData.Instance.Surname + "_" + StudySession.Instance.Guid.ToString() + "/" + Type.ToString() + ".json";
             if (!Directory.Exists(Path.GetDirectoryName(_filePath)))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(_filePath));
