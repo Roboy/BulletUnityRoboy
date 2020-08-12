@@ -169,7 +169,14 @@ namespace Controller
                             Quaternion newOrn = new Quaternion((float) bulletPosition.qx, (float) bulletPosition.qy, (float) bulletPosition.qz, (float) bulletPosition.qw).normalized.Ros2Unity().normalized;
 
                             b3ObjectStateWrapper b3ObjectStateWrapper = new b3ObjectStateWrapper(newPos, newOrn, _bulletBridge.CurrentTime + _limitationController.TrackingDelay);
-                            bulletObject.BulletBodyInformation.b3ObjectStates.Enqueue(b3ObjectStateWrapper);
+                            try
+                            {
+                                bulletObject.BulletBodyInformation.b3ObjectStates.Enqueue(b3ObjectStateWrapper);
+                            }
+                            catch (Exception e)
+                            {
+                                // ignored
+                            }
                         }
                     }
                 }
@@ -211,7 +218,7 @@ namespace Controller
                 b3ContactInformation b3ContactInformation = new b3ContactInformation();
                 IntPtr collisionCommand = NativeMethods.b3InitRequestContactPointInformation(_bulletBridge.Pybullet);
                 NativeMethods.b3SetContactFilterBodyA(collisionCommand, _bulletRobot.ActiveRobot.B3RobotId);
-                NativeMethods.b3SetContactFilterBodyB(collisionCommand, 4); // ToDo: Dynamic! Right now: Static cube to grab...
+                NativeMethods.b3SetContactFilterBodyB(collisionCommand, 7); // ToDo: Dynamic! Right now: Static cube to grab...
                 NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, collisionCommand);
 
                 NativeMethods.b3GetContactPointInformation(_bulletBridge.Pybullet, ref b3ContactInformation);

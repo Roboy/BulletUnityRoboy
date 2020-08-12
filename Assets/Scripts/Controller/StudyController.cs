@@ -32,7 +32,7 @@ namespace Controller
 
         [SerializeField] private StudyLanguage language = StudyLanguage.German;
         [SerializeField] private BulletObject bulletObject;
-        [SerializeField] private TextMeshPro guideText;
+        [SerializeField] private TextMeshPro[] guideTexts;
 
 
         private LimitationController _limitationController;
@@ -52,6 +52,11 @@ namespace Controller
         /// Holds currently running study. If [null], no study is running.
         /// </summary>
         private Study _currentStudy = null;
+
+        /// <summary>
+        /// The grabable object has three possible spawn positions.
+        /// </summary>
+        private int _objectPosition = 0;
 
         private StudyLanguage Language => language;
 
@@ -287,7 +292,10 @@ namespace Controller
         /// </summary>
         private void UpdateGuideText()
         {
-            guideText.text = _currentStudy.CurrentQuestionText;
+            foreach (var guideText in guideTexts)
+            {
+                guideText.text = _currentStudy.CurrentQuestionText;
+            }
         }
 
         /// <summary>
@@ -301,9 +309,22 @@ namespace Controller
             _currentStudy.StudyQuestions[_currentStudy.QuestionIndex].Answer = new StudyAnswer(answer, DateTime.Now.ToLongTimeString());
             _currentStudy.SaveToFile();
             
+            
             // Reset grabable object
-            bulletObject.UpdatePositionAndRotation((new Vector3(0, 0, 0.434f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
-
+            switch (_objectPosition % 3)
+            {
+                case 0:
+                    bulletObject.UpdatePositionAndRotation((new Vector3(0, 0, 0.5f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
+                    break;
+                case 1:
+                    bulletObject.UpdatePositionAndRotation((new Vector3(0.19f, 0, 0.45f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
+                    break;
+                case 2:
+                    bulletObject.UpdatePositionAndRotation((new Vector3(-0.19f, 0, 0.45f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
+                    break;
+            }
+            _objectPosition++;
+            
             Debug.Log("[Study] Answer: " + answer);
 
             NextQuestion();
