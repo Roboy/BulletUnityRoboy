@@ -48,7 +48,6 @@ namespace Controller.Helper.Study
 
         private void OnTriggerEnter(Collider other)
         {
-            Debug.Log("D1");
             _studyController.AnswerQuestion((int) answerOption);
             StartCoroutine(FlashOnTrigger());
         }

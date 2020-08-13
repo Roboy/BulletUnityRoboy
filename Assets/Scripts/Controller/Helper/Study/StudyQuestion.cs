@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace Controller.Helper.Study
 {
-    
     [Serializable]
     public class StudyQuestion
     {
         [SerializeField] private String id;
         private string _english;
         private string _german;
+        [SerializeField] private StudyState state;
         [SerializeField] private StudyAnswer answer;
         [SerializeField] private StudyQuestionCategory category;
 
@@ -30,6 +30,12 @@ namespace Controller.Helper.Study
         {
             get => answer;
             set => answer = value;
+        }
+
+        public StudyState State
+        {
+            get => state;
+            set => state = value;
         }
 
         public StudyQuestionCategory Category => category;

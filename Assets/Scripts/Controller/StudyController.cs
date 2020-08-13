@@ -36,15 +36,16 @@ namespace Controller
 
 
         private LimitationController _limitationController;
-        private BulletSyncController _bulletSyncController;
         private BulletRobot _bulletRobot;
 
 
         [Space(10), Header("Delay")] [SerializeField]
-        private float maxDelayValue = 400;
+        private float maxDelayValue = 300;
 
         [Space(10)] [Header("Velocity")] [SerializeField]
-        private float maxVelocityValue = 10;
+        private float maxVelocityValue = 2.0f;
+
+        [SerializeField] private float minVelocityValue = 0.4f;
 
         private int maxJointLimitsValue => _bulletRobot ? _bulletRobot.SyncedRobots.Count : 0;
 
@@ -63,10 +64,13 @@ namespace Controller
         private void Start()
         {
             _limitationController = GameObject.FindGameObjectWithTag("LimitationController").GetComponent<LimitationController>();
-            _bulletSyncController = GameObject.FindGameObjectWithTag("BulletSyncController").GetComponent<BulletSyncController>();
             _bulletRobot = GameObject.FindGameObjectWithTag("BulletRobotController").GetComponent<BulletRobot>();
 
             savePath = Application.persistentDataPath;
+
+            // StudyUI is hidden by default
+            ToggleStudyInterfaceVisibility(false);
+            SetGuideText("");
         }
 
         /**
@@ -187,6 +191,8 @@ namespace Controller
             _currentStudy.SaveToFile();
 
             UpdateGuideText();
+            ToggleStudyInterfaceVisibility(true);
+
             PrintQuestion();
         }
 
@@ -199,8 +205,14 @@ namespace Controller
 
             Debug.Log("[Study] Stop " + _currentStudy.Type.ToString());
 
+            ToggleStudyInterfaceVisibility(false);
+            SetGuideText("");
+
             _currentStudy.SaveToFile();
             _currentStudy = null;
+            
+            UpdateDelay();
+            UpdateVelocity();
         }
 
         #endregion
@@ -230,23 +242,18 @@ namespace Controller
                 case Study.StudyType.None:
                     break;
                 case Study.StudyType.Delay:
-                    float delayValue = (maxDelayValue / (int) studyQuestionsNumber) * _currentStudy.QuestionIndex;
-                    _limitationController.TrackingDelay = delayValue;
+                    UpdateDelay();
                     break;
                 case Study.StudyType.Velocity:
-                    float velocityValue = maxVelocityValue - ((maxVelocityValue / (int) studyQuestionsNumber) * _currentStudy.QuestionIndex);
-                    _limitationController.MaxVelocity = velocityValue;
-                    _limitationController.UpdateVelocity = true;
+                    UpdateVelocity();
                     break;
                 case Study.StudyType.JointLimits:
-                    int robotIndex = (int) Math.Floor(((_currentStudy.QuestionIndex * 1.0f) / (int) studyQuestionsNumber) * maxJointLimitsValue);
-                    if (_bulletRobot.SyncedRobots[robotIndex].B3RobotId != _bulletRobot.ActiveRobot.B3RobotId)
-                    {
-                        _limitationController.SwitchRobot = true;
-                    }
-
+                    UpdateJointLimits();
                     break;
                 case Study.StudyType.Combined:
+                    UpdateDelay();
+                    UpdateVelocity();
+                    UpdateJointLimits();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -275,7 +282,7 @@ namespace Controller
         /// </summary>
         private void PrintQuestion()
         {
-            Debug.Log("[Study] Question: " + _currentStudy.CurrentQuestionText);
+            //Debug.Log("[Study] Question: " + _currentStudy.CurrentQuestionText);
 
             if (CalculateEmbodiment() < 0)
             {
@@ -292,10 +299,7 @@ namespace Controller
         /// </summary>
         private void UpdateGuideText()
         {
-            foreach (var guideText in guideTexts)
-            {
-                guideText.text = _currentStudy.CurrentQuestionText;
-            }
+            SetGuideText(_currentStudy.CurrentQuestionText);
         }
 
         /// <summary>
@@ -307,25 +311,30 @@ namespace Controller
             if (_currentStudy == null || _currentStudy.Type == Study.StudyType.None) return;
 
             _currentStudy.StudyQuestions[_currentStudy.QuestionIndex].Answer = new StudyAnswer(answer, DateTime.Now.ToLongTimeString());
+            _currentStudy.StudyQuestions[_currentStudy.QuestionIndex].State = new StudyState(_limitationController.MaxVelocity, _limitationController.TrackingDelay, _bulletRobot.ActiveRobot.B3RobotId);
             _currentStudy.SaveToFile();
-            
-            
+
+
             // Reset grabable object
-            switch (_objectPosition % 3)
+            switch (_objectPosition % 4)
             {
                 case 0:
-                    bulletObject.UpdatePositionAndRotation((new Vector3(0, 0, 0.5f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
+                    bulletObject.UpdatePositionAndRotation((new Vector3(0, 0, 0.29f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
                     break;
                 case 1:
-                    bulletObject.UpdatePositionAndRotation((new Vector3(0.19f, 0, 0.45f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
+                    bulletObject.UpdatePositionAndRotation((new Vector3(0, 0, 0.5f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
                     break;
                 case 2:
+                    bulletObject.UpdatePositionAndRotation((new Vector3(0.19f, 0, 0.45f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
+                    break;
+                case 3:
                     bulletObject.UpdatePositionAndRotation((new Vector3(-0.19f, 0, 0.45f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
                     break;
             }
+
             _objectPosition++;
-            
-            Debug.Log("[Study] Answer: " + answer);
+
+            //Debug.Log("[Study] Answer: " + answer);
 
             NextQuestion();
         }
@@ -400,5 +409,67 @@ namespace Controller
         }
 
         #endregion
+
+        /// <summary>
+        /// Hides or shows the UI for the study, namely the guide texts and dropzones.
+        /// </summary>
+        /// <param name="visibility">true for visible, false for invisible</param>
+        private void ToggleStudyInterfaceVisibility(bool visibility)
+        {
+            GameObject[] studyUI = GameObject.FindGameObjectsWithTag("StudyUI");
+            foreach (GameObject gameObject in studyUI)
+            {
+                if (gameObject.GetComponent<Renderer>() != null)
+                {
+                    gameObject.GetComponent<Renderer>().enabled = visibility;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates all guide texts existing in the scene.
+        /// </summary>
+        /// <param name="text">the new text</param>
+        private void SetGuideText(string text)
+        {
+            foreach (TextMeshPro guideText in guideTexts)
+            {
+                guideText.text = text;
+            }
+        }
+
+        private void UpdateVelocity()
+        {
+            if (_currentStudy == null)
+            {
+                _limitationController.MaxVelocity = maxVelocityValue;
+                _limitationController.UpdateVelocity = true;
+                return;
+            }
+            
+            float velocityValue = maxVelocityValue - (((maxVelocityValue - minVelocityValue) / (int) studyQuestionsNumber) * _currentStudy.QuestionIndex);
+            _limitationController.MaxVelocity = velocityValue;
+            _limitationController.UpdateVelocity = true;
+        }
+
+        private void UpdateDelay()
+        {
+            if (_currentStudy == null)
+            {
+                _limitationController.TrackingDelay = 0;
+                return;
+            }
+            float delayValue = (maxDelayValue / (int) studyQuestionsNumber) * _currentStudy.QuestionIndex;
+            _limitationController.TrackingDelay = delayValue;
+        }
+
+        private void UpdateJointLimits()
+        {
+            int robotIndex = (int) Math.Floor(((_currentStudy.QuestionIndex * 1.0f) / (int) studyQuestionsNumber) * maxJointLimitsValue);
+            if (_bulletRobot.SyncedRobots[robotIndex].B3RobotId != _bulletRobot.ActiveRobot.B3RobotId)
+            {
+                _limitationController.SwitchRobot = true;
+            }
+        }
     }
 }
