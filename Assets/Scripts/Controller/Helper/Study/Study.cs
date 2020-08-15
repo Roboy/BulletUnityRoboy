@@ -15,7 +15,8 @@ namespace Controller.Helper.Study
             Delay,
             Velocity,
             JointLimits,
-            Combined
+            Combined,
+            ALL_IN
         }
 
         public StudyType Type => _type;
@@ -52,7 +53,7 @@ namespace Controller.Helper.Study
             new StudyQuestion("Q9", "I feel as if the virtual arm is moving by itself", "Ich habe das Gefühl, der virtuelle Arm bewegt sich von selbst", StudyQuestion.StudyQuestionCategory.Agency),
             new StudyQuestion("Q14", "I feel as if my arm is located where I see the virtual arm", "Ich habe das Gefühl, dass sich mein Arm dort befindet, wo ich den virtuellen Arm sehe",
                 StudyQuestion.StudyQuestionCategory.Location),
-            new StudyQuestion("Q15", "I feel out of my body", "Ich fühle mich, als wäre ich ausserhalb meines Körpers", StudyQuestion.StudyQuestionCategory.Location),
+            new StudyQuestion("Q15", "I feel out of my body", "Ich fühle mich, als wäre ich außerhalb meines Körpers", StudyQuestion.StudyQuestionCategory.Location),
             new StudyQuestion("Q16", "I feel as if my (real) arm is drifting toward the virtual arm or as if the virtual arm is drifting toward my (real) arm",
                 "Ich habe das Gefühl, als ob mein (realer) Arm auf den virtuellen Arm zusteuert oder als ob der virtuelle Arm auf meinen (realen) Arm zusteuert.", StudyQuestion.StudyQuestionCategory.Location),
         };
@@ -66,6 +67,8 @@ namespace Controller.Helper.Study
         /// Type of the current study.
         /// </summary>
         private readonly StudyType _type = StudyType.None;
+
+        public string FilePath => _filePath;
 
         public Study(StudyType studyType, StudyController.StudyLanguage language, int studyQuestionsNumber, LimitationController limitationController)
         {
@@ -111,17 +114,6 @@ namespace Controller.Helper.Study
             String jsonData = JsonUtility.ToJson(wrapper);
 
             File.WriteAllText(_filePath, jsonData);
-        }
-
-
-        /// <summary>
-        /// Answers the current question.
-        /// </summary>
-        /// <param name="answer">the answer the user has given</param>
-        public void AnswerQuestion(int answer)
-        {
-            _studyQuestions[QuestionIndex].Answer = new StudyAnswer(answer, DateTime.Now.ToLongTimeString());
-            this.SaveToFile();
         }
 
         /// <summary>

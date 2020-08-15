@@ -11,6 +11,7 @@ namespace Bullet.Helper
         private string _urdfPath;
         private bool _instantiated = true;
         private bool _isStatic = true;
+        private bool _isGraspable = false;
 
         private Vector3 _position;
         private Quaternion _rotation;
@@ -62,6 +63,12 @@ namespace Bullet.Helper
         {
             get => _isStatic;
             set => _isStatic = value;
+        }
+
+        public bool IsGraspable
+        {
+            get => _isGraspable;
+            set => _isGraspable = value;
         }
 
         public Vector3 NewPosition

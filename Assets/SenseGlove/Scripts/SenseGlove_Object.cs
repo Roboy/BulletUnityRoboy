@@ -875,20 +875,21 @@ public class SenseGlove_Object : MonoBehaviour
     {
     }
 
-    // SenseGloves are a huge FPS drainer. Therefore, updates are only performed every [_updateGloveTimeout] frames.
-    private int _updateGloveTimeout = 3;
+    // SenseGloves are a huge FPS drainer. Therefore, updates are only performed in [_gloveUpdateRate] Hz.
+    private int _gloveUpdateRate = 50;
+    private float _lastGloveUpdate = 0;
 
     // Update is called once per frame
     protected virtual void Update()
     {
-        if (_updateGloveTimeout == 0)
+        float currentTime = Time.realtimeSinceStartup * 1000.0f;
+        
+        if (currentTime - _lastGloveUpdate > _gloveUpdateRate)
         {
             this.UpdateGlove();
-            _updateGloveTimeout = 3;
+            _lastGloveUpdate = Time.realtimeSinceStartup * 1000.0f;
         }
         this.CheckConnection(); //must be placed after checkConnection, otherwise a nullref might occur.
-
-        _updateGloveTimeout--;
     }
 
     //Fires after all the updates.

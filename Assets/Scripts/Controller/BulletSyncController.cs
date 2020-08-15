@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Bullet;
@@ -215,22 +216,25 @@ namespace Controller
 
                 #region SenseGlove: Finger Collisions
 
-                b3ContactInformation b3ContactInformation = new b3ContactInformation();
-                IntPtr collisionCommand = NativeMethods.b3InitRequestContactPointInformation(_bulletBridge.Pybullet);
-                NativeMethods.b3SetContactFilterBodyA(collisionCommand, _bulletRobot.ActiveRobot.B3RobotId);
-                NativeMethods.b3SetContactFilterBodyB(collisionCommand, 7); // ToDo: Dynamic! Right now: Static cube to grab...
-                NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, collisionCommand);
-
-                NativeMethods.b3GetContactPointInformation(_bulletBridge.Pybullet, ref b3ContactInformation);
-
                 List<b3ContactPointData> b3ContactPointDatas = new List<b3ContactPointData>();
+                
+                // foreach (BulletObject bulletObject in _bulletObjects.Where((o => o.BulletBodyInformation.IsGraspable)))
+                // {
+                    b3ContactInformation b3ContactInformation = new b3ContactInformation();
+                    IntPtr collisionCommand = NativeMethods.b3InitRequestContactPointInformation(_bulletBridge.Pybullet);
+                    NativeMethods.b3SetContactFilterBodyA(collisionCommand, _bulletRobot.ActiveRobot.B3RobotId);
+                    NativeMethods.b3SetContactFilterBodyB(collisionCommand, 7 /*bulletObject.BulletBodyInformation.BodyId*/); // ToDo: Dynamic! Right now: Static cube to grab...
+                    NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, collisionCommand);
 
-                for (int i = 0; i < b3ContactInformation.m_numContactPoints; i++)
-                {
-                    b3ContactPointData b3ContactPointData = (b3ContactPointData) Marshal.PtrToStructure(b3ContactInformation.m_contactPointData, typeof(b3ContactPointData));
-                    b3ContactInformation.m_contactPointData = new IntPtr(b3ContactInformation.m_contactPointData.ToInt64() + (Marshal.SizeOf(typeof(b3ContactPointData))));
-                    b3ContactPointDatas.Add(b3ContactPointData);
-                }
+                    NativeMethods.b3GetContactPointInformation(_bulletBridge.Pybullet, ref b3ContactInformation);
+
+                    for (int i = 0; i < b3ContactInformation.m_numContactPoints; i++)
+                    {
+                        b3ContactPointData b3ContactPointData = (b3ContactPointData) Marshal.PtrToStructure(b3ContactInformation.m_contactPointData, typeof(b3ContactPointData));
+                        b3ContactInformation.m_contactPointData = new IntPtr(b3ContactInformation.m_contactPointData.ToInt64() + (Marshal.SizeOf(typeof(b3ContactPointData))));
+                        b3ContactPointDatas.Add(b3ContactPointData);
+                    }
+                // }
 
                 lock (_gloveController.GloveContactStatus.ThumbQueue)
                 {
@@ -292,10 +296,11 @@ namespace Controller
                 #region Limitation: Switch Robot Control
 
                 // Switch Robot Control
-                if (_limitationController.SwitchRobot == true)
+                if (_limitationController.SwitchRobot == true && _limitationController.SwitchInProgress == false)
                 {
                     _limitationController.SwitchRobot = false;
                     _bulletRobot.SyncedRobotSwitchInformation.SwitchRobotFlag = true;
+                    _limitationController.SwitchInProgress = true;
                 }
 
                 if (_bulletRobot.SyncedRobotSwitchInformation.SwitchRobotFlag || _bulletRobot.SyncedRobotSwitchInformation.WaitCounterA != 0 || _bulletRobot.SyncedRobotSwitchInformation.WaitCounterB != 0)
@@ -404,6 +409,8 @@ namespace Controller
 
                         _bulletRobot.SyncedRobotSwitchInformation.PrevSyncedRobot = null;
                         _bulletRobot.SyncedRobotSwitchInformation.NextSyncedRobot = null;
+
+                        _limitationController.SwitchInProgress = false;
                     }
 
                     if (_bulletRobot.SyncedRobotSwitchInformation.WaitCounterB != -1)

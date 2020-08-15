@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using SenseGloveCs;
-using TreeEditor;
 using UnityEngine;
-using Utils;
 
 namespace Controller
 {
@@ -52,9 +48,13 @@ namespace Controller
             {
                 get
                 {
-                    bool shouldBrake = _thumbQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) > 10;
+                    lock (_thumbQueue)
+                    {
+                        bool shouldBrake = _thumbQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) >
+                                           10;
 
-                    return shouldBrake;
+                        return shouldBrake;
+                    }
                 }
             }
 
@@ -62,9 +62,13 @@ namespace Controller
             {
                 get
                 {
-                    bool shouldBrake = _indexQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) > 10;
+                    lock (_indexQueue)
+                    {
+                        bool shouldBrake = _indexQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) >
+                                           10;
 
-                    return shouldBrake;
+                        return shouldBrake;
+                    }
                 }
             }
 
@@ -72,9 +76,13 @@ namespace Controller
             {
                 get
                 {
-                    bool shouldBrake = _middleQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) > 10;
+                    lock (_middleQueue)
+                    {
+                        bool shouldBrake = _middleQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) >
+                                           10;
 
-                    return shouldBrake;
+                        return shouldBrake;
+                    }
                 }
             }
 
@@ -82,9 +90,12 @@ namespace Controller
             {
                 get
                 {
-                    bool shouldBrake = _ringQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) > 10;
+                    lock (_ringQueue)
+                    {
+                        bool shouldBrake = _ringQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) > 10;
 
-                    return shouldBrake;
+                        return shouldBrake;
+                    }
                 }
             }
 
@@ -92,9 +103,13 @@ namespace Controller
             {
                 get
                 {
-                    bool shouldBrake = _pinkyQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) > 10;
+                    lock (_pinkyQueue)
+                    {
+                        bool shouldBrake = _pinkyQueue.Where((information => information.AtTime < _bulletBridge.CurrentTime)).Reverse().Take(RelevantObjectsPerLookup).Count((information => information.HasCollision)) >
+                                           10;
 
-                    return shouldBrake;
+                        return shouldBrake;
+                    }
                 }
             }
 

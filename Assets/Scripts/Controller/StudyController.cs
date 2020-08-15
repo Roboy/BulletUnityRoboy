@@ -6,6 +6,7 @@ using Controller.Helper.Study;
 using RosSharp;
 using TMPro;
 using UnityEngine;
+using Valve.VR.InteractionSystem;
 
 namespace Controller
 {
@@ -58,6 +59,8 @@ namespace Controller
         /// The grabable object has three possible spawn positions.
         /// </summary>
         private int _objectPosition = 0;
+        
+        private List<StudyDropzone> _studyDropzones = new List<StudyDropzone>();
 
         private StudyLanguage Language => language;
 
@@ -65,6 +68,12 @@ namespace Controller
         {
             _limitationController = GameObject.FindGameObjectWithTag("LimitationController").GetComponent<LimitationController>();
             _bulletRobot = GameObject.FindGameObjectWithTag("BulletRobotController").GetComponent<BulletRobot>();
+
+            foreach (var dropzoneObject in GameObject.FindGameObjectsWithTag("StudyDropzone"))
+            {
+                _studyDropzones.Add(dropzoneObject.GetComponentInChildren<StudyDropzone>());
+            }
+            _studyDropzones.ForEach((dropzone => dropzone.SetText(Language)));
 
             savePath = Application.persistentDataPath;
 
@@ -194,6 +203,8 @@ namespace Controller
             ToggleStudyInterfaceVisibility(true);
 
             PrintQuestion();
+
+            Debug.Log("[Study] File is at " + _currentStudy.FilePath);
         }
 
         /// <summary>
@@ -210,7 +221,7 @@ namespace Controller
 
             _currentStudy.SaveToFile();
             _currentStudy = null;
-            
+
             UpdateDelay();
             UpdateVelocity();
         }
@@ -310,24 +321,22 @@ namespace Controller
         {
             if (_currentStudy == null || _currentStudy.Type == Study.StudyType.None) return;
 
-            _currentStudy.StudyQuestions[_currentStudy.QuestionIndex].Answer = new StudyAnswer(answer, DateTime.Now.ToLongTimeString());
+            _currentStudy.StudyQuestions[_currentStudy.QuestionIndex].Answer =
+                new StudyAnswer(answer, CalculateEmbodiment(), CalculateBodyOwnership(), CalculateAgency(), CalculateLocation(), DateTime.Now.ToLongTimeString());
             _currentStudy.StudyQuestions[_currentStudy.QuestionIndex].State = new StudyState(_limitationController.MaxVelocity, _limitationController.TrackingDelay, _bulletRobot.ActiveRobot.B3RobotId);
             _currentStudy.SaveToFile();
 
 
             // Reset grabable object
-            switch (_objectPosition % 4)
+            switch (_objectPosition % 3)
             {
                 case 0:
-                    bulletObject.UpdatePositionAndRotation((new Vector3(0, 0, 0.29f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
-                    break;
-                case 1:
                     bulletObject.UpdatePositionAndRotation((new Vector3(0, 0, 0.5f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
                     break;
-                case 2:
+                case 1:
                     bulletObject.UpdatePositionAndRotation((new Vector3(0.19f, 0, 0.45f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
                     break;
-                case 3:
+                case 2:
                     bulletObject.UpdatePositionAndRotation((new Vector3(-0.19f, 0, 0.45f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
                     break;
             }
@@ -438,6 +447,9 @@ namespace Controller
             }
         }
 
+        /// <summary>
+        /// Updates the velocity limitation to the correct value depending on [_currentStudy.QuestionIndex]
+        /// </summary>
         private void UpdateVelocity()
         {
             if (_currentStudy == null)
@@ -447,11 +459,19 @@ namespace Controller
                 return;
             }
             
-            float velocityValue = maxVelocityValue - (((maxVelocityValue - minVelocityValue) / (int) studyQuestionsNumber) * _currentStudy.QuestionIndex);
+            if (_currentStudy.StudyQuestions.Count((question => question.Answer != null)) < 12)
+            {
+                return;
+            }
+
+            float velocityValue = maxVelocityValue - (((maxVelocityValue - minVelocityValue) / ((int) studyQuestionsNumber - 12)) * (_currentStudy.QuestionIndex - 11));
             _limitationController.MaxVelocity = velocityValue;
             _limitationController.UpdateVelocity = true;
         }
 
+        /// <summary>
+        /// Updates the delay limitation to the correct value depending on [_currentStudy.QuestionIndex]
+        /// </summary>
         private void UpdateDelay()
         {
             if (_currentStudy == null)
@@ -459,16 +479,33 @@ namespace Controller
                 _limitationController.TrackingDelay = 0;
                 return;
             }
-            float delayValue = (maxDelayValue / (int) studyQuestionsNumber) * _currentStudy.QuestionIndex;
+            
+            if (_currentStudy.StudyQuestions.Count((question => question.Answer != null)) < 12)
+            {
+                return;
+            }
+
+            float delayValue = (maxDelayValue / ((int) studyQuestionsNumber - 12)) * (_currentStudy.QuestionIndex - 11);
             _limitationController.TrackingDelay = delayValue;
         }
 
+        /// <summary>
+        /// Updates the joint limitation to the correct value depending on [_currentStudy.QuestionIndex]
+        /// </summary>
         private void UpdateJointLimits()
         {
-            int robotIndex = (int) Math.Floor(((_currentStudy.QuestionIndex * 1.0f) / (int) studyQuestionsNumber) * maxJointLimitsValue);
+            if (_currentStudy.StudyQuestions.Count((question => question.Answer != null)) < 12)
+            {
+                return;
+            }
+            
+            int robotIndex = (int) Math.Floor((((_currentStudy.QuestionIndex - 12) * 1.0f) / ((int) studyQuestionsNumber - 12)) * maxJointLimitsValue);
             if (_bulletRobot.SyncedRobots[robotIndex].B3RobotId != _bulletRobot.ActiveRobot.B3RobotId)
             {
-                _limitationController.SwitchRobot = true;
+                if (!_limitationController.SwitchInProgress)
+                {
+                    _limitationController.SwitchRobot = true;
+                }
             }
         }
     }

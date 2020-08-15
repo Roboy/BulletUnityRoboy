@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System;
-using UnityEditor.Animations;
 using System.Linq;
 
 public class BulletBody : MonoBehaviour

@@ -20,6 +20,8 @@ namespace Bullet
 
         [SerializeField] private bool isStatic = true;
 
+        [SerializeField] private bool isGraspable = false;
+
         private BulletBridge _bulletBridge;
         private readonly BulletBodyInformation _bulletBodyInformation = new BulletBodyInformation();
 
@@ -49,6 +51,7 @@ namespace Bullet
             _bulletBodyInformation.Rotation = transform.rotation;
             _bulletBodyInformation.Scaling = transform.localScale.x;
             _bulletBodyInformation.IsStatic = isStatic;
+            _bulletBodyInformation.IsGraspable = isGraspable;
             _bulletBodyInformation.Instantiated = false;
 
             yield return true;

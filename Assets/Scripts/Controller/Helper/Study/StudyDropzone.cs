@@ -1,27 +1,40 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 namespace Controller.Helper.Study
 {
     public class StudyDropzone : MonoBehaviour
     {
-        public enum StudyAnswerOption
+        public enum StudyAnswerOptionType
         {
-            One = 1,
-            Two = 2,
-            Three = 3,
-            Four = 4,
-            Five = 5,
-            Six = 6,
-            Seven = 7
+            STRONGLY_DISAGREE = -3,
+            DISAGREE = -2,
+            SOMEWHAT_DISAGREE = -1,
+            NEUTRAL = 0,
+            SOMEWHAT_AGREE = 1,
+            AGREE = 2,
+            STRONGLY_AGREE = 3
         }
 
-        [SerializeField] private StudyAnswerOption answerOption;
+        [SerializeField] private StudyAnswerOptionType answerOptionType;
+        [SerializeField] private TextMeshPro informationText;
 
         private StudyController _studyController;
 
+        private readonly List<StudyAnswerOption> _allStudyAnswerOptions = new List<StudyAnswerOption>()
+        {
+            new StudyAnswerOption(StudyDropzone.StudyAnswerOptionType.STRONGLY_DISAGREE, "Strongly Disagree", "Stimme überhaupt\nnicht zu"),
+            new StudyAnswerOption(StudyDropzone.StudyAnswerOptionType.DISAGREE, "Disagree", "Stimme nicht zu"),
+            new StudyAnswerOption(StudyDropzone.StudyAnswerOptionType.SOMEWHAT_DISAGREE, "Somewhat Disagree", "Stimme teilweise\nnicht zu"),
+            new StudyAnswerOption(StudyDropzone.StudyAnswerOptionType.NEUTRAL, "Neutral", "Neutral"),
+            new StudyAnswerOption(StudyDropzone.StudyAnswerOptionType.SOMEWHAT_AGREE, "Somewhat Agree", "Stimme teilweise zu"),
+            new StudyAnswerOption(StudyDropzone.StudyAnswerOptionType.AGREE, "Agree", "Stimme zu"),
+            new StudyAnswerOption(StudyDropzone.StudyAnswerOptionType.STRONGLY_AGREE, "Strongly Agree", "Stimme völlig zu")
+        };
+        
         class RendererWrapper
         {
             public Renderer Renderer { get; set; }
@@ -45,10 +58,9 @@ namespace Controller.Helper.Study
             }
         }
         
-
         private void OnTriggerEnter(Collider other)
         {
-            _studyController.AnswerQuestion((int) answerOption);
+            _studyController.AnswerQuestion((int) answerOptionType);
             StartCoroutine(FlashOnTrigger());
         }
 
@@ -65,6 +77,19 @@ namespace Controller.Helper.Study
             foreach (var rendererWrapper in _renderers)
             {
                 rendererWrapper.Renderer.material = rendererWrapper.Material;
+            }
+        }
+
+        public void SetText(StudyController.StudyLanguage studyLanguage)
+        {
+            StudyAnswerOption studyAnswerOption = _allStudyAnswerOptions.Find((option => option.StudyAnswerOptionType == answerOptionType));
+            if (studyLanguage == StudyController.StudyLanguage.English)
+            {
+                this.informationText.text = "" + (int) studyAnswerOption.StudyAnswerOptionType + "\n" + studyAnswerOption.English;
+            }
+            else
+            {
+                this.informationText.text = "" + (int) studyAnswerOption.StudyAnswerOptionType + "\n" + studyAnswerOption.German;
             }
         }
     }

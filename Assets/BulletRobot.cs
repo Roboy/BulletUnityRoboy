@@ -16,7 +16,7 @@ using Utils;
 public class BulletRobot : MonoBehaviour
 {
     [Header("Tracking Update")] [Tooltip("How often the state gathered from Bullet is synchronized to the Unity joints.")] [SerializeField]
-    private float trackingUpdateRate = 0.02f;
+    private float trackingUpdateRate = 0.025f;
 
     [Space(10)] [Header("Limitations")] [Tooltip("How often the state is gathered from Bullet.")] [Range(0.0f, 500.0f)] [SerializeField]
     private readonly int _stateSyncUpdateRate = 15;
@@ -200,7 +200,7 @@ public class BulletRobot : MonoBehaviour
         {
             foreach (SyncedIkTargetInformation syncedIkTargetInformation in _syncedIkTargetInformations)
             {
-                var targetPosRos = (syncedIkTargetInformation.Transform.position - (new Vector3(0, 0.02f, 0))).Unity2Ros(); // Correct circumstance, that tracker is slightly above hand
+                var targetPosRos = (syncedIkTargetInformation.Transform.position/* - (new Vector3(0, 0.02f, 0))*/).Unity2Ros(); // Correct circumstance, that tracker is slightly above hand
                 var targetOrnRos = syncedIkTargetInformation.Transform.rotation;
                 targetOrnRos *= Quaternion.AngleAxis(90, new Vector3(0, 1, 0));
                 targetOrnRos *= Quaternion.AngleAxis(180, new Vector3(1, 0, 0));

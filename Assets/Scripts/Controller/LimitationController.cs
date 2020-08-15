@@ -15,6 +15,8 @@ public class LimitationController : MonoBehaviour
 
     [Space(10)] [Header("Joint Limits")] [SerializeField]
     private bool switchRobot = false;
+
+    private bool _switchInProgress = false;
     
     public float TrackingDelay
     {
@@ -38,5 +40,11 @@ public class LimitationController : MonoBehaviour
     {
         get => switchRobot;
         set => switchRobot = value;
+    }
+
+    public bool SwitchInProgress
+    {
+        get => _switchInProgress;
+        set => _switchInProgress = value;
     }
 }
