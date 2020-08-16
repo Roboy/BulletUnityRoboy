@@ -218,12 +218,12 @@ namespace Controller
 
                 List<b3ContactPointData> b3ContactPointDatas = new List<b3ContactPointData>();
                 
-                // foreach (BulletObject bulletObject in _bulletObjects.Where((o => o.BulletBodyInformation.IsGraspable)))
-                // {
+                foreach (BulletObject bulletObject in _bulletObjects.Where((o => o.BulletBodyInformation.IsGraspable)))
+                {
                     b3ContactInformation b3ContactInformation = new b3ContactInformation();
                     IntPtr collisionCommand = NativeMethods.b3InitRequestContactPointInformation(_bulletBridge.Pybullet);
                     NativeMethods.b3SetContactFilterBodyA(collisionCommand, _bulletRobot.ActiveRobot.B3RobotId);
-                    NativeMethods.b3SetContactFilterBodyB(collisionCommand, 7 /*bulletObject.BulletBodyInformation.BodyId*/); // ToDo: Dynamic! Right now: Static cube to grab...
+                    NativeMethods.b3SetContactFilterBodyB(collisionCommand, bulletObject.BulletBodyInformation.BodyId); // ToDo: Dynamic! Right now: Static cube to grab...
                     NativeMethods.b3SubmitClientCommandAndWaitStatus(_bulletBridge.Pybullet, collisionCommand);
 
                     NativeMethods.b3GetContactPointInformation(_bulletBridge.Pybullet, ref b3ContactInformation);
@@ -234,7 +234,7 @@ namespace Controller
                         b3ContactInformation.m_contactPointData = new IntPtr(b3ContactInformation.m_contactPointData.ToInt64() + (Marshal.SizeOf(typeof(b3ContactPointData))));
                         b3ContactPointDatas.Add(b3ContactPointData);
                     }
-                // }
+                }
 
                 lock (_gloveController.GloveContactStatus.ThumbQueue)
                 {

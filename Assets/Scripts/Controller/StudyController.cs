@@ -16,6 +16,7 @@ namespace Controller
 
         enum StudyQuestionsNumber
         {
+            TwentyFour = 24,
             ThirtySix = 36,
             FourtyEight = 48,
             Sixty = 60,
@@ -23,7 +24,7 @@ namespace Controller
         }
 
         [Space(10)] [Header("General")] [SerializeField]
-        private StudyQuestionsNumber studyQuestionsNumber = StudyQuestionsNumber.Sixty;
+        private StudyQuestionsNumber studyQuestionsNumber = StudyQuestionsNumber.FourtyEight;
 
         public enum StudyLanguage
         {
@@ -59,7 +60,7 @@ namespace Controller
         /// The grabable object has three possible spawn positions.
         /// </summary>
         private int _objectPosition = 0;
-        
+
         private List<StudyDropzone> _studyDropzones = new List<StudyDropzone>();
 
         private StudyLanguage Language => language;
@@ -73,6 +74,7 @@ namespace Controller
             {
                 _studyDropzones.Add(dropzoneObject.GetComponentInChildren<StudyDropzone>());
             }
+
             _studyDropzones.ForEach((dropzone => dropzone.SetText(Language)));
 
             savePath = Application.persistentDataPath;
@@ -115,6 +117,11 @@ namespace Controller
             {
                 StartStudy(Study.StudyType.Combined);
             }
+            
+            if (Input.GetKeyDown(KeyCode.F5))
+            {
+                StartStudy(Study.StudyType.AllIn);
+            }
 
             if (Input.GetKeyDown(KeyCode.F9))
             {
@@ -136,47 +143,42 @@ namespace Controller
                 NextQuestion();
             }
 
-            if (Input.GetKeyDown(KeyCode.F5))
-            {
-                PrintQuestion();
-            }
-
             #region Debug: Anwser Manually
 
             // For Debugging: Answer Questions
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                AnswerQuestion(1);
+                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.STRONGLY_DISAGREE);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha2))
             {
-                AnswerQuestion(2);
+                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.DISAGREE);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha3))
             {
-                AnswerQuestion(3);
+                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_DISAGREE);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha4))
             {
-                AnswerQuestion(4);
+                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.NEUTRAL);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha5))
             {
-                AnswerQuestion(5);
+                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_AGREE);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha6))
             {
-                AnswerQuestion(6);
+                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.AGREE);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha7))
             {
-                AnswerQuestion(7);
+                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.STRONGLY_AGREE);
             }
 
             #endregion
@@ -219,6 +221,8 @@ namespace Controller
             ToggleStudyInterfaceVisibility(false);
             SetGuideText("");
 
+            CalculateLimit();
+
             _currentStudy.SaveToFile();
             _currentStudy = null;
 
@@ -251,6 +255,7 @@ namespace Controller
             switch (_currentStudy.Type)
             {
                 case Study.StudyType.None:
+                case Study.StudyType.AllIn:
                     break;
                 case Study.StudyType.Delay:
                     UpdateDelay();
@@ -295,7 +300,7 @@ namespace Controller
         {
             //Debug.Log("[Study] Question: " + _currentStudy.CurrentQuestionText);
 
-            if (CalculateEmbodiment() < 0)
+            if (_currentStudy.StudyQuestions.Count((question => question.Answer != null)) < 12)
             {
                 Debug.Log("[Study] Embodiment: Not enough data.");
             }
@@ -358,7 +363,7 @@ namespace Controller
         /// <returns>embodiment level</returns>
         private float CalculateEmbodiment()
         {
-            if (_currentStudy.StudyQuestions.Count((question => question.Answer != null)) < 12) return -1;
+            if (_currentStudy.StudyQuestions.Count((question => question.Answer != null)) < 12) return -100.0f;
 
             return (CalculateBodyOwnership() / 5.0f) + (CalculateAgency() / 4.0f) + (CalculateLocation() / 3.0f);
         }
@@ -417,6 +422,53 @@ namespace Controller
             return q14 - q15 + q16;
         }
 
+        /// <summary>
+        /// Calculates, at which point (i.e. limitation value) in the current study the embodiment level drops below a critical threshold.
+        /// This assumes, that embodiment is lost after this critical threshold.
+        /// It's used to check later, whether embodiment one step previously (where embodiment levels where still higher) can be achieved, if a user is exposed to these values directly.
+        /// </summary>
+        private void CalculateLimit()
+        {
+            float maxEmbodiment = _currentStudy.StudyQuestions.GetRange(12, _currentStudy.StudyQuestions.Count - 12).Max((question => question.Answer.Embodiment)); // 100%
+            float minEmbodiment = _currentStudy.StudyQuestions.GetRange(12, _currentStudy.StudyQuestions.Count - 12).Min((question => question.Answer.Embodiment)); // 0%
+
+            float targetEmbodiment = minEmbodiment + (((maxEmbodiment - minEmbodiment) / 100.0f) * 60.0f); // 60%
+            
+            StudyQuestion targetQuestion = _currentStudy.StudyQuestions.GetRange(12, _currentStudy.StudyQuestions.Count - 12).FindLast((question => question.Answer.Embodiment >= targetEmbodiment));
+            
+            Debug.Log("[Study] Max: " + maxEmbodiment + " | Min: " + minEmbodiment + " | Target: " + targetEmbodiment);
+            Debug.Log("[Study] " + JsonUtility.ToJson(targetQuestion));
+
+            switch (_currentStudy.Type)
+            {
+                case Study.StudyType.None:
+                case Study.StudyType.Combined:
+                case Study.StudyType.AllIn:
+                    _currentStudy.PersonalLimit.Delay = targetQuestion.State.Delay;
+                    _currentStudy.PersonalLimit.Velocity = targetQuestion.State.Velocity;
+                    _currentStudy.PersonalLimit.RobotId = targetQuestion.State.RobotId;
+                    
+                    Debug.Log("[Study] Delay Limit: " + _currentStudy.PersonalLimit.Delay);
+                    Debug.Log("[Study] Velocity Limit: " + _currentStudy.PersonalLimit.Velocity);
+                    Debug.Log("[Study] Robot Limitation Limit: " + _currentStudy.PersonalLimit.RobotId);
+                    break;
+                case Study.StudyType.Delay:
+                    _currentStudy.PersonalLimit.Delay = targetQuestion.State.Delay;
+                    Debug.Log("[Study] Delay Limit: " + _currentStudy.PersonalLimit.Delay);
+                    break;
+                case Study.StudyType.Velocity:
+                    _currentStudy.PersonalLimit.Velocity = targetQuestion.State.Velocity;
+                    Debug.Log("[Study] Velocity Limit: " + _currentStudy.PersonalLimit.Velocity);
+                    break;
+                case Study.StudyType.JointLimits:
+                    _currentStudy.PersonalLimit.RobotId = targetQuestion.State.RobotId;
+                    Debug.Log("[Study] Robot Limitation Limit: " + _currentStudy.PersonalLimit.RobotId);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         #endregion
 
         /// <summary>
@@ -458,7 +510,7 @@ namespace Controller
                 _limitationController.UpdateVelocity = true;
                 return;
             }
-            
+
             if (_currentStudy.StudyQuestions.Count((question => question.Answer != null)) < 12)
             {
                 return;
@@ -479,7 +531,7 @@ namespace Controller
                 _limitationController.TrackingDelay = 0;
                 return;
             }
-            
+
             if (_currentStudy.StudyQuestions.Count((question => question.Answer != null)) < 12)
             {
                 return;
@@ -498,7 +550,7 @@ namespace Controller
             {
                 return;
             }
-            
+
             int robotIndex = (int) Math.Floor((((_currentStudy.QuestionIndex - 12) * 1.0f) / ((int) studyQuestionsNumber - 12)) * maxJointLimitsValue);
             if (_bulletRobot.SyncedRobots[robotIndex].B3RobotId != _bulletRobot.ActiveRobot.B3RobotId)
             {

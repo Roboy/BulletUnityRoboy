@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/SimRoboy.unity
+    guid: fadd7b9b7c1ed6f40b5fcfaf9ce17801
   m_configObjects: {}

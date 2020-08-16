@@ -16,7 +16,7 @@ namespace Controller.Helper.Study
             Velocity,
             JointLimits,
             Combined,
-            ALL_IN
+            AllIn
         }
 
         public StudyType Type => _type;
@@ -70,6 +70,8 @@ namespace Controller.Helper.Study
 
         public string FilePath => _filePath;
 
+        public StudyPersonalLimit PersonalLimit { get; } = new StudyPersonalLimit();
+
         public Study(StudyType studyType, StudyController.StudyLanguage language, int studyQuestionsNumber, LimitationController limitationController)
         {
             _type = studyType;
@@ -78,7 +80,8 @@ namespace Controller.Helper.Study
             _language = language;
             _limitationController = limitationController;
 
-            _filePath = StudyController.savePath + "/" + _startTime.ToShortDateString() + "_" + StudyUserData.Instance.Forename + "-" + StudyUserData.Instance.Surname + "_" + StudySession.Instance.Guid.ToString() + "/" + Type.ToString() + ".json";
+            _filePath = StudyController.savePath + "/" + _startTime.ToShortDateString() + "_" + StudyUserData.Instance.Forename + "-" + StudyUserData.Instance.Surname + "_" + StudyUserData.Instance.Age + "_" +
+                        StudyUserData.Instance.Uuid + "/" + Type.ToString() + ".json";
             if (!Directory.Exists(Path.GetDirectoryName(_filePath)))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(_filePath));
@@ -96,7 +99,7 @@ namespace Controller.Helper.Study
                 }
             }
 
-            for (int i = 0; i < studyQuestionsNumber / 12 - 1; i++)
+            for (int i = 0; i < (studyQuestionsNumber / 12) - 1; i++)
             {
                 foreach (var question in _studyQuestions.GetRange(0, 12))
                 {
@@ -110,8 +113,8 @@ namespace Controller.Helper.Study
         /// </summary>
         public void SaveToFile()
         {
-            Wrapper<List<StudyQuestion>> wrapper = new Wrapper<List<StudyQuestion>>(_studyQuestions);
-            String jsonData = JsonUtility.ToJson(wrapper);
+            StudyJSON studyJson = new StudyJSON(_studyQuestions, PersonalLimit);
+            String jsonData = JsonUtility.ToJson(studyJson);
 
             File.WriteAllText(_filePath, jsonData);
         }

@@ -11,6 +11,12 @@ TagManager:
   - BulletRobotController
   - BulletSyncController
   - LimitationController
+  - BulletObject
+  - GloveController
+  - StudyController
+  - CollisionArea
+  - StudyUI
+  - StudyDropzone
   layers:
   - Default
   - TransparentFX
@@ -20,8 +26,8 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
+  - InvisibleToMirrors
+  - InvisibleToMainCamera
   - 
   - 
   - 

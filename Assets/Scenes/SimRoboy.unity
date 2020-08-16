@@ -10117,15 +10117,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3ca4474eacf4f97a018edf4fab90a5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  studyQuestionsNumber: 36
+  studyQuestionsNumber: 48
   language: 0
   bulletObject: {fileID: 1218221673}
   guideTexts:
   - {fileID: 371922234}
   - {fileID: 985647249}
   maxDelayValue: 350
-  maxVelocityValue: 2
-  minVelocityValue: 0.4
+  maxVelocityValue: 5
+  minVelocityValue: 0.5
 --- !u!114 &1518439593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10152,6 +10152,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   forename: Leenert
   surname: Specht
+  age: 24
+  uuid: 693610f1-e453-4b7b-81d0-88e32ea49dee
 --- !u!1 &1533074529
 GameObject:
   m_ObjectHideFlags: 0
@@ -10656,8 +10658,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5999a146a610394f8fd83365227ae95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trackingDelay: 0
-  maxVelocity: 2
+  trackingDelay: 262.5
+  maxVelocity: 1.625
   updateVelocity: 0
   switchRobot: 0
 --- !u!1 &1809265949 stripped
@@ -31484,6 +31486,10 @@ MonoBehaviour:
   rightHandGlove: {fileID: 1075615425}
   cameraTF: {fileID: 1281286681}
   syncedRobots:
+  - urdfPath: \\Urdf\\roboy3_models\\upper_body\\bullet5.urdf
+    desc: 
+  - urdfPath: \\Urdf\\roboy3_models\\upper_body\\bullet4.urdf
+    desc: 
   - urdfPath: \\Urdf\\roboy3_models\\upper_body\\bullet3.urdf
     desc: 
   - urdfPath: \\Urdf\\roboy3_models\\upper_body\\bullet2.urdf
