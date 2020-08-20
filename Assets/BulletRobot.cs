@@ -90,6 +90,15 @@ public class BulletRobot : MonoBehaviour
 
     public Vector3 UnityPos => transform.position;
 
+    public float ThumbAdd1 = 6.0f;
+    public float ThumbAdd2 = 6.0f;
+    public float ThumbAdd3 = 6.0f;
+    public float ThumbAdd4 = 6.0f;
+
+    public float FingerAdd1 = 100.0f;
+    public float FingerAdd2 = 60.0f;
+    public float FingerAdd3 = -10.0f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -264,7 +273,7 @@ public class BulletRobot : MonoBehaviour
                                     syncedGloveInformation.HandJointInformation[i][j].TargetJointPos = BulletBridge.ClipAngle(-quaternion.eulerAngles.z + 60) * Mathf.Deg2Rad;
                                     break;
                                 default:
-                                    syncedGloveInformation.HandJointInformation[i][j].TargetJointPos = BulletBridge.ClipAngle(-quaternion.eulerAngles.z - 20) * Mathf.Deg2Rad;
+                                    syncedGloveInformation.HandJointInformation[i][j].TargetJointPos = BulletBridge.ClipAngle(-quaternion.eulerAngles.z - 10) * Mathf.Deg2Rad;
                                     break;
                             }
                         }

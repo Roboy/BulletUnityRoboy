@@ -117,7 +117,7 @@ namespace Controller
             {
                 StartStudy(Study.StudyType.Combined);
             }
-            
+
             if (Input.GetKeyDown(KeyCode.F5))
             {
                 StartStudy(Study.StudyType.AllIn);
@@ -130,7 +130,18 @@ namespace Controller
 
             if (Input.GetKeyDown(KeyCode.F10))
             {
-                bulletObject.UpdatePositionAndRotation((new Vector3(0, 0, 0.434f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
+                switch (_objectPosition % 3)
+                {
+                    case 0:
+                        bulletObject.UpdatePositionAndRotation((new Vector3(-0.0634f, 0, 0.4564f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
+                        break;
+                    case 1:
+                        bulletObject.UpdatePositionAndRotation((new Vector3(0.0995f, 0, 0.4524f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
+                        break;
+                    case 2:
+                        bulletObject.UpdatePositionAndRotation((new Vector3(-0.225f, 0, 0.4044f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
+                        break;
+                }
             }
 
             if (Input.GetKeyDown(KeyCode.F11))
@@ -145,42 +156,92 @@ namespace Controller
 
             #region Debug: Anwser Manually
 
+            
             // For Debugging: Answer Questions
-            if (Input.GetKeyDown(KeyCode.Alpha1))
+            if (Input.GetKeyDown(KeyCode.Keypad1))
             {
+                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.STRONGLY_DISAGREE);
                 AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.STRONGLY_DISAGREE);
             }
 
-            if (Input.GetKeyDown(KeyCode.Alpha2))
+            if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.DISAGREE);
+                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.STRONGLY_DISAGREE);
+                ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.STRONGLY_DISAGREE);
             }
 
+            if (Input.GetKeyDown(KeyCode.Keypad2))
+            {
+                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.DISAGREE);
+                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.DISAGREE);
+            }
+            
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.DISAGREE);
+                ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.DISAGREE);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad3))
+            {
+                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_DISAGREE);
+                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_DISAGREE);
+            }
+            
             if (Input.GetKeyDown(KeyCode.Alpha3))
             {
-                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_DISAGREE);
+                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_DISAGREE);
+                ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_DISAGREE);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad4))
+            {
+                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.NEUTRAL);
+                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.NEUTRAL);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha4))
             {
-                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.NEUTRAL);
+                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.NEUTRAL);
+                ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.NEUTRAL);
             }
-
-            if (Input.GetKeyDown(KeyCode.Alpha5))
+            
+            if (Input.GetKeyDown(KeyCode.Keypad5))
             {
+                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_AGREE);
                 AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_AGREE);
             }
+            
+            if (Input.GetKeyDown(KeyCode.Alpha5))
+            {
+                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_AGREE);
+                ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_AGREE);
+            }
 
+            if (Input.GetKeyDown(KeyCode.Keypad6))
+            {
+                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.AGREE);
+                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.AGREE);
+            }
+            
             if (Input.GetKeyDown(KeyCode.Alpha6))
             {
-                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.AGREE);
+                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.AGREE);
+                ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.AGREE);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad7))
+            {
+                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.STRONGLY_AGREE);
+                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.STRONGLY_AGREE);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha7))
             {
-                AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.STRONGLY_AGREE);
+                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.STRONGLY_AGREE);
+                ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.STRONGLY_AGREE);
             }
-
+            
             #endregion
         }
 
@@ -284,10 +345,10 @@ namespace Controller
         /// </summary>
         private void PreviousQuestion()
         {
-            if (_currentStudy == null || _currentStudy.Type == Study.StudyType.None) return;
+            if (_currentStudy == null || _currentStudy.Type == Study.StudyType.None || _currentStudy.QuestionIndex == 0) return;
 
             // Go to previous question by increasing current index
-            _currentStudy.QuestionIndex++;
+            _currentStudy.QuestionIndex--;
 
             UpdateGuideText();
             PrintQuestion();
@@ -302,11 +363,11 @@ namespace Controller
 
             if (_currentStudy.StudyQuestions.Count((question => question.Answer != null)) < 12)
             {
-                Debug.Log("[Study] Embodiment: Not enough data.");
+                Debug.Log("[Study] Embodiment: Not enough data. (" + (_currentStudy.QuestionIndex + 1) + "/" + _currentStudy.StudyQuestions.Count + ")");
             }
             else
             {
-                Debug.Log("[Study] Embodiment: " + CalculateEmbodiment());
+                Debug.Log("[Study] Embodiment: " + CalculateEmbodiment() + " (" + (_currentStudy.QuestionIndex + 1) + "/" + _currentStudy.StudyQuestions.Count + ")");
             }
         }
 
@@ -336,13 +397,13 @@ namespace Controller
             switch (_objectPosition % 3)
             {
                 case 0:
-                    bulletObject.UpdatePositionAndRotation((new Vector3(0, 0, 0.5f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
+                    bulletObject.UpdatePositionAndRotation((new Vector3(-0.0634f, 0, 0.4564f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
                     break;
                 case 1:
-                    bulletObject.UpdatePositionAndRotation((new Vector3(0.19f, 0, 0.45f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
+                    bulletObject.UpdatePositionAndRotation((new Vector3(0.0995f, 0, 0.4524f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
                     break;
                 case 2:
-                    bulletObject.UpdatePositionAndRotation((new Vector3(-0.19f, 0, 0.45f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
+                    bulletObject.UpdatePositionAndRotation((new Vector3(-0.225f, 0, 0.4044f)).Unity2Ros(), Quaternion.identity.Unity2Ros());
                     break;
             }
 
@@ -351,6 +412,25 @@ namespace Controller
             //Debug.Log("[Study] Answer: " + answer);
 
             NextQuestion();
+        }
+
+        /// <summary>
+        /// Modifies a previous answer if the user missed his/her target
+        /// </summary>
+        public void ModifyAnswer(int answer)
+        {
+            if (_currentStudy == null || _currentStudy.Type == Study.StudyType.None || _currentStudy.QuestionIndex == 0)
+            {
+                return;
+            }
+
+            _currentStudy.QuestionIndex--;
+
+            _currentStudy.StudyQuestions[_currentStudy.QuestionIndex].Answer =
+                new StudyAnswer(answer, CalculateEmbodiment(), CalculateBodyOwnership(), CalculateAgency(), CalculateLocation(), DateTime.Now.ToLongTimeString());
+            _currentStudy.SaveToFile();
+
+            _currentStudy.QuestionIndex++;
         }
 
         #endregion
@@ -433,9 +513,9 @@ namespace Controller
             float minEmbodiment = _currentStudy.StudyQuestions.GetRange(12, _currentStudy.StudyQuestions.Count - 12).Min((question => question.Answer.Embodiment)); // 0%
 
             float targetEmbodiment = minEmbodiment + (((maxEmbodiment - minEmbodiment) / 100.0f) * 60.0f); // 60%
-            
+
             StudyQuestion targetQuestion = _currentStudy.StudyQuestions.GetRange(12, _currentStudy.StudyQuestions.Count - 12).FindLast((question => question.Answer.Embodiment >= targetEmbodiment));
-            
+
             Debug.Log("[Study] Max: " + maxEmbodiment + " | Min: " + minEmbodiment + " | Target: " + targetEmbodiment);
             Debug.Log("[Study] " + JsonUtility.ToJson(targetQuestion));
 
@@ -447,7 +527,7 @@ namespace Controller
                     _currentStudy.PersonalLimit.Delay = targetQuestion.State.Delay;
                     _currentStudy.PersonalLimit.Velocity = targetQuestion.State.Velocity;
                     _currentStudy.PersonalLimit.RobotId = targetQuestion.State.RobotId;
-                    
+
                     Debug.Log("[Study] Delay Limit: " + _currentStudy.PersonalLimit.Delay);
                     Debug.Log("[Study] Velocity Limit: " + _currentStudy.PersonalLimit.Velocity);
                     Debug.Log("[Study] Robot Limitation Limit: " + _currentStudy.PersonalLimit.RobotId);
