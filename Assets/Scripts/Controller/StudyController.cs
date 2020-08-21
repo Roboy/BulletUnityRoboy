@@ -160,85 +160,71 @@ namespace Controller
             // For Debugging: Answer Questions
             if (Input.GetKeyDown(KeyCode.Keypad1))
             {
-                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.STRONGLY_DISAGREE);
                 AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.STRONGLY_DISAGREE);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.STRONGLY_DISAGREE);
                 ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.STRONGLY_DISAGREE);
             }
 
             if (Input.GetKeyDown(KeyCode.Keypad2))
             {
-                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.DISAGREE);
                 AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.DISAGREE);
             }
             
             if (Input.GetKeyDown(KeyCode.Alpha2))
             {
-                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.DISAGREE);
                 ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.DISAGREE);
             }
 
             if (Input.GetKeyDown(KeyCode.Keypad3))
             {
-                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_DISAGREE);
                 AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_DISAGREE);
             }
             
             if (Input.GetKeyDown(KeyCode.Alpha3))
             {
-                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_DISAGREE);
                 ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_DISAGREE);
             }
 
             if (Input.GetKeyDown(KeyCode.Keypad4))
             {
-                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.NEUTRAL);
                 AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.NEUTRAL);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha4))
             {
-                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.NEUTRAL);
                 ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.NEUTRAL);
             }
             
             if (Input.GetKeyDown(KeyCode.Keypad5))
             {
-                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_AGREE);
                 AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_AGREE);
             }
             
             if (Input.GetKeyDown(KeyCode.Alpha5))
             {
-                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_AGREE);
                 ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.SOMEWHAT_AGREE);
             }
 
             if (Input.GetKeyDown(KeyCode.Keypad6))
             {
-                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.AGREE);
                 AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.AGREE);
             }
             
             if (Input.GetKeyDown(KeyCode.Alpha6))
             {
-                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.AGREE);
                 ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.AGREE);
             }
 
             if (Input.GetKeyDown(KeyCode.Keypad7))
             {
-                Debug.Log("[Study] Answer Question with " + (int) StudyDropzone.StudyAnswerOptionType.STRONGLY_AGREE);
                 AnswerQuestion((int) StudyDropzone.StudyAnswerOptionType.STRONGLY_AGREE);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha7))
             {
-                Debug.Log("[Study] Modifying Last Answer to " + (int) StudyDropzone.StudyAnswerOptionType.STRONGLY_AGREE);
                 ModifyAnswer((int) StudyDropzone.StudyAnswerOptionType.STRONGLY_AGREE);
             }
             
@@ -376,6 +362,8 @@ namespace Controller
         /// </summary>
         private void UpdateGuideText()
         {
+            Debug.Log("[Study] Question: " + _currentStudy.CurrentQuestionText + " (" + (_currentStudy.QuestionIndex + 1) + "/" + _currentStudy.StudyQuestions.Count + ")");
+
             SetGuideText(_currentStudy.CurrentQuestionText);
         }
 
@@ -386,6 +374,8 @@ namespace Controller
         public void AnswerQuestion(int answer)
         {
             if (_currentStudy == null || _currentStudy.Type == Study.StudyType.None) return;
+
+            Debug.Log("[Study] Answer Question with " + answer);
 
             _currentStudy.StudyQuestions[_currentStudy.QuestionIndex].Answer =
                 new StudyAnswer(answer, CalculateEmbodiment(), CalculateBodyOwnership(), CalculateAgency(), CalculateLocation(), DateTime.Now.ToLongTimeString());
@@ -423,6 +413,9 @@ namespace Controller
             {
                 return;
             }
+            
+            Debug.Log("[Study] Modifying Last Answer to " + answer);
+
 
             _currentStudy.QuestionIndex--;
 

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using Utils;
+using Random = UnityEngine.Random;
 
 namespace Controller.Helper.Study
 {
@@ -39,7 +40,7 @@ namespace Controller.Helper.Study
             new StudyQuestion("Q1", "I feel as if the virtual arm is my arm", "Ich habe das Gefühl, dass der virtuelle Arm mein Arm ist", StudyQuestion.StudyQuestionCategory.BodyOwnership),
             new StudyQuestion("Q2", "It feels as if the virtual arm I see is someone else", "Es fühlt sich an, als ob der virtuelle Arm, den ich sehe, jemand anderes ist",
                 StudyQuestion.StudyQuestionCategory.BodyOwnership),
-            new StudyQuestion("Q3", "It seems as if I might have more than one arm", "Es scheint, als hätte ich mehr als einen Arm", StudyQuestion.StudyQuestionCategory.BodyOwnership),
+            new StudyQuestion("Q3", "It seems as if I might have more than one arm", "Es scheint, als könnte ich mehr als einen Arm haben", StudyQuestion.StudyQuestionCategory.BodyOwnership),
             new StudyQuestion("Q4", "I feel as if the virtual arm I see when looking in the mirror is my own arm",
                 "Ich habe das Gefühl, dass der virtuelle Arm, den ich beim Blick in den Spiegel sehe, mein eigener Arm ist", StudyQuestion.StudyQuestionCategory.BodyOwnership),
             new StudyQuestion("Q5", "I feel as if the virtual arm I see when looking at myself in the mirror is another person",
@@ -56,6 +57,25 @@ namespace Controller.Helper.Study
             new StudyQuestion("Q15", "I feel out of my body", "Ich fühle mich, als wäre ich außerhalb meines Körpers", StudyQuestion.StudyQuestionCategory.Location),
             new StudyQuestion("Q16", "I feel as if my (real) arm is drifting toward the virtual arm or as if the virtual arm is drifting toward my (real) arm",
                 "Ich habe das Gefühl, als ob mein (realer) Arm auf den virtuellen Arm zusteuert oder als ob der virtuelle Arm auf meinen (realen) Arm zusteuert.", StudyQuestion.StudyQuestionCategory.Location),
+        };
+
+        /// <summary>
+        /// Questions are selected randomly out of the respecting categories.
+        /// </summary>
+        private readonly List<StudyQuestion.StudyQuestionCategory> _studyQuestionOrder = new List<StudyQuestion.StudyQuestionCategory>()
+        {
+            StudyQuestion.StudyQuestionCategory.Agency,
+            StudyQuestion.StudyQuestionCategory.BodyOwnership,
+            StudyQuestion.StudyQuestionCategory.Location,
+            StudyQuestion.StudyQuestionCategory.BodyOwnership,
+            StudyQuestion.StudyQuestionCategory.Agency,
+            StudyQuestion.StudyQuestionCategory.BodyOwnership,
+            StudyQuestion.StudyQuestionCategory.Location,
+            StudyQuestion.StudyQuestionCategory.BodyOwnership,
+            StudyQuestion.StudyQuestionCategory.Agency,
+            StudyQuestion.StudyQuestionCategory.BodyOwnership,
+            StudyQuestion.StudyQuestionCategory.Agency,
+            StudyQuestion.StudyQuestionCategory.Location
         };
 
         /// <summary>
@@ -87,17 +107,35 @@ namespace Controller.Helper.Study
                 Directory.CreateDirectory(Path.GetDirectoryName(_filePath));
             }
 
-
-            foreach (StudyQuestion.StudyQuestionCategory studyQuestionCategory in Enum.GetValues(typeof(StudyQuestion.StudyQuestionCategory)))
+            // StudyQuestion[] tmpShuffledQuestions = _allStudyQuestions.ToArray();
+            // Utils.ShuffleArray.Shuffle(tmpShuffledQuestions);
+            //
+            // foreach (var shuffledQuestion in tmpShuffledQuestions)
+            // {
+            //     _studyQuestions.Add(new StudyQuestion(shuffledQuestion.Id, shuffledQuestion.English, shuffledQuestion.German, shuffledQuestion.Category));
+            // }
+            
+            List<StudyQuestion> tmpStudyQuestions = new List<StudyQuestion>(_allStudyQuestions);
+            foreach (StudyQuestion.StudyQuestionCategory studyQuestionCategory in _studyQuestionOrder)
             {
-                StudyQuestion[] tmpShuffledQuestions = (_allStudyQuestions.Where((question => question.Category == studyQuestionCategory)).ToArray());
-                Utils.ShuffleArray.Shuffle(tmpShuffledQuestions);
-
-                foreach (var shuffledQuestion in tmpShuffledQuestions)
-                {
-                    _studyQuestions.Add(new StudyQuestion(shuffledQuestion.Id, shuffledQuestion.English, shuffledQuestion.German, shuffledQuestion.Category));
-                }
+                List<StudyQuestion> studyQuestions = new List<StudyQuestion>(tmpStudyQuestions.Where((question => question.Category == studyQuestionCategory)));
+                StudyQuestion selectedStudyQuestion = studyQuestions[Random.Range(0, studyQuestions.Count)];
+                _studyQuestions.Add(new StudyQuestion(selectedStudyQuestion.Id, selectedStudyQuestion.English, selectedStudyQuestion.German, selectedStudyQuestion.Category));
+                tmpStudyQuestions.Remove(tmpStudyQuestions.Find((question => question.Id == selectedStudyQuestion.Id)));
+                
+                Debug.Log(tmpStudyQuestions.Count);
             }
+
+            // foreach (StudyQuestion.StudyQuestionCategory studyQuestionCategory in Enum.GetValues(typeof(StudyQuestion.StudyQuestionCategory)))
+            // {
+            //     StudyQuestion[] tmpShuffledQuestions = (_allStudyQuestions.Where((question => question.Category == studyQuestionCategory)).ToArray());
+            //     Utils.ShuffleArray.Shuffle(tmpShuffledQuestions);
+            //
+            //     foreach (var shuffledQuestion in tmpShuffledQuestions)
+            //     {
+            //         _studyQuestions.Add(new StudyQuestion(shuffledQuestion.Id, shuffledQuestion.English, shuffledQuestion.German, shuffledQuestion.Category));
+            //     }
+            // }
 
             for (int i = 0; i < (studyQuestionsNumber / 12) - 1; i++)
             {

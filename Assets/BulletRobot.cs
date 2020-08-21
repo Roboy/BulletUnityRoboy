@@ -90,15 +90,6 @@ public class BulletRobot : MonoBehaviour
 
     public Vector3 UnityPos => transform.position;
 
-    public float ThumbAdd1 = 6.0f;
-    public float ThumbAdd2 = 6.0f;
-    public float ThumbAdd3 = 6.0f;
-    public float ThumbAdd4 = 6.0f;
-
-    public float FingerAdd1 = 100.0f;
-    public float FingerAdd2 = 60.0f;
-    public float FingerAdd3 = -10.0f;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -118,7 +109,7 @@ public class BulletRobot : MonoBehaviour
         // Load Roboy model
         urdfRobot = GetComponent<UrdfRobot>();
 
-        for (var i = 0; i < syncedRobots.Count; i++)
+        for (var i = 0; i < 1/*syncedRobots.Count*/; i++)
         {
             syncedRobots[i].TrackingPosition = transform.position.Unity2Ros();
             syncedRobots[i].Position = (transform.position + new Vector3(i * 1.5f, 0, 0)).Unity2Ros(); // Base position with 2 units distance
